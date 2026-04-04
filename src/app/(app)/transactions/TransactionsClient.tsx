@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Transaction, Category } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
-import { getRelativeDate } from '@/lib/utils/dates'
+import * as DateUtils from '@/lib/utils/dates'
 import { createClient } from '@/lib/supabase/client'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -361,7 +361,7 @@ export function TransactionsClient({
                 {/* Date header */}
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-surface-border/50">
                   <h3 className="text-sm font-semibold text-text-primary">
-                    {getRelativeDate(date)}
+                    {DateUtils.getRelativeDate(date)}
                   </h3>
                   <span className={`text-xs font-mono ${
                     dayTotal >= 0 ? 'text-success' : 'text-danger'
