@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#1A0A2E"/>
+  <!-- Columna vertical de la F -->
+  <rect x="5" y="4"  width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="5" y="10" width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="5" y="16" width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="5" y="22" width="4" height="4" rx="1" fill="#A855F7"/>
+  <!-- Barra top de la F -->
+  <rect x="11" y="4" width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="17" y="4" width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="23" y="4" width="4" height="4" rx="1" fill="#A855F7"/>
+  <!-- Barra media de la F -->
+  <rect x="11" y="16" width="4" height="4" rx="1" fill="#A855F7"/>
+  <rect x="17" y="16" width="4" height="4" rx="1" fill="#A855F7"/>
+  <!-- Punto verde solo como acento de marca -->
+  <circle cx="26" cy="27" r="3" fill="#84CC16"/>
+</svg>
