@@ -1,25 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { GradientButton } from '@/components/shared/GradientButton'
 import { FinantekLogo } from '@/components/logo/finantek-logo'
+import { Mail, Lock, Eye, EyeOff, Loader2, User, Check } from 'lucide-react'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
+  // Password requirements validation
+  const passwordRequirements = useMemo(() => {
+    return {
+      minLength: password.length >= 6
+    }
+  }, [password])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (password !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden')
+      return
+    }
+
+    if (!passwordRequirements.minLength) {
+      toast.error('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
     setLoading(true)
     const { error } = await supabase.auth.signUp({
       email,
@@ -43,56 +64,130 @@ export default function RegisterPage() {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-text-primary">Crea tu cuenta</h1>
-        <p className="text-text-secondary mt-1">Empieza a controlar tus finanzas hoy</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-white">Crea tu cuenta</h1>
+        <p className="text-gray-400 mt-1">Empieza a controlar tus finanzas hoy</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-text-secondary text-sm font-medium">Nombre</Label>
-          <Input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Tu nombre"
-            className="h-12 bg-surface border-surface-border text-text-primary placeholder:text-text-tertiary rounded-xl focus:border-violet-primary focus:ring-violet-primary/20"
-          />
+          <Label htmlFor="name" className="text-gray-300 text-sm font-medium">Nombre</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Tu nombre"
+              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+            />
+          </div>
         </div>
+
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-text-secondary text-sm font-medium">Correo electronico</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-            className="h-12 bg-surface border-surface-border text-text-primary placeholder:text-text-tertiary rounded-xl focus:border-violet-primary focus:ring-violet-primary/20"
-            required
-          />
+          <Label htmlFor="email" className="text-gray-300 text-sm font-medium">Correo electrónico</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              required
+            />
+          </div>
         </div>
+
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-text-secondary text-sm font-medium">Contrasena</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Minimo 6 caracteres"
-            className="h-12 bg-surface border-surface-border text-text-primary placeholder:text-text-tertiary rounded-xl focus:border-violet-primary focus:ring-violet-primary/20"
-            minLength={6}
-            required
-          />
+          <Label htmlFor="password" className="text-gray-300 text-sm font-medium">Contraseña</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          {/* Password requirements */}
+          {password && (
+            <div className="mt-2">
+              <div className="flex items-center gap-2 text-xs">
+                <Check
+                  className={`h-3 w-3 ${passwordRequirements.minLength ? 'text-green-500' : 'text-gray-500'}`}
+                />
+                <span className={passwordRequirements.minLength ? 'text-green-500' : 'text-gray-500'}>
+                  Mínimo 6 caracteres
+                </span>
+              </div>
+            </div>
+          )}
         </div>
-        <GradientButton type="submit" loading={loading} fullWidth size="lg">
-          Crear cuenta
-        </GradientButton>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword" className="text-gray-300 text-sm font-medium">Confirmar contraseña</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirma tu contraseña"
+              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #6D28D9, #A855F7)' }}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Creando cuenta...
+            </div>
+          ) : (
+            'Crear cuenta'
+          )}
+        </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-text-tertiary">
+      <div className="flex items-center gap-3 my-4">
+        <hr className="flex-1 border-white/10" />
+        <span className="text-xs text-gray-500">o</span>
+        <hr className="flex-1 border-white/10" />
+      </div>
+
+      <p className="text-center text-sm text-gray-400">
         ¿Ya tienes cuenta?{' '}
-        <Link href="/login" className="font-semibold text-violet-light hover:text-violet-primary transition-colors">
-          Inicia sesion
+        <Link href="/login" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+          Inicia sesión
         </Link>
       </p>
     </div>

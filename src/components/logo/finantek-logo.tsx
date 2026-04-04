@@ -11,7 +11,7 @@ export function FinantekLogo({ variant = "sidebar", className }: FinantekLogoPro
     return (
       <div className={cn("inline-block", className)}>
         <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
-          <rect width="680" height="200" fill="#0F0A1E" rx="12"/>
+          <rect width="680" height="200" fill="transparent" rx="12"/>
           {/* F */}
           <rect x="30"  y="58"  width="10" height="90" rx="3" fill="#A855F7"/>
           <rect x="44"  y="58"  width="10" height="12" rx="3" fill="#A855F7"/>
