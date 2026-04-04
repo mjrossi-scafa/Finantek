@@ -74,7 +74,7 @@ export function SummaryCards({ income, expense }: SummaryCardsProps) {
           <div className="w-px bg-white/10 self-stretch hidden md:block" />
 
           {/* Mitad derecha - insights */}
-          <div className="w-64 flex flex-col items-center justify-center h-full gap-3 py-8 px-6 hidden md:flex">
+          <div className="w-64 flex flex-col items-center justify-center h-full gap-2 py-8 px-6 hidden md:flex">
             <BalanceInsights />
           </div>
         </div>

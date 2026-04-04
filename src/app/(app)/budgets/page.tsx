@@ -34,7 +34,7 @@ export default async function BudgetsPage() {
   const spendingMap = new Map(spending.map((s) => [s.category_id, s.total]))
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Presupuestos"
         description="Establece límites mensuales o anuales por categoría"

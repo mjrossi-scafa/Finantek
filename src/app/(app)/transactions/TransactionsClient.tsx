@@ -208,99 +208,99 @@ export function TransactionsClient({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">Transacciones</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Transacciones</h1>
           <p className="text-text-secondary mt-1">Historial de ingresos y gastos</p>
         </div>
-        <GradientButton onClick={handleCreateNew} className="rounded-full">
+        <GradientButton onClick={handleCreateNew} className="rounded-full hidden md:flex">
           <Plus className="h-4 w-4 mr-2" />
           Nueva transacción
         </GradientButton>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
-            <Input
-              placeholder="Buscar transacción..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full sm:w-64 bg-surface-secondary border-surface-border"
-            />
-          </div>
+      <div className="space-y-4">
+        <div className="overflow-x-auto pb-2 md:pb-0">
+          <div className="flex gap-3 min-w-max md:min-w-0 md:flex-wrap">
+            {/* Search */}
+            <div className="relative min-w-[200px] flex-1 md:min-w-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+              <Input
+                placeholder="Buscar transacción..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full bg-surface-secondary border-surface-border"
+              />
+            </div>
 
-          {/* Type filters */}
-          <div className="flex rounded-lg bg-surface-secondary border border-surface-border p-1">
-            {[
-              { key: 'all', label: 'Todos' },
-              { key: 'income', label: 'Ingresos' },
-              { key: 'expense', label: 'Gastos' }
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setTypeFilter(key as any)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  typeFilter === key
-                    ? 'bg-surface-primary text-text-primary shadow-sm'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          {/* Category filter */}
-          <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value || 'all')}>
-            <SelectTrigger className="w-48 bg-surface-secondary border-surface-border">
-              <SelectValue placeholder="Todas las categorías" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{category.icon}</span>
-                    <span>{category.name}</span>
-                  </div>
-                </SelectItem>
+            {/* Type filters */}
+            <div className="flex rounded-lg bg-surface-secondary border border-surface-border p-1 flex-shrink-0">
+              {[
+                { key: 'all', label: 'Todos' },
+                { key: 'income', label: 'Ingresos' },
+                { key: 'expense', label: 'Gastos' }
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setTypeFilter(key as any)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap ${
+                    typeFilter === key
+                      ? 'bg-surface-primary text-text-primary shadow-sm'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {label}
+                </button>
               ))}
-            </SelectContent>
-          </Select>
+            </div>
 
-          {/* Month filter */}
-          <Select value={monthFilter} onValueChange={(value) => setMonthFilter(value || 'all')}>
-            <SelectTrigger className="w-40 bg-surface-secondary border-surface-border">
-              <SelectValue placeholder="Todos los meses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los meses</SelectItem>
-              {availableMonths.map((month) => {
-                const [year, monthNum] = month.split('-')
-                const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('es', { month: 'long', year: 'numeric' })
-                return (
-                  <SelectItem key={month} value={month}>
-                    {monthName}
+            {/* Category filter */}
+            <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value || 'all')}>
+              <SelectTrigger className="w-48 bg-surface-secondary border-surface-border flex-shrink-0">
+                <SelectValue placeholder="Todas las categorías" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{category.icon}</span>
+                      <span>{category.name}</span>
+                    </div>
                   </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Export */}
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={filteredTransactions.length === 0}
-            className="bg-surface-secondary border-surface-border"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+            {/* Month filter */}
+            <Select value={monthFilter} onValueChange={(value) => setMonthFilter(value || 'all')}>
+              <SelectTrigger className="w-40 bg-surface-secondary border-surface-border flex-shrink-0">
+                <SelectValue placeholder="Todos los meses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los meses</SelectItem>
+                {availableMonths.map((month) => {
+                  const [year, monthNum] = month.split('-')
+                  const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('es', { month: 'long', year: 'numeric' })
+                  return (
+                    <SelectItem key={month} value={month}>
+                      {monthName}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+
+            {/* Export */}
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={filteredTransactions.length === 0}
+              className="bg-surface-secondary border-surface-border flex-shrink-0"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -401,8 +401,8 @@ export function TransactionsClient({
                         </div>
                       </div>
 
-                      {/* Time */}
-                      <div className="text-xs text-text-tertiary flex items-center gap-1">
+                      {/* Time - hidden on mobile */}
+                      <div className="text-xs text-text-tertiary flex items-center gap-1 hidden md:flex">
                         <Clock className="h-3 w-3" />
                         <span>{new Date(transaction.created_at).toLocaleTimeString('es', {
                           hour: '2-digit',
@@ -475,6 +475,14 @@ export function TransactionsClient({
         onSuccess={refreshTransactions}
         mode={modalMode}
       />
+
+      {/* Fixed floating button for mobile */}
+      <button
+        onClick={handleCreateNew}
+        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center md:hidden z-50"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
     </div>
   )
 }

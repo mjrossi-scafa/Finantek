@@ -66,17 +66,17 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header mejorado con selector de período y botón de transacción */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-primary">Dashboard</h1>
             <p className="text-text-secondary mt-1 text-sm capitalize flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               {formatMonthYear(year, month)}
             </p>
           </div>
           {/* Selector de período */}
-          <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2">
+          <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2 hidden md:flex">
             <Calendar className="h-4 w-4 text-text-muted" />
             <select className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer">
               <option>Este mes</option>
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
         {/* Botón de nueva transacción */}
         <Link
           href="/transactions/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="flex items-center gap-2 px-4 py-2.5 w-full md:w-auto justify-center md:justify-start bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <Plus className="h-4 w-4" />
           Nueva Transacción
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
 
       {/* Barra de filtros */}
       <div className="glass-card rounded-2xl p-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex md:flex-wrap items-center gap-3 overflow-x-auto pb-2 md:pb-0 md:overflow-visible">
           {/* Búsqueda */}
           <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
@@ -111,17 +111,17 @@ export default async function DashboardPage() {
           </div>
 
           {/* Filtro por tipo */}
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-2 text-xs font-medium bg-bamboo-take/10 text-bamboo-take border border-bamboo-take/30 rounded-lg hover:bg-bamboo-take/20 transition-colors">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button className="px-3 py-2 text-xs font-medium bg-bamboo-take/10 text-bamboo-take border border-bamboo-take/30 rounded-lg hover:bg-bamboo-take/20 transition-colors whitespace-nowrap">
               • Ingresos
             </button>
-            <button className="px-3 py-2 text-xs font-medium bg-vermillion-shu/10 text-vermillion-shu border border-vermillion-shu/30 rounded-lg hover:bg-vermillion-shu/20 transition-colors">
+            <button className="px-3 py-2 text-xs font-medium bg-vermillion-shu/10 text-vermillion-shu border border-vermillion-shu/30 rounded-lg hover:bg-vermillion-shu/20 transition-colors whitespace-nowrap">
               • Gastos
             </button>
           </div>
 
           {/* Filtro de categorías */}
-          <div className="glass-card rounded-lg px-3 py-2 flex items-center gap-2 min-w-[120px]">
+          <div className="glass-card rounded-lg px-3 py-2 flex items-center gap-2 min-w-[120px] flex-shrink-0">
             <Filter className="h-4 w-4 text-text-muted" />
             <select className="bg-transparent text-xs font-medium text-text-primary border-0 outline-none cursor-pointer">
               <option>Todas las categorías</option>
@@ -132,7 +132,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Botón de exportar */}
-          <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary border border-surface-border rounded-lg hover:bg-surface-subtle/50 transition-colors">
+          <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary border border-surface-border rounded-lg hover:bg-surface-subtle/50 transition-colors whitespace-nowrap flex-shrink-0">
             <Download className="h-4 w-4" />
             Exportar
           </button>

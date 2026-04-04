@@ -1,5 +1,5 @@
 import { FinantekLogo } from '@/components/logo/finantek-logo'
-import { BarChart3, Bot, Camera } from 'lucide-react'
+import { BarChart3, Bot, Camera, Sparkles } from 'lucide-react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,8 +28,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <h1 className="text-4xl font-black text-white leading-tight">
               Toma el control
             </h1>
-            <p className="text-base text-purple-300/70 mt-2">
-              Finanzas inteligentes al estilo samurai.
+            <p className="text-lg text-purple-300/70 mt-2">
+              La disciplina del samurai
+            </p>
+            <p className="text-lg text-purple-300/70">
+              aplicada al dinero.
             </p>
           </div>
 
@@ -38,17 +41,33 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
           {/* Features como cards verticales */}
           <div className="space-y-3">
-            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-center gap-3">
-              <BarChart3 className="h-5 w-5 text-purple-400" />
-              <span className="text-sm text-white/80">Dashboard inteligente</span>
+            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
+              <BarChart3 className="h-5 w-5 text-purple-400 mt-0.5" />
+              <div>
+                <div className="text-sm text-white font-medium">Dashboard inteligente</div>
+                <div className="text-xs text-white/40 mt-0.5">Visualiza tus finanzas en tiempo real</div>
+              </div>
             </div>
-            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-center gap-3">
-              <Bot className="h-5 w-5 text-purple-400" />
-              <span className="text-sm text-white/80">Bot de Telegram</span>
+            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
+              <Bot className="h-5 w-5 text-purple-400 mt-0.5" />
+              <div>
+                <div className="text-sm text-white font-medium">Bot de Telegram</div>
+                <div className="text-xs text-white/40 mt-0.5">Registra gastos desde donde estés</div>
+              </div>
             </div>
-            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-center gap-3">
-              <Camera className="h-5 w-5 text-purple-400" />
-              <span className="text-sm text-white/80">Escaneo de recibos</span>
+            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
+              <Camera className="h-5 w-5 text-purple-400 mt-0.5" />
+              <div>
+                <div className="text-sm text-white font-medium">Escaneo de recibos</div>
+                <div className="text-xs text-white/40 mt-0.5">Fotografía y digitaliza tus boletas</div>
+              </div>
+            </div>
+            <div className="bg-white/5 border border-purple-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
+              <Sparkles className="h-5 w-5 text-purple-400 mt-0.5" />
+              <div>
+                <div className="text-sm text-white font-medium">Insights inteligentes</div>
+                <div className="text-xs text-white/40 mt-0.5">Diagnóstico y planes claros con IA</div>
+              </div>
             </div>
           </div>
 

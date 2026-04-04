@@ -32,15 +32,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div>
-      <div className="mb-8 lg:hidden">
-        <div style={{ minWidth: '160px' }}>
-          <FinantekLogo variant="sidebar" />
-        </div>
+    <div className="px-6 py-8 lg:px-0 lg:py-0">
+      <div className="flex justify-center mb-8 lg:hidden">
+        <FinantekLogo variant="sidebar" />
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-white">Bienvenido de vuelta</h1>
+        <h1 className="text-2xl lg:text-2xl font-extrabold tracking-tight text-white">Bienvenido de vuelta</h1>
         <p className="text-gray-400 mt-1">Ingresa tus credenciales para continuar</p>
       </div>
 
@@ -55,7 +53,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+              className="pl-10 h-12 py-4 lg:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-base lg:text-sm"
               required
             />
           </div>
@@ -71,7 +69,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+              className="pl-10 pr-10 h-12 py-4 lg:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-base lg:text-sm"
               required
             />
             <button
@@ -87,7 +85,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="w-full py-4 lg:py-3 rounded-full font-semibold text-base lg:text-sm text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: 'linear-gradient(135deg, #6D28D9, #A855F7)' }}
         >
           {loading ? (
@@ -102,7 +100,7 @@ export default function LoginPage() {
       </form>
 
       <div className="mt-4 text-center">
-        <Link href="/forgot-password" className="text-xs hover:text-violet-light transition-colors" style={{ color: '#A855F7' }}>
+        <Link href="/forgot-password" className="text-xs hover:text-violet-light transition-colors py-2 block" style={{ color: '#A855F7' }}>
           ¿Olvidaste tu contraseña?
         </Link>
       </div>

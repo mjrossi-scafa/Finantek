@@ -44,7 +44,7 @@ export default async function AchievementsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Logros"
         description={`${userAchievements.length}/${allAchievements.length} desbloqueados`}
@@ -70,7 +70,7 @@ export default async function AchievementsPage() {
               return (
                 <div
                   key={achievement.id}
-                  className={`glass-card rounded-2xl p-4 transition-fintech ${
+                  className={`glass-card rounded-2xl p-4 md:p-6 transition-fintech ${
                     isUnlocked
                       ? 'hover:bg-surface-hover border-violet-primary/20'
                       : 'opacity-40'

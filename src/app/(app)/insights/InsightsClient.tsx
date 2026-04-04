@@ -229,7 +229,7 @@ function InsightsStats({ insights }: { insights: WeeklyInsight[] }) {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div className="glass-card rounded-xl p-4 text-center">
         <div className="text-2xl font-bold text-indigo-600 mb-1">{totalInsights}</div>
         <div className="text-xs text-text-muted">insights generados</div>
@@ -283,7 +283,7 @@ function InsightCard({ insight, isLatest, index }: { insight: WeeklyInsight; isL
   }
 
   return (
-    <div className={`relative glass-card rounded-2xl p-6 transition-all duration-200 hover:shadow-lg ${!isLatest ? 'opacity-80' : ''}`}>
+    <div className={`relative glass-card rounded-2xl p-4 md:p-6 transition-all duration-200 hover:shadow-lg ${!isLatest ? 'opacity-80' : ''}`}>
       {/* Timeline connector */}
       {index > 0 && (
         <div className="absolute -top-4 left-6 w-px h-4 bg-purple-200"></div>
@@ -396,7 +396,7 @@ export function InsightsClient({ insights: initialInsights }: InsightsClientProp
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary mb-1">Insights IA</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-text-primary mb-1">Insights IA</h1>
           <p className="text-text-secondary">Análisis semanal de tus hábitos financieros</p>
         </div>
 

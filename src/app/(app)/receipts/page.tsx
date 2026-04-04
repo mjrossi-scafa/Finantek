@@ -34,7 +34,7 @@ export default async function ReceiptsPage() {
     .limit(50)
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Recibos y documentos"
         description="Sube fotos de recibos o estados de cuenta para extraer transacciones automaticamente"
@@ -47,7 +47,7 @@ export default async function ReceiptsPage() {
           <h2 className="text-xs font-bold text-text-tertiary uppercase tracking-[0.15em]">Historial</h2>
           {receipts.map((receipt: Receipt) => (
             <Link key={receipt.id} href={`/receipts/${receipt.id}`}>
-              <div className="glass-card rounded-2xl p-4 flex items-center gap-3 transition-fintech hover:bg-surface-hover cursor-pointer group">
+              <div className="glass-card rounded-2xl p-4 md:p-6 flex items-center gap-3 transition-fintech hover:bg-surface-hover cursor-pointer group">
                 <div className="text-2xl">
                   {receipt.file_type === 'application/pdf' ? '📄' : '🖼️'}
                 </div>
