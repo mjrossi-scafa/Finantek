@@ -82,10 +82,10 @@ export function BudgetForm({ categories, userId, onSuccess }: BudgetFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-text-secondary text-sm font-medium">Categoria</Label>
+        <Label className="text-text-secondary text-sm font-medium">Categoría</Label>
         <Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? '')}>
           <SelectTrigger className={selectClasses}>
-            <SelectValue placeholder="Selecciona categoria de gasto" />
+            <SelectValue placeholder="Selecciona categoría de gasto" />
           </SelectTrigger>
           <SelectContent>
             {expenseCategories.map((c) => (

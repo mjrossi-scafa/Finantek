@@ -121,7 +121,7 @@ export function ExtractedTransactionReview({
 
               {/* Category */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-tertiary mb-1 block">Categoria</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-tertiary mb-1 block">Categoría</label>
                 <Select
                   value={t.category_id || ''}
                   onValueChange={(v) => update(index, 'category_id', v)}

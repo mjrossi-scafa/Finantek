@@ -116,10 +116,10 @@ export function TransactionForm({ categories, userId }: TransactionFormProps) {
 
       {/* Category */}
       <div className="space-y-2">
-        <Label className="text-text-secondary text-sm font-medium">Categoria</Label>
+        <Label className="text-text-secondary text-sm font-medium">Categoría</Label>
         <Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? '')}>
           <SelectTrigger className={inputClasses}>
-            <SelectValue placeholder="Selecciona una categoria" />
+            <SelectValue placeholder="Selecciona una categoría" />
           </SelectTrigger>
           <SelectContent>
             {filteredCategories.map((c) => (

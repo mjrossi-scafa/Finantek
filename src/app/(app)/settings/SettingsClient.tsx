@@ -43,7 +43,7 @@ export function SettingsClient({ profile, categories, userId }: SettingsClientPr
 
   async function addCategory() {
     if (!newCatName.trim()) {
-      toast.error('Ingresa un nombre para la categoria')
+      toast.error('Ingresa un nombre para la categoría')
       return
     }
 
@@ -56,9 +56,9 @@ export function SettingsClient({ profile, categories, userId }: SettingsClientPr
       sort_order: categories.length + 1,
     })
 
-    if (error) toast.error('Error al crear categoria')
+    if (error) toast.error('Error al crear categoría')
     else {
-      toast.success('Categoria creada')
+      toast.success('Categoría creada')
       setNewCatName('')
       router.refresh()
     }
@@ -68,10 +68,10 @@ export function SettingsClient({ profile, categories, userId }: SettingsClientPr
     const { error } = await supabase.from('categories').delete().eq('id', id)
     if (error) {
       toast.error('No se puede eliminar', {
-        description: 'La categoria puede tener transacciones asociadas.',
+        description: 'La categoría puede tener transacciones asociadas.',
       })
     } else {
-      toast.success('Categoria eliminada')
+      toast.success('Categoría eliminada')
       router.refresh()
     }
   }
@@ -114,7 +114,7 @@ export function SettingsClient({ profile, categories, userId }: SettingsClientPr
 
       {/* Categories */}
       <div className="glass-card rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-text-primary mb-4">Categorias</h2>
+        <h2 className="text-sm font-bold text-text-primary mb-4">Categorías</h2>
         <div className="space-y-4">
           <div className="space-y-2">
             <h3 className="text-xs font-bold text-text-tertiary uppercase tracking-[0.15em]">Gastos</h3>
