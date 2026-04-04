@@ -60,7 +60,9 @@ export default function RegisterPage() {
   return (
     <div>
       <div className="mb-8 lg:hidden">
-        <FinantekLogo variant="sidebar" />
+        <div style={{ minWidth: '160px' }}>
+          <FinantekLogo variant="sidebar" />
+        </div>
       </div>
 
       <div className="mb-8">
@@ -79,7 +81,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tu nombre"
-              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
             />
           </div>
         </div>
@@ -94,7 +96,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
               required
             />
           </div>
@@ -110,7 +112,7 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
-              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
               minLength={6}
               required
             />
@@ -148,7 +150,7 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirma tu contraseña"
-              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 pr-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
               required
             />
             <button
@@ -178,15 +180,9 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <div className="flex items-center gap-3 my-4">
-        <hr className="flex-1 border-white/10" />
-        <span className="text-xs text-gray-500">o</span>
-        <hr className="flex-1 border-white/10" />
-      </div>
-
-      <p className="text-center text-sm text-gray-400">
+      <p className="mt-6 text-center text-sm text-gray-400">
         ¿Ya tienes cuenta?{' '}
-        <Link href="/login" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+        <Link href="/login" className="font-semibold hover:text-violet-light transition-colors" style={{ color: '#A855F7' }}>
           Inicia sesión
         </Link>
       </p>

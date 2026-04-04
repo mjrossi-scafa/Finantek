@@ -46,7 +46,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl px-4 py-3 flex items-center gap-3">
               <Camera className="h-5 w-5 text-white" />
-              <span className="text-sm text-white font-medium">Escaneo de boletas</span>
+              <span className="text-sm text-white font-medium">Escaneo de recibos</span>
             </div>
           </div>
         </div>

@@ -35,7 +35,9 @@ export default function ForgotPasswordPage() {
     return (
       <div>
         <div className="mb-8 lg:hidden">
-          <FinantekLogo variant="sidebar" />
+          <div style={{ minWidth: '160px' }}>
+            <FinantekLogo variant="sidebar" />
+          </div>
         </div>
 
         <div className="text-center space-y-6">
@@ -52,7 +54,8 @@ export default function ForgotPasswordPage() {
 
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium"
+            className="inline-flex items-center gap-2 hover:text-violet-light transition-colors font-medium"
+            style={{ color: '#A855F7' }}
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al login
@@ -65,7 +68,9 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <div className="mb-8 lg:hidden">
-        <FinantekLogo variant="sidebar" />
+        <div style={{ minWidth: '160px' }}>
+          <FinantekLogo variant="sidebar" />
+        </div>
       </div>
 
       <div className="mb-8">
@@ -84,7 +89,7 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
               required
             />
           </div>
@@ -110,7 +115,8 @@ export default function ForgotPasswordPage() {
       <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors text-sm"
+          className="inline-flex items-center gap-2 hover:text-violet-light transition-colors text-sm"
+          style={{ color: '#A855F7' }}
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al login
