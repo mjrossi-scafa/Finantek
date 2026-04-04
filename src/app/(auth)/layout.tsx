@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Título y subtítulo */}
           <div className="text-center space-y-2">
             <h1 className="text-4xl font-black text-white leading-tight">
-              Toma el control.
+              Toma el control
             </h1>
             <p className="text-base text-purple-300/70 mt-2">
               Finanzas inteligentes al estilo samurai.

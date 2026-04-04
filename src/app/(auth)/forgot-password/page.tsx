@@ -1,125 +1,104 @@
 'use client'
-
 import { useState } from 'react'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
-import { FinantekLogo } from '@/components/logo/finantek-logo'
-import { Mail, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
   const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-
+    setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
     })
-
     if (error) {
-      toast.error('Error al enviar el correo', { description: error.message })
+      setError('No pudimos enviar el correo. Intenta de nuevo.')
     } else {
       setSuccess(true)
     }
     setLoading(false)
   }
 
-  if (success) {
-    return (
-      <div>
-        <div className="mb-8 lg:hidden">
-          <div style={{ minWidth: '160px' }}>
-            <FinantekLogo variant="sidebar" />
-          </div>
-        </div>
-
-        <div className="text-center space-y-6">
-          <div className="flex justify-center">
-            <CheckCircle className="h-16 w-16 text-green-500" />
-          </div>
-
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white mb-2">¡Listo! Revisa tu correo</h1>
-            <p className="text-gray-400">
-              Te enviamos las instrucciones a <span className="text-white font-medium">{email}</span>
-            </p>
-          </div>
-
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 hover:text-violet-light transition-colors font-medium"
-            style={{ color: '#A855F7' }}
-          >
-            Volver al login
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div>
-      <div className="mb-8 lg:hidden">
-        <div style={{ minWidth: '160px' }}>
-          <FinantekLogo variant="sidebar" />
-        </div>
+    <div className="min-h-screen flex">
+      <div className="hidden lg:flex w-1/2 bg-[#0F0A1E] flex-col justify-center px-16"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(139,92,246,0.15) 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}>
+        <p className="text-4xl font-black text-white">"El guerrero no</p>
+        <p className="text-4xl font-black text-white">actúa sin plan."</p>
+        <p className="text-purple-400 mt-4 text-sm">— Bushido financiero</p>
       </div>
 
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-white">Recupera tu acceso</h1>
-        <p className="text-gray-400 mt-1">Te enviaremos un enlace a tu correo</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-gray-300 text-sm font-medium">Correo electrónico</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              className="pl-10 h-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-              required
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: 'linear-gradient(135deg, #6D28D9, #A855F7)' }}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Enviando...
-            </div>
+      <div className="flex-1 bg-[#07050F] flex items-center justify-center px-8">
+        <div className="w-full max-w-sm">
+          {!success ? (
+            <>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Recupera tu acceso
+              </h1>
+              <p className="text-gray-400 text-sm mb-8">
+                Te enviaremos un enlace a tu correo.
+              </p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm text-gray-300 block mb-2">
+                    Correo electrónico
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  />
+                </div>
+                {error && (
+                  <p className="text-red-400 text-xs">{error}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-full font-semibold text-white transition hover:opacity-90"
+                  style={{background: 'linear-gradient(135deg, #6D28D9, #A855F7)'}}>
+                  {loading ? 'Enviando...' : 'Enviar instrucciones'}
+                </button>
+              </form>
+              <Link
+                href="/login"
+                className="block text-center mt-6 text-sm text-purple-400 hover:text-purple-300">
+                ← Volver al inicio de sesión
+              </Link>
+            </>
           ) : (
-            'Enviar instrucciones'
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                  stroke="#84CC16" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">¡Listo!</h2>
+              <p className="text-gray-400 text-sm mb-1">Revisa tu correo.</p>
+              <p className="text-gray-500 text-xs mb-8">
+                Te enviamos las instrucciones a {email}
+              </p>
+              <Link
+                href="/login"
+                className="text-sm text-purple-400 hover:text-purple-300">
+                ← Volver al inicio de sesión
+              </Link>
+            </div>
           )}
-        </button>
-      </form>
-
-      <div className="mt-6 text-center">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 hover:text-violet-light transition-colors text-sm"
-          style={{ color: '#A855F7' }}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          ← Volver al inicio de sesión
-        </Link>
+        </div>
       </div>
     </div>
   )

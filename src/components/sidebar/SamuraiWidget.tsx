@@ -3,30 +3,30 @@
 export function SamuraiWidget() {
   return (
     <div className="px-3 py-2">
-      <svg width="100%" viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg">
+      <svg width="100%" viewBox="0 0 160 240" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <style>{`
-            @keyframes cut {
-              0%,100% { transform: rotate(-30deg) translateY(-8px); }
-              45%,55% { transform: rotate(15deg) translateY(8px); }
+            @keyframes cutDown {
+              0%,100% { transform: rotate(-40deg); }
+              45%,55% { transform: rotate(20deg); }
             }
             @keyframes slashFx {
               0%,40%  { opacity: 0; }
               48%,56% { opacity: 1; }
-              65%     { opacity: 0; }
+              66%     { opacity: 0; }
               100%    { opacity: 0; }
             }
-            @keyframes coinFall {
-              0%,40%   { opacity: 1; transform: translate(0,0) rotate(0deg); }
-              55%      { opacity: 1; transform: translate(-6px,14px) rotate(-25deg); }
-              75%      { opacity: 0; transform: translate(-10px,28px) rotate(-45deg); }
-              100%     { opacity: 0; transform: translate(0,0); }
+            @keyframes coinLeft {
+              0%,42%  { opacity: 1; transform: translate(0,0) rotate(0deg); }
+              58%     { opacity: 1; transform: translate(-12px,-8px) rotate(-30deg); }
+              72%     { opacity: 0; transform: translate(-20px,10px) rotate(-60deg); }
+              100%    { opacity: 0; transform: translate(0,0); }
             }
-            @keyframes coinFall2 {
-              0%,40%   { opacity: 1; transform: translate(0,0) rotate(0deg); }
-              55%      { opacity: 1; transform: translate(6px,16px) rotate(25deg); }
-              75%      { opacity: 0; transform: translate(10px,30px) rotate(45deg); }
-              100%     { opacity: 0; transform: translate(0,0); }
+            @keyframes coinRight {
+              0%,42%  { opacity: 1; transform: translate(0,0) rotate(0deg); }
+              58%     { opacity: 1; transform: translate(12px,10px) rotate(30deg); }
+              72%     { opacity: 0; transform: translate(20px,24px) rotate(60deg); }
+              100%    { opacity: 0; transform: translate(0,0); }
             }
             @keyframes blinkEye {
               0%,90%,100% { transform: scaleY(1); }
@@ -42,18 +42,18 @@ export function SamuraiWidget() {
               43%,95% { opacity: 1; }
               100%    { opacity: 0; }
             }
-            .arm {
-              transform-origin: 72px 75px;
-              animation: cut 2.6s ease-in-out infinite;
+            .arm-down {
+              transform-origin: 52px 72px;
+              animation: cutDown 2.6s ease-in-out infinite;
             }
             .sfx { animation: slashFx 2.6s ease-in-out infinite; }
-            .cf1 {
-              transform-origin: 60px 118px;
-              animation: coinFall 2.6s ease-in-out infinite;
+            .cl {
+              transform-origin: 108px 88px;
+              animation: coinLeft 2.6s ease-in-out infinite;
             }
-            .cf2 {
-              transform-origin: 72px 118px;
-              animation: coinFall2 2.6s ease-in-out infinite;
+            .cr {
+              transform-origin: 118px 96px;
+              animation: coinRight 2.6s ease-in-out infinite;
             }
             .ey {
               transform-origin: 80px 52px;
@@ -64,24 +64,19 @@ export function SamuraiWidget() {
           `}</style>
         </defs>
 
-        {/* Fondo transparente — se integra al sidebar */}
-
         {/* KABUTO */}
         <rect x="62" y="16" width="36" height="4" rx="1" fill="#7C3AED"/>
         <rect x="58" y="20" width="44" height="7" rx="1" fill="#6D28D9"/>
         <rect x="54" y="27" width="52" height="5" rx="1" fill="#5B21B6"/>
-        {/* cuernos */}
         <rect x="62" y="10" width="4" height="10" rx="1" fill="#A855F7"/>
         <rect x="94" y="10" width="4" height="10" rx="1" fill="#A855F7"/>
 
         {/* CARA */}
         <rect x="62" y="32" width="36" height="26" rx="2" fill="#1E1040"/>
-        {/* ojos */}
         <g className="ey">
           <rect x="68" y="38" width="7" height="6" rx="1" fill="#84CC16"/>
           <rect x="85" y="38" width="7" height="6" rx="1" fill="#84CC16"/>
         </g>
-        {/* mascara */}
         <rect x="62" y="50" width="36" height="8" rx="1" fill="#4C1D95"/>
         <rect x="67" y="53" width="4" height="2" fill="#1A0A2E"/>
         <rect x="76" y="53" width="8" height="2" fill="#1A0A2E"/>
@@ -106,44 +101,40 @@ export function SamuraiWidget() {
         <rect x="98" y="70" width="10" height="28" rx="3" fill="#1E1040"/>
         <rect x="98" y="96" width="10" height="8" rx="2" fill="#2D1F4E"/>
 
-        {/* BRAZO IZQUIERDO + KATANA animado (corta hacia abajo) */}
-        <g className="arm">
-          {/* brazo */}
-          <rect x="52" y="60" width="10" height="32" rx="3" fill="#1E1040"/>
-          {/* antebrazo diagonal */}
-          <rect x="40" y="46" width="10" height="22" rx="3" fill="#1E1040"/>
-          {/* mano */}
-          <rect x="38" y="40" width="12" height="8" rx="2" fill="#2D1F4E"/>
-          {/* KATANA apuntando hacia abajo-derecha */}
+        {/* BRAZO IZQUIERDO + KATANA — corta hacia abajo-derecha */}
+        <g className="arm-down">
+          <rect x="46" y="60" width="10" height="30" rx="3" fill="#1E1040"/>
+          <rect x="38" y="42" width="10" height="22" rx="3" fill="#1E1040"/>
+          <rect x="36" y="36" width="12" height="8" rx="2" fill="#2D1F4E"/>
           {/* mango */}
-          <rect x="40" y="14" width="7" height="28" rx="2" fill="#1A0A2E"/>
-          <rect x="41" y="18" width="5" height="3" rx="1" fill="#6D28D9"/>
-          <rect x="41" y="25" width="5" height="3" rx="1" fill="#6D28D9"/>
-          <rect x="41" y="32" width="5" height="3" rx="1" fill="#6D28D9"/>
+          <rect x="38" y="8" width="7" height="30" rx="2" fill="#1A0A2E"/>
+          <rect x="39" y="12" width="5" height="3" rx="1" fill="#6D28D9"/>
+          <rect x="39" y="19" width="5" height="3" rx="1" fill="#6D28D9"/>
+          <rect x="39" y="26" width="5" height="3" rx="1" fill="#6D28D9"/>
           {/* tsuba */}
-          <rect x="34" y="40" width="19" height="5" rx="2" fill="#7C3AED"/>
-          {/* hoja larga hacia arriba */}
-          <rect x="41" y="0" width="5" height="42" rx="1" fill="#C084FC"/>
-          <rect x="42" y="0" width="2" height="40" rx="1" fill="#EDE9FE" opacity="0.8"/>
+          <rect x="32" y="36" width="19" height="5" rx="2" fill="#7C3AED"/>
+          {/* hoja */}
+          <rect x="39" y="0" width="5" height="38" rx="1" fill="#C084FC"/>
+          <rect x="40" y="0" width="2" height="36" rx="1" fill="#EDE9FE" opacity="0.8"/>
         </g>
 
-        {/* SLASH FX diagonal */}
+        {/* MONEDAS al frente derecha del samurai, altura torso */}
+        <g className="cl">
+          <circle cx="108" cy="82" r="10" fill="#84CC16"/>
+          <circle cx="108" cy="82" r="6" fill="#3F6212"/>
+          <text x="108" y="86" textAnchor="middle" fontFamily="monospace" fontSize="7" fontWeight="bold" fill="#84CC16">$</text>
+        </g>
+        <g className="cr">
+          <circle cx="122" cy="90" r="8" fill="#65A30D"/>
+          <circle cx="122" cy="90" r="5" fill="#3F6212"/>
+          <text x="122" y="94" textAnchor="middle" fontFamily="monospace" fontSize="6" fontWeight="bold" fill="#84CC16">$</text>
+        </g>
+
+        {/* SLASH FX diagonal arriba-izq → abajo-der */}
         <g className="sfx">
-          <line x1="48" y1="95" x2="90" y2="130" stroke="#A855F7" strokeWidth="2.5" strokeLinecap="round"/>
-          <line x1="44" y1="100" x2="86" y2="135" stroke="#C084FC" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
-          <line x1="52" y1="92" x2="94" y2="127" stroke="#A855F7" strokeWidth="1" strokeLinecap="round" opacity="0.3"/>
-        </g>
-
-        {/* MONEDAS que caen al ser cortadas */}
-        <g className="cf1">
-          <circle cx="66" cy="118" r="10" fill="#84CC16"/>
-          <circle cx="66" cy="118" r="6" fill="#3F6212"/>
-          <text x="66" y="122" textAnchor="middle" fontFamily="monospace" fontSize="7" fontWeight="bold" fill="#84CC16">$</text>
-        </g>
-        <g className="cf2">
-          <circle cx="82" cy="122" r="8" fill="#65A30D"/>
-          <circle cx="82" cy="122" r="5" fill="#3F6212"/>
-          <text x="82" y="126" textAnchor="middle" fontFamily="monospace" fontSize="6" fontWeight="bold" fill="#84CC16">$</text>
+          <line x1="55" y1="55" x2="125" y2="110" stroke="#A855F7" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="50" y1="60" x2="120" y2="115" stroke="#C084FC" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+          <line x1="60" y1="50" x2="130" y2="105" stroke="#A855F7" strokeWidth="1" strokeLinecap="round" opacity="0.3"/>
         </g>
 
         {/* FALDA */}
@@ -159,21 +150,19 @@ export function SamuraiWidget() {
         <rect x="61" y="143" width="17" height="6" rx="2" fill="#0F0520"/>
         <rect x="82" y="143" width="17" height="6" rx="2" fill="#0F0520"/>
 
-        {/* Línea suelo */}
-        <rect x="30" y="150" width="100" height="1" rx="1" fill="#2D1F4E" opacity="0.6"/>
+        {/* Suelo */}
+        <rect x="20" y="150" width="120" height="1" rx="1" fill="#2D1F4E" opacity="0.5"/>
 
         {/* FRASES */}
-        <rect x="10" y="160" width="140" height="0.5" fill="#4C1D95" opacity="0.4"/>
-
+        <rect x="8" y="162" width="144" height="0.5" fill="#4C1D95" opacity="0.4"/>
         <g className="qq1">
-          <text x="80" y="176" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fill="#9F7AEA">"No gastes sin intención."</text>
+          <text x="80" y="178" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fill="#9F7AEA">"No gastes sin intención."</text>
         </g>
         <g className="qq2">
-          <text x="80" y="176" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fill="#9F7AEA">"Cada peso, una victoria."</text>
+          <text x="80" y="178" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fill="#9F7AEA">"Cada peso, una victoria."</text>
         </g>
-        <text x="80" y="190" textAnchor="middle" fontFamily="sans-serif" fontSize="8" fill="#4C1D95">武士道 · Bushido</text>
-
-        <rect x="10" y="198" width="140" height="0.5" fill="#4C1D95" opacity="0.4"/>
+        <text x="80" y="192" textAnchor="middle" fontFamily="sans-serif" fontSize="8" fill="#4C1D95">武士道 · Bushido</text>
+        <rect x="8" y="200" width="144" height="0.5" fill="#4C1D95" opacity="0.4"/>
 
       </svg>
     </div>
