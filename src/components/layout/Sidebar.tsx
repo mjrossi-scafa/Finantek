@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { FinantekLogo } from '@/components/logo/finantek-logo'
+import { SamuraiWidget } from '@/components/sidebar/SamuraiWidget'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -90,6 +91,9 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
           )
         })}
       </nav>
+
+      {/* Samurai Widget */}
+      <SamuraiWidget />
 
       {/* Bot connection with subtle zen indicator */}
       <div className="px-4 mb-4">
