@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { formatCLP, parseCLP } from '@/lib/utils/currency'
+import { cn } from '@/lib/utils'
 
 interface CurrencyInputProps {
   value: number
@@ -10,9 +11,10 @@ interface CurrencyInputProps {
   placeholder?: string
   disabled?: boolean
   id?: string
+  className?: string
 }
 
-export function CurrencyInput({ value, onChange, placeholder = '$0', disabled, id }: CurrencyInputProps) {
+export function CurrencyInput({ value, onChange, placeholder = '$0', disabled, id, className }: CurrencyInputProps) {
   const [displayValue, setDisplayValue] = useState('')
 
   useEffect(() => {
@@ -55,7 +57,10 @@ export function CurrencyInput({ value, onChange, placeholder = '$0', disabled, i
       onFocus={handleFocus}
       placeholder={placeholder}
       disabled={disabled}
-      className="font-mono bg-surface border-surface-border text-text-primary placeholder:text-text-tertiary rounded-xl focus:border-violet-primary focus:ring-violet-primary/20"
+      className={cn(
+        "font-mono bg-surface border-surface-border text-text-primary placeholder:text-text-tertiary rounded-xl focus:border-violet-primary focus:ring-violet-primary/20",
+        className
+      )}
     />
   )
 }

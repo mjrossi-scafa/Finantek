@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Transaction, Category } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
-import { formatDateGroup, getRelativeDate } from '@/lib/utils/dates'
+import { getRelativeDate } from '@/lib/utils/dates'
 import { createClient } from '@/lib/supabase/client'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -255,7 +255,7 @@ export function TransactionsClient({
 
         <div className="flex gap-3">
           {/* Category filter */}
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value || 'all')}>
             <SelectTrigger className="w-48 bg-surface-secondary border-surface-border">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
@@ -273,7 +273,7 @@ export function TransactionsClient({
           </Select>
 
           {/* Month filter */}
-          <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <Select value={monthFilter} onValueChange={(value) => setMonthFilter(value || 'all')}>
             <SelectTrigger className="w-40 bg-surface-secondary border-surface-border">
               <SelectValue placeholder="Todos los meses" />
             </SelectTrigger>
@@ -433,13 +433,8 @@ export function TransactionsClient({
                           </button>
 
                           <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <button
-                                onClick={(e) => e.stopPropagation()}
-                                className="p-1.5 rounded-lg text-text-tertiary hover:text-danger hover:bg-danger/10 transition-colors"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
+                            <AlertDialogTrigger className="p-1.5 rounded-lg text-text-tertiary hover:text-danger hover:bg-danger/10 transition-colors" onClick={(e) => e.stopPropagation()}>
+                              <Trash2 className="h-3.5 w-3.5" />
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>

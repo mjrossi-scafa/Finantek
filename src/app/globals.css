@@ -205,6 +205,23 @@
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
+  /* Surface hover states */
+  .surface-hover {
+    background: rgba(42, 42, 62, 0.6);
+  }
+
+  .surface-primary {
+    background: rgba(26, 26, 36, 1);
+  }
+
+  .surface-secondary {
+    background: rgba(36, 36, 56, 1);
+  }
+
+  .surface-border {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
   /* Zen-like glow effects */
   .glow-indigo {
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), 0 0 40px rgba(99, 102, 241, 0.05);

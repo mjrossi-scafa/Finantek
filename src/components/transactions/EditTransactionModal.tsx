@@ -251,7 +251,7 @@ export function EditTransactionModal({
           {/* Category */}
           <div className="space-y-2">
             <Label>Categoría</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select value={categoryId} onValueChange={(value) => setCategoryId(value || '')}>
               <SelectTrigger className="bg-surface-secondary border-surface-border">
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
@@ -321,17 +321,12 @@ export function EditTransactionModal({
           {mode === 'edit' && transaction && (
             <div className="border-t border-surface-border pt-4 mt-6">
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-danger hover:text-danger hover:bg-danger/10 w-full"
-                    disabled={deleteLoading}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Eliminar transacción
-                  </Button>
+                <AlertDialogTrigger
+                  className="w-full inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-danger hover:text-danger hover:bg-danger/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
+                  disabled={deleteLoading}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Eliminar transacción
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>

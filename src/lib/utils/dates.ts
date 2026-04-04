@@ -98,3 +98,29 @@ export function getRelativeWeekLabel(weekStartStr: string): string {
   const weeksAgo = Math.floor((now.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24 * 7))
   return weeksAgo > 0 ? `Hace ${weeksAgo} semana${weeksAgo > 1 ? 's' : ''}` : 'Esta semana'
 }
+
+// Transaction-specific date formatting functions
+export function getRelativeDate(dateStr: string): string {
+  const date = parseISO(dateStr)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+  const diffTime = today.getTime() - targetDate.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) {
+    return `Hoy · ${format(date, "d 'de' MMMM", { locale: es })}`
+  } else if (diffDays === 1) {
+    return `Ayer · ${format(date, "d 'de' MMMM", { locale: es })}`
+  } else if (diffDays < 7) {
+    return `${format(date, 'EEEE', { locale: es })} · ${format(date, "d 'de' MMMM", { locale: es })}`
+  } else {
+    return format(date, "d 'de' MMMM 'de' yyyy", { locale: es })
+  }
+}
+
+export function formatDateGroup(dateStr: string): string {
+  const date = parseISO(dateStr)
+  return format(date, "d 'de' MMMM, yyyy", { locale: es })
+}
