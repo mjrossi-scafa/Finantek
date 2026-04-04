@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: process.env.NEXT_PUBLIC_APP_URL + '/reset-password'
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
     })
 
     if (error) {
@@ -57,7 +57,6 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-2 hover:text-violet-light transition-colors font-medium"
             style={{ color: '#A855F7' }}
           >
-            <ArrowLeft className="h-4 w-4" />
             Volver al login
           </Link>
         </div>
@@ -119,7 +118,7 @@ export default function ForgotPasswordPage() {
           style={{ color: '#A855F7' }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Volver al login
+          ← Volver al inicio de sesión
         </Link>
       </div>
     </div>
