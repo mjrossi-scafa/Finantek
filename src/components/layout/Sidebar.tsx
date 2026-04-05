@@ -50,7 +50,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
 
       {/* Logo KATANA con barras SVG */}
       <div className="pt-6 pb-2 px-4">
-        <div className="max-w-[130px]">
+        <div>
           <KatanaLogo variant="sidebar" />
         </div>
       </div>

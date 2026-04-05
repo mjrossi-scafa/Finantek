@@ -34,7 +34,9 @@ export default function LoginPage() {
   return (
     <div className="px-6 py-8 lg:px-0 lg:py-0">
       <div className="flex justify-center mb-8 lg:hidden">
-        <KatanaLogo variant="sidebar" />
+        <div className="w-48">
+          <KatanaLogo variant="sidebar" />
+        </div>
       </div>
 
       <div className="mb-8">

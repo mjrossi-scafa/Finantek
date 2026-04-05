@@ -65,7 +65,7 @@ export function KatanaLogo({ variant = "sidebar", className }: KatanaLogoProps) 
   // Variante sidebar sin fondo ni subtítulo
   if (variant === "sidebar") {
     return (
-      <div className={cn("inline-block max-w-[140px]", className)}>
+      <div className={cn("inline-block min-w-[160px] max-w-[160px]", className)}>
         <svg width="100%" height="auto" viewBox="0 0 485 110" xmlns="http://www.w3.org/2000/svg">
           {/* K */}
           <rect x="30"  y="8"   width="10" height="90" rx="3" fill="#A855F7"/>

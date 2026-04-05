@@ -17,7 +17,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative space-y-8 max-w-md mx-auto">
           {/* Logo */}
           <div className="flex justify-center">
-            <KatanaLogo variant="sidebar" />
+            <div className="w-56">
+              <KatanaLogo variant="sidebar" />
+            </div>
           </div>
 
           {/* Separador */}
