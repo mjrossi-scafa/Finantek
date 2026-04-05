@@ -1,43 +1,49 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmailInput } from '@/components/ui/EmailInput'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { toast } from 'sonner'
 import { KatanaLogo } from '@/components/logo/katana-logo'
-import { Mail, Lock, Eye, EyeOff, Loader2, User, Check } from 'lucide-react'
+import { Loader2, User } from 'lucide-react'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
-  // Password requirements validation
-  const passwordRequirements = useMemo(() => {
-    return {
-      minLength: password.length >= 6
-    }
-  }, [password])
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      toast.error('Ingresa un correo electrónico válido')
+      return
+    }
+
+    // Validar contraseña
+    if (password.length < 6) {
+      toast.error('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
 
     if (password !== confirmPassword) {
       toast.error('Las contraseñas no coinciden')
       return
     }
 
-    if (!passwordRequirements.minLength) {
-      toast.error('La contraseña debe tener al menos 6 caracteres')
+    if (!name.trim()) {
+      toast.error('Ingresa tu nombre')
       return
     }
 
@@ -86,82 +92,21 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-gray-300 text-sm font-medium">Correo electrónico</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              className="pl-10 h-12 py-4 lg:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-base lg:text-sm"
-              required
-            />
-          </div>
-        </div>
+        <EmailInput value={email} onChange={setEmail} />
 
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-gray-300 text-sm font-medium">Contraseña</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className="pl-10 pr-10 h-12 py-4 lg:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-base lg:text-sm"
-              minLength={6}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
+        <PasswordInput
+          value={password}
+          onChange={setPassword}
+          showRequirements={true}
+        />
 
-          {/* Password requirements */}
-          {password && (
-            <div className="mt-2">
-              <div className="flex items-center gap-2 text-xs">
-                <Check
-                  className={`h-3 w-3 ${passwordRequirements.minLength ? 'text-green-500' : 'text-gray-500'}`}
-                />
-                <span className={passwordRequirements.minLength ? 'text-green-500' : 'text-gray-500'}>
-                  Mínimo 6 caracteres
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-gray-300 text-sm font-medium">Confirmar contraseña</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirma tu contraseña"
-              className="pl-10 pr-10 h-12 py-4 lg:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-base lg:text-sm"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
+        <PasswordInput
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          label="Confirmar contraseña"
+          placeholder="Confirma tu contraseña"
+          showRequirements={false}
+        />
 
         <button
           type="submit"
