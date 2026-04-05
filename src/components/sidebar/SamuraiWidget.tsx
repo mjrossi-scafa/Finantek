@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import { SamuraiQuotes } from './SamuraiQuotes'
 
 export function SamuraiWidget() {
@@ -48,7 +47,12 @@ export function SamuraiWidget() {
         }
       `}</style>
 
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        overflow: 'hidden',
+        maxHeight: '200px',
+      }}>
 
         {/* Aura violeta detrás */}
         <div
@@ -68,18 +72,22 @@ export function SamuraiWidget() {
         {/* Samurai flotando con glow */}
         <div
           className="samurai-float samurai-glow"
-          style={{ position: 'relative', zIndex: 1 }}>
-          <Image
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            background: 'transparent',
+            mixBlendMode: 'lighten',
+          }}>
+          <img
             src="/images/samurai.png"
             alt="Katana Samurai"
-            width={160}
-            height={200}
             style={{
-              width: '100%',
+              width: '140%',
+              marginLeft: '-20%',
+              marginTop: '-5%',
               height: 'auto',
-              objectFit: 'contain',
+              mixBlendMode: 'lighten',
             }}
-            priority
           />
         </div>
 
