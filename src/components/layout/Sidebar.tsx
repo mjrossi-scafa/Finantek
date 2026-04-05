@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { KatanaLogo } from '@/components/logo/katana-logo'
-import { SamuraiWidget } from '@/components/sidebar/SamuraiWidget'
+import { SamuraiContainer } from '@/components/sidebar/SamuraiContainer'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -93,7 +93,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       </nav>
 
       {/* Samurai Widget */}
-      <SamuraiWidget />
+      <SamuraiContainer />
 
       {/* Bot connection with subtle zen indicator */}
       <div className="px-4 mb-4">
