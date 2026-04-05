@@ -9,10 +9,30 @@ export function SamuraiWidget() {
   const [visible, setVisible] = useState(true)
 
   const quotes = [
-    { text: '"No gastes sin intención"', color: '#C084FC', mode: 'SERIO' },
-    { text: '"Cada peso, una victoria"', color: '#84CC16', mode: 'VICTORIA' },
-    { text: '"Ahorra hoy, domina mañana"', color: '#A855F7', mode: 'ESTRATEGIA' },
-    { text: '"El guerrero planifica\nantes de gastar"', color: '#7C3AED', mode: 'MEDITACIÓN' },
+    {
+      text: '"No gastes sin intención"',
+      kanji: '武',
+      romaji: 'Bu · Disciplina',
+      color: '#C084FC',
+    },
+    {
+      text: '"Cada peso, una victoria"',
+      kanji: '勝',
+      romaji: 'Katsu · Victoria',
+      color: '#84CC16',
+    },
+    {
+      text: '"Ahorra hoy, domina mañana"',
+      kanji: '道',
+      romaji: 'Dō · El camino',
+      color: '#A855F7',
+    },
+    {
+      text: '"El guerrero planifica\nantes de gastar"',
+      kanji: '禅',
+      romaji: 'Zen · Meditación',
+      color: '#C084FC',
+    },
   ]
 
   useEffect(() => {
@@ -34,8 +54,15 @@ export function SamuraiWidget() {
           50%      { transform: translateY(-8px) rotate(-45deg); }
         }
         @keyframes katanaGlow {
-          0%,100% { filter: drop-shadow(0 0 6px #A855F7) drop-shadow(0 0 12px #7C3AED); }
-          50%      { filter: drop-shadow(0 0 16px #A855F7) drop-shadow(0 0 24px #7C3AED) drop-shadow(0 0 8px #C084FC); }
+          0%,100% {
+            filter: drop-shadow(0 0 6px #7C3AED)
+                    drop-shadow(0 0 2px #A855F7);
+          }
+          50% {
+            filter: drop-shadow(0 0 14px #A855F7)
+                    drop-shadow(0 0 6px #84CC16)
+                    drop-shadow(0 0 2px #C084FC);
+          }
         }
         @keyframes auraKatana {
           0%,100% { opacity: 0.15; transform: scale(1); }
@@ -118,72 +145,43 @@ export function SamuraiWidget() {
           border: '1px solid rgba(124,58,237,0.1)',
         }}/>
 
-        {/* KATANA SVG ULTRA-PROFESIONAL */}
+        {/* KATANA ELEGANTE Y PROPORCIONAL */}
         <div className="k-float k-glow" style={{
           position: 'absolute',
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%) rotate(-45deg)',
           zIndex: 10,
         }}>
-          <svg width="90" height="90" viewBox="0 0 90 90">
-            {/* Hoja principal con gradiente */}
-            <defs>
-              <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.9"/>
-                <stop offset="40%" stopColor="#C084FC" stopOpacity="0.7"/>
-                <stop offset="60%" stopColor="#A855F7" stopOpacity="0.8"/>
-                <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.9"/>
-              </linearGradient>
-              <radialGradient id="tsuba" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#7C3AED"/>
-                <stop offset="80%" stopColor="#4C1D95"/>
-                <stop offset="100%" stopColor="#1E1B4B"/>
-              </radialGradient>
-            </defs>
-
-            {/* Hoja principal */}
-            <rect x="42" y="4" width="6" height="58" rx="3" fill="url(#bladeGrad)"/>
-
-            {/* Filo central brillante */}
-            <rect x="44" y="4" width="2" height="56" rx="1" fill="#FFFFFF" opacity="0.8"/>
-            <rect x="44.5" y="6" width="1" height="52" rx="0.5" fill="#FBBF24" opacity="0.4"/>
-
-            {/* Punta perfecta */}
-            <polygon points="42,4 48,4 45,0" fill="#F8FAFC"/>
-            <polygon points="43,3 47,3 45,0" fill="#FFFFFF" opacity="0.9"/>
-
-            {/* Sangre del canal */}
-            <line x1="43.5" y1="8" x2="43.5" y2="54" stroke="#DC2626" strokeWidth="0.3" opacity="0.6"/>
-            <line x1="46.5" y1="10" x2="46.5" y2="52" stroke="#B91C1C" strokeWidth="0.2" opacity="0.4"/>
-
-            {/* Tsuba (protector) con detalles */}
-            <rect x="32" y="60" width="26" height="7" rx="3" fill="url(#tsuba)"/>
-            <rect x="34" y="61" width="22" height="5" rx="2" fill="#A855F7"/>
-            <circle cx="37" cy="63.5" r="1.5" fill="#84CC16" opacity="0.9"/>
-            <circle cx="53" cy="63.5" r="1.5" fill="#84CC16" opacity="0.9"/>
-            <rect x="43" y="62" width="4" height="3" rx="1" fill="#22C55E" opacity="0.7"/>
-
-            {/* Mango (tsuka) con envolturas */}
-            <rect x="40" y="66" width="10" height="20" rx="3" fill="#0F0A19"/>
-            <rect x="41" y="67" width="8" height="18" rx="2" fill="#1A0B2E"/>
-
-            {/* Envolturas tradicionales */}
-            <rect x="41.5" y="70" width="7" height="2.5" rx="1" fill="#6D28D9" opacity="0.9"/>
-            <rect x="41.5" y="74" width="7" height="2.5" rx="1" fill="#6D28D9" opacity="0.9"/>
-            <rect x="41.5" y="78" width="7" height="2.5" rx="1" fill="#6D28D9" opacity="0.9"/>
-
-            {/* Pommel brillante */}
-            <circle cx="45" cy="87" r="4" fill="#84CC16"/>
-            <circle cx="45" cy="87" r="2.5" fill="#22C55E"/>
-            <circle cx="45" cy="86" r="1" fill="#FFFFFF" opacity="0.8"/>
-
-            {/* Grabados en la hoja */}
-            <line x1="44.2" y1="12" x2="44.2" y2="50" stroke="#7C3AED" strokeWidth="0.2" opacity="0.3"/>
-            <line x1="45.8" y1="14" x2="45.8" y2="48" stroke="#A855F7" strokeWidth="0.15" opacity="0.4"/>
-
-            {/* Brillos dinámicos */}
-            <rect x="43" y="8" width="0.5" height="44" rx="0.25" fill="#FBBF24" opacity="0.6"/>
-            <rect x="46.2" y="10" width="0.3" height="40" rx="0.15" fill="#FEF3C7" opacity="0.5"/>
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            {/* Hoja larga y delgada — diagonal */}
+            <rect x="48" y="2" width="3" height="65" rx="1.5"
+              fill="#C084FC" transform="rotate(0 50 50)"/>
+            <rect x="48.5" y="2" width="1" height="63" rx="1"
+              fill="#EDE9FE" opacity="0.8"
+              transform="rotate(0 50 50)"/>
+            {/* Punta afilada */}
+            <polygon points="47,2 51,2 49,0" fill="#EDE9FE"/>
+            {/* Hamon (línea de temple) sutil */}
+            <path d="M 48.5 10 Q 50 20 48.5 30 Q 50 40 48.5 50 Q 50 60 48.5 65"
+              fill="none" stroke="#9F7AEA" strokeWidth="0.5" opacity="0.5"/>
+            {/* Tsuba más detallada */}
+            <ellipse cx="49" cy="68" rx="10" ry="4" fill="#7C3AED"/>
+            <ellipse cx="49" cy="68" rx="8" ry="3" fill="#6D28D9"/>
+            {/* Mango con grip */}
+            <rect x="46" y="71" width="6" height="22" rx="2" fill="#1A0A2E"/>
+            {/* Ito (vendaje) diagonal */}
+            <rect x="46" y="73" width="6" height="2" rx="0"
+              fill="#4C1D95" opacity="0.8"/>
+            <rect x="46" y="77" width="6" height="2" rx="0"
+              fill="#4C1D95" opacity="0.8"/>
+            <rect x="46" y="81" width="6" height="2" rx="0"
+              fill="#4C1D95" opacity="0.8"/>
+            <rect x="46" y="85" width="6" height="2" rx="0"
+              fill="#4C1D95" opacity="0.8"/>
+            {/* Kashira (pommel) */}
+            <ellipse cx="49" cy="94" rx="5" ry="3" fill="#6D28D9"/>
+            {/* Punto verde acento */}
+            <circle cx="49" cy="96" r="2.5" fill="#84CC16"/>
           </svg>
         </div>
 
@@ -237,33 +235,44 @@ export function SamuraiWidget() {
         }}/>
       </div>
 
-      {/* FRASES ROTATIVAS MEJORADAS */}
+      {/* FRASES JAPONESAS REVERENTES */}
       <div style={{
         textAlign: 'center',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.5s ease',
         marginTop: '6px',
       }}>
-        <p style={{
-          fontSize: '10px',
+        {/* Kanji grande y sutil */}
+        <div style={{
+          fontSize: '28px',
+          fontFamily: 'serif',
           color: quotes[current].color,
-          fontWeight: '600',
+          opacity: 0.15,
+          lineHeight: 1,
+          marginBottom: '4px',
+        }}>
+          {quotes[current].kanji}
+        </div>
+        {/* Frase */}
+        <p style={{
+          fontSize: '9px',
+          color: quotes[current].color,
+          fontWeight: '500',
           whiteSpace: 'pre-line',
-          lineHeight: '1.4',
-          textShadow: `0 0 10px ${quotes[current].color}50, 0 0 20px ${quotes[current].color}30`,
-          letterSpacing: '0.03em',
+          lineHeight: '1.5',
+          fontStyle: 'italic',
         }}>
           {quotes[current].text}
         </p>
+        {/* Romaji */}
         <p style={{
-          fontSize: '8px',
-          color: '#3B1D6E',
-          marginTop: '5px',
-          letterSpacing: '0.12em',
-          fontWeight: '600',
-          textShadow: '0 0 4px rgba(59,29,110,0.5)'
+          fontSize: '7px',
+          color: '#4C1D95',
+          marginTop: '4px',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
         }}>
-          — {quotes[current].mode}
+          {quotes[current].romaji}
         </p>
       </div>
 

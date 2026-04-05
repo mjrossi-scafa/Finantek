@@ -16,26 +16,53 @@ export function SamuraiContainer() {
         <SamuraiWidget />
       </div>
 
-      <div className="flex items-center justify-center gap-3 pb-3">
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '8px',
+        padding: '4px 8px 8px',
+      }}>
         <button
           onClick={() => setMode('active')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-300 ${
-            mode === 'active'
-              ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40'
-              : 'text-gray-600 hover:text-gray-400'
-          }`}>
-          <span>⚔</span>
-          <span>Activo</span>
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '3px 10px',
+            borderRadius: '999px',
+            fontSize: '10px',
+            border: mode === 'active'
+              ? '1px solid rgba(168,85,247,0.5)'
+              : '1px solid transparent',
+            background: mode === 'active'
+              ? 'rgba(109,40,217,0.3)'
+              : 'transparent',
+            color: mode === 'active' ? '#C084FC' : '#3B1D6E',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+          }}>
+          ⚔ 武
         </button>
         <button
           onClick={() => setMode('zen')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-300 ${
-            mode === 'zen'
-              ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40'
-              : 'text-gray-600 hover:text-gray-400'
-          }`}>
-          <span>☯</span>
-          <span>Zen</span>
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '3px 10px',
+            borderRadius: '999px',
+            fontSize: '10px',
+            border: mode === 'zen'
+              ? '1px solid rgba(168,85,247,0.5)'
+              : '1px solid transparent',
+            background: mode === 'zen'
+              ? 'rgba(109,40,217,0.3)'
+              : 'transparent',
+            color: mode === 'zen' ? '#C084FC' : '#3B1D6E',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+          }}>
+          ☯ 禅
         </button>
       </div>
     </div>
