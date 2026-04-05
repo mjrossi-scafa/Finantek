@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { FinantekLogo } from '@/components/logo/finantek-logo'
+import { KatanaLogo } from '@/components/logo/katana-logo'
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Check } from 'lucide-react'
 
 export default function RegisterPage() {
@@ -60,7 +60,7 @@ export default function RegisterPage() {
   return (
     <div className="px-6 py-8 lg:px-0 lg:py-0">
       <div className="flex justify-center mb-8 lg:hidden">
-        <FinantekLogo variant="sidebar" />
+        <KatanaLogo variant="sidebar" />
       </div>
 
       <div className="mb-8">

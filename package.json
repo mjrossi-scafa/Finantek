@@ -1,6 +1,6 @@
 {
-  "name": "finantek",
-  "description": "Tu plataforma de finanzas inteligentes",
+  "name": "katana",
+  "description": "La disciplina del samurai aplicada al dinero",
   "version": "0.1.0",
   "private": true,
   "scripts": {

@@ -17,8 +17,8 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Finantek',
-  description: 'Tu plataforma de finanzas inteligentes',
+  title: 'Katana',
+  description: 'La disciplina del samurai aplicada al dinero',
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',

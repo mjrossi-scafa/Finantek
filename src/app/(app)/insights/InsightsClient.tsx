@@ -60,7 +60,7 @@ function InsightsEmptyState({ onGenerate, isGenerating }: { onGenerate: () => vo
 
         {/* Descripción */}
         <p className="text-text-secondary max-w-md mx-auto leading-relaxed">
-          Finantek analiza tus gastos de la semana y te da recomendaciones personalizadas. Solo toma unos segundos.
+          Katana analiza tus gastos de la semana y te da recomendaciones personalizadas. Solo toma unos segundos.
         </p>
 
         {/* Botón principal */}

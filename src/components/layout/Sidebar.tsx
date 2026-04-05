@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
-import { FinantekLogo } from '@/components/logo/finantek-logo'
+import { KatanaLogo } from '@/components/logo/katana-logo'
 import { SamuraiWidget } from '@/components/sidebar/SamuraiWidget'
 
 const navItems = [
@@ -48,10 +48,10 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       {/* Zen accent line (inspired by Japanese scroll design) */}
       <div className="absolute top-0 left-0 w-[1px] h-full gradient-indigo opacity-30" />
 
-      {/* Logo FINANTEK con barras SVG */}
+      {/* Logo KATANA con barras SVG */}
       <div className="pt-6 pb-2 px-4">
         <div className="max-w-[130px]">
-          <FinantekLogo variant="sidebar" />
+          <KatanaLogo variant="sidebar" />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { FinantekLogo } from '@/components/logo/finantek-logo'
+import { KatanaLogo } from '@/components/logo/katana-logo'
 import { BarChart3, Bot, Camera, Sparkles } from 'lucide-react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative space-y-8 max-w-md mx-auto">
           {/* Logo */}
           <div className="flex justify-center">
-            <FinantekLogo variant="sidebar" />
+            <KatanaLogo variant="sidebar" />
           </div>
 
           {/* Separador */}
@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               La disciplina del samurai
             </p>
             <p className="text-lg text-purple-300/70">
-              aplicada al dinero.
+              aplicada al dinero
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
           {/* Footer */}
           <p className="text-center font-mono text-xs text-purple-800">
-            武士道 · FINANTEK © 2025
+            武士道 · KATANA © 2026
           </p>
         </div>
       </div>
