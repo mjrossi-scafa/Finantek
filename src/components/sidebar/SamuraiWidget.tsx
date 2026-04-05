@@ -1,7 +1,116 @@
 'use client'
+
+import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { SamuraiQuotes } from './SamuraiQuotes'
+import { SamuraiFallback } from './SamuraiFallback'
+
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
 export function SamuraiWidget() {
+  const [animData, setAnimData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    const tryLoadAnimation = async () => {
+      try {
+        // Lista de posibles animaciones ordenadas por preferencia
+        const animationPaths = [
+          '/animations/samurai.json',
+          '/animations/ninja.json',
+          '/animations/warrior.json',
+          '/animations/test.json' // la que sabemos que funciona
+        ]
+
+        for (const path of animationPaths) {
+          try {
+            const response = await fetch(path)
+            if (!response.ok) continue
+
+            const data = await response.json()
+
+            // Validar que es una animación Lottie válida
+            if (data && data.v && data.layers && data.w && data.h) {
+              setAnimData(data)
+              setLoading(false)
+              return
+            }
+          } catch (err) {
+            continue
+          }
+        }
+
+        // No se encontró animación válida
+        setError(true)
+        setLoading(false)
+
+      } catch (err) {
+        setError(true)
+        setLoading(false)
+      }
+    }
+
+    // Dar 2 segundos para intentar cargar Lottie, luego usar fallback
+    setTimeout(() => {
+      if (loading) {
+        setError(true)
+        setLoading(false)
+      }
+    }, 2000)
+
+    tryLoadAnimation()
+  }, [])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="px-3 py-2 hidden lg:block">
+        <div style={{
+          width: '100%',
+          height: '120px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            animation: 'spin 1s linear infinite',
+            width: '20px', height: '20px',
+            border: '2px solid #7C3AED',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%'
+          }}/>
+        </div>
+      </div>
+    )
+  }
+
+  // Si hay animación Lottie válida, usarla
+  if (!error && animData) {
+    return (
+      <div className="px-3 py-2 hidden lg:block">
+        <div style={{
+          width: '100%',
+          maxHeight: '180px',
+          overflow: 'hidden',
+          filter: 'hue-rotate(260deg) saturate(1.3) brightness(1.1)', // Ajustar a tema morado
+          borderRadius: '12px'
+        }}>
+          <Lottie
+            animationData={animData}
+            loop={true}
+            style={{
+              width: '100%',
+              height: 'auto'
+            }}
+          />
+        </div>
+        <SamuraiQuotes />
+      </div>
+    )
+  }
+
+  // Fallback: usar el samurai PNG existente con mejores animaciones CSS
   return (
     <div className="px-3 py-2 hidden lg:block">
       <style>{`
@@ -51,25 +160,22 @@ export function SamuraiWidget() {
         position: 'relative',
         width: '100%',
         overflow: 'hidden',
-        maxHeight: '200px',
+        maxHeight: '180px',
       }}>
 
-        {/* Aura violeta detrás */}
+        {/* Aura violeta mejorada */}
         <div
           className="samurai-aura"
           style={{
             position: 'absolute',
-            top: '15%',
-            left: '15%',
-            right: '15%',
-            bottom: '15%',
+            top: '10%', left: '10%', right: '10%', bottom: '10%',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, #7C3AED 0%, #4C1D95 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(124,58,237,0.3) 0%, rgba(76,29,149,0.2) 40%, transparent 70%)',
             zIndex: 0,
           }}
         />
 
-        {/* Samurai flotando con glow */}
+        {/* Samurai flotando con glow mejorado */}
         <div
           className="samurai-float samurai-glow"
           style={{

@@ -5,7 +5,10 @@
       "Bash(npm run:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(python3 -m json.tool public/animations/test.json)",
+      "Bash(npm install:*)"
     ]
   }
 }
