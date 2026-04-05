@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GradientButton } from '@/components/shared/GradientButton'
+import { TelegramBotSection } from '@/components/settings/TelegramBotSection'
 import { toast } from 'sonner'
 import { Plus, Trash2, Save, LogOut } from 'lucide-react'
 
@@ -111,6 +112,9 @@ export function SettingsClient({ profile, categories, userId }: SettingsClientPr
           </GradientButton>
         </div>
       </div>
+
+      {/* Telegram Bot */}
+      <TelegramBotSection userId={userId} />
 
       {/* Categories */}
       <div className="glass-card rounded-2xl p-6">

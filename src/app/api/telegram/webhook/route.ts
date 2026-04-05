@@ -27,24 +27,55 @@ async function getUserByChat(chatId: number) {
   return data?.user_id as string | null
 }
 
-async function linkUser(chatId: number, username: string | undefined): Promise<string | null> {
+async function linkUserWithCode(chatId: number, username: string | undefined, linkCode: string): Promise<{ success: boolean; message: string; userId?: string }> {
   const supabase = getSupabase()
-  // Get the first (only) user since this is a single-user app
+
+  // Find profile with valid code
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id')
-    .limit(1)
+    .select('id, telegram_link_code, telegram_link_expires_at')
+    .eq('telegram_link_code', linkCode)
     .single()
 
-  if (!profile) return null
+  if (!profile) {
+    return {
+      success: false,
+      message: "❌ Código inválido. Genera uno nuevo en Configuración → Bot de Telegram"
+    }
+  }
 
+  if (new Date(profile.telegram_link_expires_at) < new Date()) {
+    return {
+      success: false,
+      message: "⏰ El código expiró. Genera uno nuevo en la app."
+    }
+  }
+
+  // Link user
   await supabase.from('telegram_users').upsert({
-    user_id: profile.id,
     telegram_chat_id: chatId,
-    telegram_username: username,
+    user_id: profile.id,
+    telegram_username: username || null,
   }, { onConflict: 'telegram_chat_id' })
 
-  return profile.id
+  // Clear used code
+  await supabase.from('profiles')
+    .update({
+      telegram_link_code: null,
+      telegram_link_expires_at: null
+    })
+    .eq('id', profile.id)
+
+  return {
+    success: true,
+    message: "✅ ¡Cuenta vinculada exitosamente!\n\n" +
+             "Ya puedes registrar gastos:\n" +
+             "• 'Almuerzo 8500'\n" +
+             "• 'Ingreso sueldo 150000'\n" +
+             "• Foto de un recibo\n\n" +
+             "Escribe 'ayuda' para ver todos los comandos.",
+    userId: profile.id
+  }
 }
 
 async function getCategories(userId: string): Promise<Category[]> {
@@ -64,16 +95,38 @@ export async function POST(request: NextRequest) {
 
   const chatId = message.chat.id
 
-  // Get or link user
+  // Get user
   let userId = await getUserByChat(chatId)
+
+  // Handle unlinked users - check for linking code first
   if (!userId) {
-    userId = await linkUser(chatId, message.from.username)
-    if (!userId) {
-      await sendMessage(chatId, '⚠️ No hay usuario registrado en la app. Primero crea una cuenta en la web.')
+    const text = message.text?.trim()
+
+    // Check for linking code
+    if (text && (text.match(/^\d{6}$/) || text.startsWith('/vincular'))) {
+      const linkCode = text.startsWith('/vincular') ? text.replace('/vincular', '').trim() : text
+      const linkResult = await linkUserWithCode(chatId, message.from.username, linkCode)
+
+      await sendMessage(chatId, linkResult.message)
+
+      if (linkResult.success) {
+        userId = linkResult.userId!
+      } else {
+        return NextResponse.json({ ok: true })
+      }
+    } else {
+      // Send registration message
+      await sendMessage(chatId,
+        "👋 ¡Hola! Soy el asistente de Katana.\n\n" +
+        "Para vincular tu cuenta necesitas:\n" +
+        "1️⃣ Registrarte en katana-omega.vercel.app\n" +
+        "2️⃣ Ir a Configuración → Bot de Telegram\n" +
+        "3️⃣ Copiar tu código de vinculación\n" +
+        "4️⃣ Enviarlo aquí\n\n" +
+        "O escribe /vincular [tu-código] para conectar tu cuenta."
+      )
       return NextResponse.json({ ok: true })
     }
-    await sendMessage(chatId, `✅ ¡Cuenta vinculada! Ya puedes registrar transacciones.\n\nEnvía /ayuda para ver los comandos.`)
-    return NextResponse.json({ ok: true })
   }
 
   const categories = await getCategories(userId)
@@ -168,7 +221,19 @@ export async function POST(request: NextRequest) {
 
   // Quick commands
   if (text === '/start') {
-    await sendMessage(chatId, `👋 ¡Hola! Soy tu asistente financiero.\n\n💰 Envía un gasto: "Almuerzo 8500"\n💚 Envía un ingreso: "Ingreso sueldo 1200000"\n📸 Envía foto de boleta\n📊 Escribe "resumen" para ver tu mes\n💡 Escribe "insights" para análisis\n🌐 Escribe "dashboard" para el link\n❓ Escribe "ayuda" para más info`)
+    await sendMessage(chatId,
+      "⚔️ Bienvenido a Katana\n\n" +
+      "La disciplina del samurai aplicada al dinero.\n\n" +
+      "Si ya tienes cuenta en katana-omega.vercel.app:\n" +
+      "→ Ve a Configuración → Bot de Telegram\n" +
+      "→ Copia tu código y envíalo aquí\n\n" +
+      "Si no tienes cuenta:\n" +
+      "→ Regístrate en katana-omega.vercel.app\n\n" +
+      "💡 Una vez vinculado podrás:\n" +
+      "- Registrar gastos con texto o foto\n" +
+      "- Ver tu resumen mensual\n" +
+      "- Recibir insights de IA"
+    )
     return NextResponse.json({ ok: true })
   }
 

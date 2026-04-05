@@ -10,7 +10,7 @@ export default async function SettingsPage() {
   if (!user) redirect('/login')
 
   const [profileResult, categoriesResult] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('profiles').select('*, telegram_link_code, telegram_link_expires_at').eq('id', user.id).single(),
     supabase
       .from('categories')
       .select('*')
