@@ -2,38 +2,72 @@
 
 import { useEffect, useState } from 'react'
 
-export function SamuraiWidget() {
-  // NUEVA VERSION ULTRA-PROFESIONAL CON KATANA SVG
+interface SamuraiWidgetProps {
+  mode?: 'active' | 'zen'
+  transitioning?: boolean
+}
 
+export function SamuraiWidget({ mode = 'active', transitioning = false }: SamuraiWidgetProps) {
   const [current, setCurrent] = useState(0)
   const [visible, setVisible] = useState(true)
 
-  const quotes = [
+  // FRASES ACTUALIZADAS POR MODO
+  const zenQuotes = [
+    {
+      text: '"El presupuesto es el\nmapa del guerrero"',
+      kanji: '禅',
+      romaji: 'Zen · Meditación',
+      color: '#9F7AEA'
+    },
+    {
+      text: '"Recorta lo innecesario.\nPreserva lo esencial"',
+      kanji: '静',
+      romaji: 'Shizuka · Quietud',
+      color: '#7C3AED'
+    },
+    {
+      text: '"El orden en tus gastos\nes orden en tu vida"',
+      kanji: '整',
+      romaji: 'Sei · Orden',
+      color: '#9F7AEA'
+    },
+    {
+      text: '"Ahorra con intención.\nGasta con propósito"',
+      kanji: '律',
+      romaji: 'Ritsu · Disciplina',
+      color: '#7C3AED'
+    },
+  ]
+
+  const activeQuotes = [
     {
       text: '"No gastes sin intención"',
       kanji: '武',
       romaji: 'Bu · Disciplina',
-      color: '#C084FC',
+      color: '#C084FC'
     },
     {
       text: '"Cada peso, una victoria"',
       kanji: '勝',
       romaji: 'Katsu · Victoria',
-      color: '#84CC16',
+      color: '#84CC16'
     },
     {
       text: '"Ahorra hoy, domina mañana"',
       kanji: '道',
       romaji: 'Dō · El camino',
-      color: '#A855F7',
+      color: '#A855F7'
     },
     {
-      text: '"El guerrero planifica\nantes de gastar"',
-      kanji: '禅',
-      romaji: 'Zen · Meditación',
-      color: '#C084FC',
+      text: '"Corta gastos.\nMultiplica libertad"',
+      kanji: '斬',
+      romaji: 'Zan · El corte',
+      color: '#84CC16'
     },
   ]
+
+  const quotes = mode === 'zen' ? zenQuotes : activeQuotes
+  const quoteInterval = mode === 'zen' ? 8000 : 5000
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,16 +76,33 @@ export function SamuraiWidget() {
         setCurrent(p => (p + 1) % quotes.length)
         setVisible(true)
       }, 400)
-    }, 5000)
+    }, quoteInterval)
     return () => clearInterval(interval)
-  }, [])
+  }, [quotes.length, quoteInterval])
 
   return (
-    <div className="px-3 py-2 hidden lg:block">
+    <div
+      className="px-3 py-2 hidden lg:block"
+      style={{
+        opacity: transitioning ? 0 : 1,
+        transition: 'opacity 0.4s ease, all 0.8s ease',
+      }}
+    >
       <style>{`
         @keyframes katanaFloat {
           0%,100% { transform: translateY(0) rotate(-45deg); }
           50%      { transform: translateY(-8px) rotate(-45deg); }
+        }
+        @keyframes katanaZenBreathe {
+          0%,100% {
+            transform: translateY(0) rotate(0deg);
+            filter: drop-shadow(0 0 6px #4C1D95);
+          }
+          50% {
+            transform: translateY(-4px) rotate(0deg);
+            filter: drop-shadow(0 0 12px #7C3AED)
+                    drop-shadow(0 0 4px #A855F7);
+          }
         }
         @keyframes katanaGlow {
           0%,100% {
@@ -68,6 +119,10 @@ export function SamuraiWidget() {
           0%,100% { opacity: 0.15; transform: scale(1); }
           50%      { opacity: 0.35; transform: scale(1.12); }
         }
+        @keyframes auraZen {
+          0%,100% { opacity: 0.08; transform: scale(1); }
+          50%      { opacity: 0.18; transform: scale(1.05); }
+        }
         @keyframes particleFloat {
           0%   { opacity: 0; transform: translateY(25px) scale(0); }
           50%  { opacity: 1; transform: translateY(-12px) scale(1); }
@@ -78,78 +133,109 @@ export function SamuraiWidget() {
           50%      { opacity: 0.6; transform: scaleY(1.3); }
         }
         .k-float { animation: katanaFloat 3.5s ease-in-out infinite; }
+        .k-zen   { animation: katanaZenBreathe 6s ease-in-out infinite; }
         .k-glow  { animation: katanaGlow 2.5s ease-in-out infinite; }
         .k-aura  { animation: auraKatana 3.5s ease-in-out infinite; }
+        .k-aura-zen { animation: auraZen 4s ease-in-out infinite; }
         .k-particle { animation: particleFloat 4.5s ease-in-out infinite; }
         .k-energy { animation: energyLine 2s ease-in-out infinite; }
       `}</style>
 
-      {/* NUEVO SAMURAI WIDGET PROFESIONAL */}
+      {/* WIDGET DIFERENCIADO POR MODO */}
       <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'hidden' }}>
 
-        {/* Partículas de energía mejoradas */}
-        <div className="k-particle" style={{
-          position: 'absolute',
-          top: '25%', left: '15%',
-          width: '6px', height: '6px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #84CC16, #22C55E)',
-          boxShadow: '0 0 12px #84CC16',
-          animationDelay: '0s'
-        }}/>
-        <div className="k-particle" style={{
-          position: 'absolute',
-          top: '65%', right: '20%',
-          width: '4px', height: '4px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #C084FC, #A855F7)',
-          boxShadow: '0 0 10px #C084FC',
-          animationDelay: '1.8s'
-        }}/>
-        <div className="k-particle" style={{
-          position: 'absolute',
-          top: '45%', left: '70%',
-          width: '3px', height: '3px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #7C3AED, #6D28D9)',
-          boxShadow: '0 0 8px #7C3AED',
-          animationDelay: '3.2s'
-        }}/>
+        {/* ENSO para modo ZEN */}
+        {mode === 'zen' && (
+          <svg style={{
+            position: 'absolute', top: 0, left: 0,
+            width: '100%', height: '100%', opacity: 0.12
+          }}>
+            <circle
+              cx="50%" cy="45%" r="38%"
+              fill="none"
+              stroke="#7C3AED"
+              strokeWidth="3"
+              strokeDasharray="200 40"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
 
-        {/* Líneas de energía cruzadas */}
-        <div className="k-energy" style={{
-          position: 'absolute',
-          top: '20%', left: '25%',
-          width: '2px', height: '40px',
-          background: 'linear-gradient(to bottom, #C084FC, rgba(192,132,252,0.3), transparent)',
-          transform: 'rotate(-25deg)',
-          borderRadius: '1px',
-          animationDelay: '0.5s'
-        }}/>
-        <div className="k-energy" style={{
-          position: 'absolute',
-          top: '30%', right: '28%',
-          width: '1.5px', height: '30px',
-          background: 'linear-gradient(to bottom, #84CC16, rgba(132,204,22,0.3), transparent)',
-          transform: 'rotate(35deg)',
-          borderRadius: '1px',
-          animationDelay: '1.2s'
-        }}/>
+        {/* Partículas - solo en modo activo */}
+        {mode === 'active' && (
+          <>
+            <div className="k-particle" style={{
+              position: 'absolute',
+              top: '25%', left: '15%',
+              width: '6px', height: '6px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, #84CC16, #22C55E)',
+              boxShadow: '0 0 12px #84CC16',
+              animationDelay: '0s'
+            }}/>
+            <div className="k-particle" style={{
+              position: 'absolute',
+              top: '65%', right: '20%',
+              width: '4px', height: '4px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, #C084FC, #A855F7)',
+              boxShadow: '0 0 10px #C084FC',
+              animationDelay: '1.8s'
+            }}/>
+            <div className="k-particle" style={{
+              position: 'absolute',
+              top: '45%', left: '70%',
+              width: '3px', height: '3px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, #7C3AED, #6D28D9)',
+              boxShadow: '0 0 8px #7C3AED',
+              animationDelay: '3.2s'
+            }}/>
+          </>
+        )}
 
-        {/* Aura principal mejorada */}
-        <div className="k-aura" style={{
+        {/* Líneas de energía - solo en modo activo */}
+        {mode === 'active' && (
+          <>
+            <div className="k-energy" style={{
+              position: 'absolute',
+              top: '20%', left: '25%',
+              width: '2px', height: '40px',
+              background: 'linear-gradient(to bottom, #C084FC, rgba(192,132,252,0.3), transparent)',
+              transform: 'rotate(-25deg)',
+              borderRadius: '1px',
+              animationDelay: '0.5s'
+            }}/>
+            <div className="k-energy" style={{
+              position: 'absolute',
+              top: '30%', right: '28%',
+              width: '1.5px', height: '30px',
+              background: 'linear-gradient(to bottom, #84CC16, rgba(132,204,22,0.3), transparent)',
+              transform: 'rotate(35deg)',
+              borderRadius: '1px',
+              animationDelay: '1.2s'
+            }}/>
+          </>
+        )}
+
+        {/* Aura diferenciada por modo */}
+        <div className={mode === 'zen' ? 'k-aura-zen' : 'k-aura'} style={{
           position: 'absolute',
           top: '15%', left: '15%', right: '15%', bottom: '15%',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0.15) 30%, rgba(76,29,149,0.08) 60%, transparent 80%)',
-          border: '1px solid rgba(124,58,237,0.1)',
+          background: mode === 'zen'
+            ? 'radial-gradient(circle, #4C1D95 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0.15) 30%, rgba(76,29,149,0.08) 60%, transparent 80%)',
+          border: `1px solid rgba(124,58,237,${mode === 'zen' ? '0.05' : '0.1'})`,
         }}/>
 
-        {/* KATANA ELEGANTE Y PROPORCIONAL */}
-        <div className="k-float k-glow" style={{
+        {/* KATANA ELEGANTE - comportamiento por modo */}
+        <div className={mode === 'zen' ? 'k-zen' : 'k-float k-glow'} style={{
           position: 'absolute',
           top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%) rotate(-45deg)',
+          transform: mode === 'zen'
+            ? 'translate(-50%, -50%) rotate(0deg)'
+            : 'translate(-50%, -50%) rotate(-45deg)',
           zIndex: 10,
         }}>
           <svg width="100" height="100" viewBox="0 0 100 100">

@@ -4,6 +4,16 @@ import { SamuraiWidget } from './SamuraiWidget'
 
 export function SamuraiContainer() {
   const [mode, setMode] = useState<'active' | 'zen'>('active')
+  const [transitioning, setTransitioning] = useState(false)
+
+  const handleModeChange = (newMode: 'active' | 'zen') => {
+    if (newMode === mode) return
+    setTransitioning(true)
+    setTimeout(() => {
+      setMode(newMode)
+      setTransitioning(false)
+    }, 400)
+  }
 
   return (
     <div className="hidden lg:block">
@@ -13,57 +23,88 @@ export function SamuraiContainer() {
           : 'none',
         transition: 'filter 1.2s ease'
       }}>
-        <SamuraiWidget />
+        <SamuraiWidget mode={mode} transitioning={transitioning} />
       </div>
 
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '4px 8px 8px',
-      }}>
-        <button
-          onClick={() => setMode('active')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '10px',
-            border: mode === 'active'
-              ? '1px solid rgba(168,85,247,0.5)'
-              : '1px solid transparent',
-            background: mode === 'active'
-              ? 'rgba(109,40,217,0.3)'
-              : 'transparent',
-            color: mode === 'active' ? '#C084FC' : '#3B1D6E',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-          }}>
-          ⚔ 武
-        </button>
-        <button
-          onClick={() => setMode('zen')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '10px',
-            border: mode === 'zen'
-              ? '1px solid rgba(168,85,247,0.5)'
-              : '1px solid transparent',
-            background: mode === 'zen'
-              ? 'rgba(109,40,217,0.3)'
-              : 'transparent',
-            color: mode === 'zen' ? '#C084FC' : '#3B1D6E',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-          }}>
-          ☯ 禅
-        </button>
+      {/* TOGGLE COMPLETAMENTE REDISEÑADO */}
+      <div style={{ padding: '4px 8px 10px' }}>
+
+        {/* Label del modo actual */}
+        <p style={{
+          textAlign: 'center',
+          fontSize: '8px',
+          color: mode === 'active' ? '#84CC16' : '#9F7AEA',
+          letterSpacing: '0.15em',
+          marginBottom: '8px',
+          fontWeight: '600',
+          textTransform: 'uppercase',
+          transition: 'color 0.5s ease',
+        }}>
+          {mode === 'active' ? '斬 · MODO BATALLA' : '瞑 · MODO MEDITACIÓN'}
+        </p>
+
+        {/* Botones toggle */}
+        <div style={{
+          display: 'flex',
+          background: 'rgba(15, 10, 30, 0.8)',
+          borderRadius: '999px',
+          border: '1px solid rgba(76, 29, 149, 0.3)',
+          padding: '3px',
+          gap: '2px',
+        }}>
+          <button
+            onClick={() => handleModeChange('active')}
+            style={{
+              flex: 1,
+              padding: '5px 8px',
+              borderRadius: '999px',
+              fontSize: '10px',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              background: mode === 'active'
+                ? 'linear-gradient(135deg, #6D28D9, #A855F7)'
+                : 'transparent',
+              color: mode === 'active' ? '#ffffff' : '#4C1D95',
+              letterSpacing: '0.05em',
+            }}>
+            ⚔ 武
+          </button>
+          <button
+            onClick={() => handleModeChange('zen')}
+            style={{
+              flex: 1,
+              padding: '5px 8px',
+              borderRadius: '999px',
+              fontSize: '10px',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              background: mode === 'zen'
+                ? 'linear-gradient(135deg, #4C1D95, #7C3AED)'
+                : 'transparent',
+              color: mode === 'zen' ? '#EDE9FE' : '#4C1D95',
+              letterSpacing: '0.05em',
+            }}>
+            ☯ 禅
+          </button>
+        </div>
+
+        {/* Descripción debajo */}
+        <p style={{
+          textAlign: 'center',
+          fontSize: '7px',
+          color: '#2D1F4E',
+          marginTop: '5px',
+          letterSpacing: '0.08em',
+        }}>
+          {mode === 'active'
+            ? 'Disciplina · Acción · Victoria'
+            : 'Orden · Presupuesto · Control'}
+        </p>
+
       </div>
     </div>
   )
