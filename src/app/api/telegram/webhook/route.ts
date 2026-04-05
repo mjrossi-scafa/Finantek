@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendMessage, getFile, TelegramUpdate } from '@/lib/telegram/bot'
-import { parseMessage } from '@/lib/telegram/parser'
+import { parseMessage, ParsedTransaction } from '@/lib/telegram/parser'
 import { parseReceipt } from '@/lib/anthropic/receiptParser'
 import { generateWeeklyInsight } from '@/lib/anthropic/insightGenerator'
 import { formatCLP } from '@/lib/utils/currency'
@@ -144,30 +144,36 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: true })
       }
 
-      // Auto-register all extracted transactions
-      const supabase = getSupabase()
-      let registered = 0
-      const lines: string[] = []
+      // Show confirmation before saving
+      const total = result.transactions.reduce((sum, t) => sum + t.amount, 0)
+      const itemsList = result.transactions.slice(0, 8).map(t =>
+        `• ${t.description}: ${formatCLP(t.amount)}`
+      ).join('\n')
 
-      for (const t of result.transactions) {
-        const catId = t.category_id || categories.find(c => c.type === t.type)?.id
-        if (!catId) continue
+      const moreItems = result.transactions.length > 8 ?
+        `\n... y ${result.transactions.length - 8} items más` : ''
 
-        await supabase.from('transactions').insert({
-          user_id: userId,
-          category_id: catId,
-          type: t.type,
-          amount: t.amount,
-          description: t.description,
-          transaction_date: t.date,
-          source: 'receipt',
-        })
-        registered++
-        const emoji = t.type === 'income' ? '💚' : '🔴'
-        lines.push(`${emoji} ${t.description}: ${formatCLP(t.amount)}`)
-      }
+      // Save pending action
+      const { savePendingAction } = await import('@/lib/telegram/botHelpers')
+      const defaultCat = categories.find(c => c.type === 'expense' && c.name === 'Alimentación') ||
+                         categories.find(c => c.type === 'expense')
 
-      await sendMessage(chatId, `✅ ${registered} transacciones registradas desde el recibo:\n\n${lines.join('\n')}`)
+      await savePendingAction(chatId, userId, 'receipt_confirmation', {
+        transactions: result.transactions,
+        venue: 'Recibo',
+        suggested_category_id: defaultCat?.id
+      })
+
+      await sendMessage(chatId,
+        `📋 **Encontré ${result.transactions.length} transacciones:**\n\n` +
+        `${itemsList}${moreItems}\n\n` +
+        `💰 **Total: ${formatCLP(total)}**\n\n` +
+        `¿Cómo quieres registrarlo?\n` +
+        `**1️⃣** Todo junto como 'Recibo - ${formatCLP(total)}'\n` +
+        `**2️⃣** Cada item por separado\n` +
+        `**3️⃣** Cancelar\n\n` +
+        `Responde **1**, **2** o **3**`
+      )
     } catch {
       await sendMessage(chatId, '❌ Error al procesar la imagen.')
     }
@@ -186,29 +192,36 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: true })
       }
 
-      const supabase = getSupabase()
-      let registered = 0
-      const lines: string[] = []
+      // Show confirmation for PDF too
+      const total = result.transactions.reduce((sum, t) => sum + t.amount, 0)
+      const itemsList = result.transactions.slice(0, 8).map(t =>
+        `• ${t.description}: ${formatCLP(t.amount)}`
+      ).join('\n')
 
-      for (const t of result.transactions) {
-        const catId = t.category_id || categories.find(c => c.type === t.type)?.id
-        if (!catId) continue
+      const moreItems = result.transactions.length > 8 ?
+        `\n... y ${result.transactions.length - 8} items más` : ''
 
-        await supabase.from('transactions').insert({
-          user_id: userId,
-          category_id: catId,
-          type: t.type,
-          amount: t.amount,
-          description: t.description,
-          transaction_date: t.date,
-          source: 'pdf',
-        })
-        registered++
-        const emoji = t.type === 'income' ? '💚' : '🔴'
-        lines.push(`${emoji} ${t.description}: ${formatCLP(t.amount)}`)
-      }
+      // Save pending action
+      const { savePendingAction } = await import('@/lib/telegram/botHelpers')
+      const defaultCat = categories.find(c => c.type === 'expense' && c.name === 'Alimentación') ||
+                         categories.find(c => c.type === 'expense')
 
-      await sendMessage(chatId, `✅ ${registered} transacciones registradas desde el PDF:\n\n${lines.join('\n')}`)
+      await savePendingAction(chatId, userId, 'receipt_confirmation', {
+        transactions: result.transactions,
+        venue: 'PDF',
+        suggested_category_id: defaultCat?.id
+      })
+
+      await sendMessage(chatId,
+        `📄 **Encontré ${result.transactions.length} transacciones en el PDF:**\n\n` +
+        `${itemsList}${moreItems}\n\n` +
+        `💰 **Total: ${formatCLP(total)}**\n\n` +
+        `¿Cómo quieres registrarlo?\n` +
+        `**1️⃣** Todo junto como 'PDF - ${formatCLP(total)}'\n` +
+        `**2️⃣** Cada item por separado\n` +
+        `**3️⃣** Cancelar\n\n` +
+        `Responde **1**, **2** o **3**`
+      )
     } catch {
       await sendMessage(chatId, '❌ Error al procesar el PDF.')
     }
@@ -239,54 +252,155 @@ export async function POST(request: NextRequest) {
 
   if (text === '/ayuda' || text.toLowerCase() === 'ayuda' || text.toLowerCase() === 'help') {
     await sendMessage(chatId,
-      `<b>📖 Comandos disponibles:</b>\n\n` +
-      `<b>Registrar gasto:</b> Escribe la descripción y monto\n` +
-      `Ej: "Almuerzo 8500", "Uber 3200", "Netflix 7500"\n\n` +
-      `<b>Registrar ingreso:</b> Incluye "ingreso" o "sueldo"\n` +
-      `Ej: "Ingreso sueldo 1500000", "Me pagaron freelance 200000"\n\n` +
-      `<b>Varios a la vez:</b> "Café 2500 y pan 1500"\n\n` +
-      `<b>📸 Foto de boleta:</b> Envía la imagen y la proceso automáticamente\n\n` +
-      `<b>📊 Resumen:</b> "resumen" o "cuánto llevo"\n` +
-      `<b>💡 Insights:</b> "insights" o "cómo voy"\n` +
-      `<b>🌐 Dashboard:</b> "dashboard" o "web"`
+      `<b>⚔️ Katana Bot - Guía Completa</b>\n\n` +
+
+      `<b>💰 REGISTRAR GASTOS:</b>\n` +
+      `• "Almuerzo 8500", "Uber 3200"\n` +
+      `• "Café 2500 y pan 1500" (múltiples)\n` +
+      `• "Ingreso sueldo 1500000"\n\n` +
+
+      `<b>📸 RECIBOS:</b>\n` +
+      `• Envía foto o PDF del recibo\n` +
+      `• Elige si guardar todo junto o separado\n\n` +
+
+      `<b>❓ PREGUNTAS (lenguaje natural):</b>\n` +
+      `• "¿Cuánto gasté hoy?"\n` +
+      `• "¿Cuánto llevo esta semana?"\n` +
+      `• "¿En qué gasté más este mes?"\n` +
+      `• "¿Cuál fue mi último gasto?"\n` +
+      `• "¿Se registró como alimentación...?"\n\n` +
+
+      `<b>🗑️ EDITAR:</b>\n` +
+      `• "Borra el último gasto"\n` +
+      `• "Edita el último gasto"\n\n` +
+
+      `<b>📊 INFORMES:</b>\n` +
+      `• "resumen" - Balance mensual\n` +
+      `• "insights" - Análisis IA\n` +
+      `• "dashboard" - Ver gráficos web\n\n` +
+
+      `<b>💬 CONVERSACIÓN:</b>\n` +
+      `• Salúdame con "hola", "buenas"\n` +
+      `• Haz preguntas en español natural\n` +
+      `• Confirma con "sí" o números (1,2,3)`
     )
     return NextResponse.json({ ok: true })
   }
 
-  // Parse with AI
+  // NEW IMPROVED BOT WITH AI AND CONFIRMATIONS
   try {
+    const {
+      handleGreeting,
+      handleQuestion,
+      savePendingAction,
+      getPendingAction,
+      clearPendingAction,
+      deleteLastTransaction
+    } = await import('@/lib/telegram/botHelpers')
+
     const parsed = await parseMessage(text)
 
-    if (parsed.action === 'transaction' && parsed.transactions && parsed.transactions.length > 0) {
-      const supabase = getSupabase()
-      const lines: string[] = []
+    // Check for pending actions first
+    const pendingAction = await getPendingAction(chatId)
 
-      for (const t of parsed.transactions) {
-        const matchedCat = categories.find(
-          c => c.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ===
-               t.suggested_category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        ) || categories.find(c => c.type === t.type && c.name.includes('Otros'))
-
-        if (!matchedCat) continue
-
-        await supabase.from('transactions').insert({
-          user_id: userId,
-          category_id: matchedCat.id,
-          type: t.type,
-          amount: t.amount,
-          description: t.description,
-          transaction_date: t.date,
-          source: 'manual',
-        })
-
-        const emoji = t.type === 'income' ? '💚' : '🔴'
-        lines.push(`${emoji} ${t.description}: ${formatCLP(t.amount)} → ${matchedCat.icon} ${matchedCat.name}`)
+    if (pendingAction && (parsed.action === 'confirmation' || parsed.action === 'cancellation')) {
+      if (parsed.action === 'cancellation') {
+        await clearPendingAction(chatId)
+        await sendMessage(chatId, '❌ Acción cancelada.')
+        return NextResponse.json({ ok: true })
       }
 
-      await sendMessage(chatId, `✅ Registrado:\n\n${lines.join('\n')}`)
+      // Handle confirmation based on pending action type
+      if (pendingAction.action_type === 'receipt_confirmation') {
+        const choice = parsed.confirmationType === 'numeric' ? text.trim() : '2'
+        await handleReceiptConfirmation(chatId, userId, pendingAction.payload, choice)
+        await clearPendingAction(chatId)
+        return NextResponse.json({ ok: true })
+      }
 
-    } else if (parsed.action === 'summary') {
-      const supabase = getSupabase()
+      if (pendingAction.action_type === 'delete_confirmation') {
+        const lastTransaction = pendingAction.payload
+        await deleteLastTransaction(userId)
+        await sendMessage(chatId,
+          `🗑️ **Transacción eliminada:**\n\n` +
+          `📝 ${lastTransaction.description}\n` +
+          `💰 ${formatCLP(Number(lastTransaction.amount))}`
+        )
+        await clearPendingAction(chatId)
+        return NextResponse.json({ ok: true })
+      }
+    }
+
+    // Handle new message types
+    switch (parsed.action) {
+      case 'greeting':
+        await handleGreeting(chatId)
+        break
+
+      case 'question':
+        if (parsed.question) {
+          await handleQuestion(chatId, userId, parsed.question)
+        }
+        break
+
+      case 'command':
+        await handleCommand(chatId, userId, parsed.command || '', categories)
+        break
+
+      case 'transaction':
+        if (parsed.transactions && parsed.transactions.length > 0) {
+          await handleTransactions(chatId, userId, parsed.transactions, categories)
+        }
+        break
+
+      default:
+        await sendMessage(chatId, '🤔 No entendí. Intenta con algo como "Almuerzo 8500" o escribe "ayuda" para ver los comandos.')
+        break
+    }
+  } catch (err) {
+    console.error('Telegram webhook error:', err)
+    await sendMessage(chatId, '❌ Hubo un error procesando tu mensaje. Intenta de nuevo.')
+  }
+
+  return NextResponse.json({ ok: true })
+}
+
+async function handleCommand(chatId: number, userId: string, command: string, categories: Category[]): Promise<void> {
+  const supabase = getSupabase()
+
+  switch (command) {
+    case 'borra_ultimo':
+      const { data: last } = await supabase
+        .from('transactions')
+        .select('*, categories(name, icon)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (!last) {
+        await sendMessage(chatId, "🤷‍♂️ No tienes transacciones para eliminar.")
+        return
+      }
+
+      const cat = last.categories as any
+      const date = new Date(last.transaction_date).toLocaleDateString('es-CL')
+
+      // Save pending action
+      const { savePendingAction } = await import('@/lib/telegram/botHelpers')
+      await savePendingAction(chatId, userId, 'delete_confirmation', last)
+
+      await sendMessage(chatId,
+        `🗑️ **¿Eliminar esta transacción?**\n\n` +
+        `📝 ${last.description}\n` +
+        `💰 ${formatCLP(Number(last.amount))}\n` +
+        `📁 ${cat?.icon || '💰'} ${cat?.name || 'Sin categoría'}\n` +
+        `📅 ${date}\n\n` +
+        `Responde **"sí"** para confirmar o **"no"** para cancelar.`
+      )
+      break
+
+    case 'resumen':
       const now = new Date()
       const year = now.getFullYear()
       const month = now.getMonth() + 1
@@ -311,12 +425,12 @@ export async function POST(request: NextRequest) {
         `${balance >= 0 ? '💙' : '⚠️'} Balance: ${formatCLP(balance)}\n\n` +
         `📈 Ve los gráficos completos en el dashboard.`
       )
+      break
 
-    } else if (parsed.action === 'insights') {
+    case 'insights':
       await sendMessage(chatId, '💡 Generando análisis...')
-      const supabase = getSupabase()
 
-      // Get weekly comparison data using raw SQL since we can't use RPC without user context
+      // Get weekly comparison data
       const { data: thisWeekData } = await supabase
         .from('transactions')
         .select('amount, categories(name, color, icon, id)')
@@ -360,6 +474,7 @@ export async function POST(request: NextRequest) {
         last_week: lastWeek.find(lw => lw.id === tw.id)?.total ?? 0,
       }))
 
+      const { generateWeeklyInsight } = await import('@/lib/anthropic/insightGenerator')
       const insightText = await generateWeeklyInsight(
         weeklyComparison, weeklyComparison,
         thisWeekTotal, lastWeekTotal,
@@ -367,20 +482,92 @@ export async function POST(request: NextRequest) {
       )
 
       await sendMessage(chatId, `💡 <b>Insight semanal:</b>\n\n${insightText}`)
+      break
 
-    } else if (parsed.action === 'dashboard') {
-      const url = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    case 'dashboard':
+      const url = process.env.NEXT_PUBLIC_APP_URL || 'https://finantek-omega.vercel.app'
       await sendMessage(chatId, `🌐 Abre tu dashboard aquí:\n${url}/dashboard`)
+      break
 
-    } else {
-      await sendMessage(chatId, '🤔 No entendí. Intenta con algo como "Almuerzo 8500" o escribe "ayuda" para ver los comandos.')
-    }
-  } catch (err) {
-    console.error('Telegram webhook error:', err)
-    await sendMessage(chatId, '❌ Hubo un error procesando tu mensaje. Intenta de nuevo.')
+    default:
+      await sendMessage(chatId, '🤔 No reconozco ese comando. Escribe "ayuda" para ver las opciones.')
+  }
+}
+
+async function handleTransactions(chatId: number, userId: string, transactions: ParsedTransaction[], categories: Category[]): Promise<void> {
+  const supabase = getSupabase()
+  const lines: string[] = []
+
+  for (const t of transactions) {
+    const matchedCat = categories.find(
+      c => c.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ===
+           t.suggested_category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    ) || categories.find(c => c.type === t.type && c.name.includes('Otros'))
+
+    if (!matchedCat) continue
+
+    await supabase.from('transactions').insert({
+      user_id: userId,
+      category_id: matchedCat.id,
+      type: t.type,
+      amount: t.amount,
+      description: t.description,
+      transaction_date: t.date,
+      source: 'manual',
+    })
+
+    const emoji = t.type === 'income' ? '💚' : '🔴'
+    lines.push(`${emoji} ${t.description}: ${formatCLP(t.amount)} → ${matchedCat.icon} ${matchedCat.name}`)
   }
 
-  return NextResponse.json({ ok: true })
+  await sendMessage(chatId, `✅ **Registrado:**\n\n${lines.join('\n')}`)
+}
+
+async function handleReceiptConfirmation(chatId: number, userId: string, receiptData: any, choice: string): Promise<void> {
+  const supabase = getSupabase()
+
+  const transactions = receiptData.transactions || []
+  if (transactions.length === 0) return
+
+  if (choice === '1') {
+    // Save as single consolidated transaction
+    const total = transactions.reduce((sum: number, t: any) => sum + t.amount, 0)
+    const venue = receiptData.venue || 'Compra'
+
+    await supabase.from('transactions').insert({
+      user_id: userId,
+      category_id: receiptData.suggested_category_id,
+      type: 'expense',
+      amount: total,
+      description: `${venue} - Total compra`,
+      transaction_date: new Date().toISOString().split('T')[0],
+      source: 'receipt',
+    })
+
+    await sendMessage(chatId, `✅ **Registrado como una transacción:**\n\n🔴 ${venue}: ${formatCLP(total)}`)
+
+  } else if (choice === '2') {
+    // Save each item separately (original behavior)
+    let registered = 0
+    const lines: string[] = []
+
+    for (const t of transactions) {
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        category_id: t.category_id || receiptData.suggested_category_id,
+        type: 'expense',
+        amount: t.amount,
+        description: t.description,
+        transaction_date: t.date || new Date().toISOString().split('T')[0],
+        source: 'receipt',
+      })
+      registered++
+      lines.push(`🔴 ${t.description}: ${formatCLP(t.amount)}`)
+    }
+
+    await sendMessage(chatId, `✅ **${registered} transacciones registradas:**\n\n${lines.join('\n')}`)
+  }
+  // choice === '3' is handled as cancellation above
 }
 
 function getWeekStart(offset: number): string {

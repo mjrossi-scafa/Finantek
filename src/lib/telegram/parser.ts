@@ -10,56 +10,106 @@ export interface ParsedTransaction {
   date: string
 }
 
+export interface ParsedQuestion {
+  queryType: 'today' | 'week' | 'month' | 'category' | 'last_transaction' | 'search' | 'balance'
+  query?: string
+  category?: string
+}
+
 interface ParseResult {
-  action: 'transaction' | 'summary' | 'insights' | 'dashboard' | 'help' | 'unknown'
+  action: 'transaction' | 'question' | 'command' | 'greeting' | 'confirmation' | 'cancellation' | 'unknown'
   transactions?: ParsedTransaction[]
+  question?: ParsedQuestion
+  command?: string
+  confirmationType?: string
   message?: string
 }
 
-const SYSTEM_PROMPT = `Eres un asistente financiero en un bot de Telegram. Tu trabajo es interpretar mensajes del usuario y determinar qué acción quiere realizar.
+const SYSTEM_PROMPT = `Eres el asistente financiero del bot de Katana. Procesas mensajes en español de usuarios chilenos.
 
-Las acciones posibles son:
-1. "transaction" - El usuario quiere registrar un gasto o ingreso
-2. "summary" - El usuario quiere ver un resumen (palabras como "resumen", "cuánto llevo", "total", "balance")
-3. "insights" - El usuario quiere un análisis inteligente (palabras como "insight", "análisis", "cómo voy", "consejo")
-4. "dashboard" - El usuario quiere el link al dashboard (palabras como "dashboard", "web", "ver gráficos", "sitio")
-5. "help" - El usuario pide ayuda (palabras como "ayuda", "help", "cómo funciona", "comandos")
-6. "unknown" - No puedes determinar la intención
+Clasifica el mensaje en uno de estos tipos:
+- TRANSACTION: registrar gasto o ingreso
+- QUESTION: pregunta sobre sus finanzas
+- COMMAND: comando específico (resumen, insights, dashboard, ayuda)
+- GREETING: saludo o mensaje casual
+- CONFIRMATION: confirmando una acción previa (sí, ok, confirmo, 1, 2, etc.)
+- CANCELLATION: cancelando una acción previa (no, cancelar, 3, salir)
 
-Para transacciones, extrae: tipo (expense por defecto, income si dice "ingreso", "sueldo", "me pagaron", "recibí"), monto en CLP (número entero), descripción corta, y categoría sugerida de esta lista exacta: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Ropa, Otros Gastos, Sueldo, Freelance, Inversiones, Otros Ingresos.
+Para TRANSACTION extrae:
+{ type, amount, description, suggested_category, date }
+Categorías exactas: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Ropa, Otros Gastos, Sueldo, Freelance, Inversiones, Otros Ingresos
 
-El usuario puede enviar múltiples transacciones en un mensaje. Ejemplos:
-- "Almuerzo 8500" → expense, 8500, Almuerzo, Alimentación
-- "Uber 3200" → expense, 3200, Uber, Transporte
-- "Me pagaron el sueldo 1200000" → income, 1200000, Sueldo mensual, Sueldo
-- "Café 2500 y pan 1500" → dos transacciones
+Para QUESTION identifica qué información necesita:
+{ queryType: "today|week|month|category|last_transaction|search|balance", query?: "texto de búsqueda", category?: "nombre categoría" }
 
-Responde ÚNICAMENTE con JSON válido, sin texto adicional:
+Ejemplos de QUESTION:
+- "cuánto gasté hoy?" → { queryType: "today" }
+- "cuánto llevo esta semana?" → { queryType: "week" }
+- "en qué gasté más este mes?" → { queryType: "category" }
+- "cuál fue mi último gasto?" → { queryType: "last_transaction" }
+- "se registró como alimentación rest tony?" → { queryType: "search", query: "rest tony" }
+- "cuánto tengo de balance?" → { queryType: "balance" }
+
+Para COMMAND:
+command: "resumen|insights|dashboard|ayuda|borra_ultimo|edita_ultimo"
+
+Para GREETING detecta saludos: hola, buenas, hey, buenos días, etc.
+
+Para CONFIRMATION: sí, ok, confirmo, 1, 2, correcto, etc.
+Para CANCELLATION: no, cancelar, 3, salir, etc.
+
+Responde SOLO en JSON válido:
 {
-  "action": "transaction|summary|insights|dashboard|help|unknown",
+  "action": "transaction|question|command|greeting|confirmation|cancellation|unknown",
   "transactions": [{"type":"expense","amount":8500,"description":"Almuerzo","suggested_category":"Alimentación","date":"YYYY-MM-DD"}],
-  "message": "texto opcional para respuestas no-transacción"
+  "question": {"queryType":"today","query":"texto opcional"},
+  "command": "resumen|insights|dashboard|ayuda|borra_ultimo|edita_ultimo",
+  "confirmationType": "numeric|boolean",
+  "message": "texto de respuesta"
 }`
 
 export async function parseMessage(text: string): Promise<ParseResult> {
   const today = new Date().toISOString().split('T')[0]
+  const cleanText = text.trim().toLowerCase()
 
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{
-      role: 'user',
-      content: `Fecha de hoy: ${today}\nMensaje del usuario: ${text}`,
-    }],
-  })
+  // Quick pattern matching for simple cases
+  const greetings = ['hola', 'buenas', 'hey', 'buenos días', 'buenas tardes', 'buenas noches', 'hi', 'hello']
+  if (greetings.some(g => cleanText.includes(g))) {
+    return { action: 'greeting' }
+  }
 
-  const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
-  const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+  // Simple confirmations
+  if (['sí', 'si', 'ok', 'confirmo', 'dale', 'yes'].includes(cleanText)) {
+    return { action: 'confirmation', confirmationType: 'boolean' }
+  }
+
+  // Numeric confirmations
+  if (['1', '2', '3'].includes(cleanText)) {
+    return { action: 'confirmation', confirmationType: 'numeric' }
+  }
+
+  // Cancellations
+  if (['no', 'cancelar', 'salir', 'cancel'].includes(cleanText)) {
+    return { action: 'cancellation' }
+  }
 
   try {
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: `Fecha de hoy: ${today}\nMensaje del usuario: ${text}`,
+      }],
+    })
+
+    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
+    const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+
     return JSON.parse(jsonText) as ParseResult
-  } catch {
+  } catch (error) {
+    console.error('Parser error:', error)
     return { action: 'unknown' }
   }
 }
