@@ -93,15 +93,17 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
           0%,100% { transform: translateY(0) rotate(-45deg); }
           50%      { transform: translateY(-8px) rotate(-45deg); }
         }
-        @keyframes katanaZenBreathe {
+        @keyframes zenFloat {
           0%,100% {
-            transform: translateY(0) rotate(0deg);
-            filter: drop-shadow(0 0 6px #4C1D95);
+            transform: translateY(0px) rotate(0deg);
+            filter: drop-shadow(0 0 6px #4C1D95)
+                    drop-shadow(0 0 2px #7C3AED);
           }
           50% {
-            transform: translateY(-4px) rotate(0deg);
-            filter: drop-shadow(0 0 12px #7C3AED)
-                    drop-shadow(0 0 4px #A855F7);
+            transform: translateY(-8px) rotate(0deg);
+            filter: drop-shadow(0 0 14px #7C3AED)
+                    drop-shadow(0 0 6px #A855F7)
+                    drop-shadow(0 0 2px #84CC16);
           }
         }
         @keyframes katanaGlow {
@@ -133,7 +135,7 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
           50%      { opacity: 0.6; transform: scaleY(1.3); }
         }
         .k-float { animation: katanaFloat 3.5s ease-in-out infinite; }
-        .k-zen   { animation: katanaZenBreathe 6s ease-in-out infinite; }
+        .zen-float { animation: zenFloat 4s ease-in-out infinite; }
         .k-glow  { animation: katanaGlow 2.5s ease-in-out infinite; }
         .k-aura  { animation: auraKatana 3.5s ease-in-out infinite; }
         .k-aura-zen { animation: auraZen 4s ease-in-out infinite; }
@@ -142,20 +144,33 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
       `}</style>
 
       {/* WIDGET DIFERENCIADO POR MODO */}
-      <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'hidden' }}>
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '160px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
+      }}>
 
         {/* ENSO para modo ZEN */}
         {mode === 'zen' && (
           <svg style={{
-            position: 'absolute', top: 0, left: 0,
-            width: '100%', height: '100%', opacity: 0.12
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '120px',
+            height: '120px',
+            opacity: 0.15
           }}>
             <circle
-              cx="50%" cy="45%" r="38%"
+              cx="60" cy="60" r="50"
               fill="none"
               stroke="#7C3AED"
               strokeWidth="3"
-              strokeDasharray="200 40"
+              strokeDasharray="280 40"
               strokeLinecap="round"
             />
           </svg>
@@ -230,12 +245,13 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
         }}/>
 
         {/* KATANA ELEGANTE - comportamiento por modo */}
-        <div className={mode === 'zen' ? 'k-zen' : 'k-float k-glow'} style={{
+        <div className={mode === 'zen' ? 'zen-float' : 'k-float k-glow'} style={{
           position: 'absolute',
           top: '50%', left: '50%',
           transform: mode === 'zen'
             ? 'translate(-50%, -50%) rotate(0deg)'
             : 'translate(-50%, -50%) rotate(-45deg)',
+          transformOrigin: 'center',
           zIndex: 10,
         }}>
           <svg width="100" height="100" viewBox="0 0 100 100">
@@ -323,17 +339,23 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
 
       {/* FRASES JAPONESAS REVERENTES */}
       <div style={{
-        textAlign: 'center',
+        height: '80px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 8px',
+        overflow: 'hidden',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.5s ease',
         marginTop: '6px',
       }}>
         {/* Kanji grande y sutil */}
         <div style={{
-          fontSize: '28px',
+          fontSize: '20px',
           fontFamily: 'serif',
           color: quotes[current].color,
-          opacity: 0.15,
+          opacity: 0.08,
           lineHeight: 1,
           marginBottom: '4px',
         }}>
@@ -341,21 +363,22 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
         </div>
         {/* Frase */}
         <p style={{
-          fontSize: '9px',
-          color: quotes[current].color,
+          fontSize: '9.5px',
+          color: '#E9D5FF',
           fontWeight: '500',
+          fontStyle: 'italic',
           whiteSpace: 'pre-line',
           lineHeight: '1.5',
-          fontStyle: 'italic',
+          textAlign: 'center',
         }}>
           {quotes[current].text}
         </p>
         {/* Romaji */}
         <p style={{
-          fontSize: '7px',
-          color: '#4C1D95',
-          marginTop: '4px',
-          letterSpacing: '0.15em',
+          fontSize: '8px',
+          color: '#7C3AED',
+          letterSpacing: '0.12em',
+          marginTop: '5px',
           textTransform: 'uppercase',
         }}>
           {quotes[current].romaji}
@@ -368,12 +391,9 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
         marginTop: '10px',
         paddingTop: '8px',
         textAlign: 'center',
-        fontSize: '8px',
-        color: '#3B1D6E',
-        letterSpacing: '0.08em',
-        fontWeight: '600',
-        opacity: 0.8,
-        textShadow: '0 0 6px rgba(59,29,110,0.3)'
+        fontSize: '7px',
+        color: '#2D1F4E',
+        letterSpacing: '0.1em',
       }}>
         武士道 · Bushido
       </div>
