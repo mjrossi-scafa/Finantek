@@ -15,7 +15,7 @@ export default async function TransactionsPage() {
       .eq('user_id', user.id)
       .order('transaction_date', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(500),
+      .limit(50),
     supabase
       .from('categories')
       .select('*')

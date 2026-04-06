@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Transaction, Category } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import * as DateUtils from '@/lib/utils/dates'
 import { createClient } from '@/lib/supabase/client'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
+import { TransactionItem } from '@/components/transactions/TransactionItem'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { GradientButton } from '@/components/shared/GradientButton'
 import { Input } from '@/components/ui/input'
@@ -17,26 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Plus,
   Search,
   Download,
   Edit2,
   Trash2,
-  Clock
+  Clock,
+  X,
+  Check,
+  XIcon
 } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 
 interface TransactionsClientProps {
   initialTransactions: Transaction[]
@@ -67,15 +61,71 @@ export function TransactionsClient({
 }: TransactionsClientProps) {
   const supabase = createClient()
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions)
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [monthFilter, setMonthFilter] = useState<string>('all')
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectionMode, setSelectionMode] = useState(false)
+
+  // Pagination state
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  // Inline delete confirmation state
+  const [deletingId, setDeletingId] = useState<string>('')
+
   // Modal state
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>()
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  // Selection functions
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const selectAll = () => {
+    setSelectedIds(new Set(filteredTransactions.map(t => t.id)))
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+    setSelectionMode(false)
+  }
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!sentinelRef.current) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !searchQuery && typeFilter === 'all' && categoryFilter === 'all' && monthFilter === 'all') {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
+  }, [hasMore, searchQuery, typeFilter, categoryFilter, monthFilter])
 
   // Get unique months for filter
   const availableMonths = useMemo(() => {
@@ -134,6 +184,28 @@ export function TransactionsClient({
   // Group filtered transactions
   const groupedTransactions = groupByDate(filteredTransactions)
 
+  const PAGE_SIZE = 50
+
+  const loadMore = async () => {
+    const offset = transactions.length
+    const { data } = await supabase
+      .from('transactions')
+      .select('*, categories(*)')
+      .eq('user_id', userId)
+      .order('transaction_date', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1)
+
+    if (data && data.length > 0) {
+      setTransactions(prev => [...prev, ...data as Transaction[]])
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false)
+      }
+    } else {
+      setHasMore(false)
+    }
+  }
+
   const refreshTransactions = async () => {
     const { data } = await supabase
       .from('transactions')
@@ -141,10 +213,37 @@ export function TransactionsClient({
       .eq('user_id', userId)
       .order('transaction_date', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(500)
+      .limit(PAGE_SIZE)
 
     if (data) {
       setTransactions(data as Transaction[])
+      setHasMore(data.length === PAGE_SIZE)
+      setPage(0)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return
+
+    const confirmed = window.confirm(
+      `¿Eliminar ${selectedIds.size} transacciones? Esta acción no se puede deshacer.`
+    )
+    if (!confirmed) return
+
+    try {
+      const ids = Array.from(selectedIds)
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .in('id', ids)
+
+      if (error) throw error
+
+      setTransactions(prev => prev.filter(t => !selectedIds.has(t.id)))
+      clearSelection()
+      toast.success(`${ids.length} transacciones eliminadas`)
+    } catch (err) {
+      toast.error('Error al eliminar transacciones')
     }
   }
 
@@ -170,10 +269,12 @@ export function TransactionsClient({
       if (error) throw error
 
       setTransactions(prev => prev.filter(t => t.id !== transactionId))
+      setDeletingId('')
       toast.success('Transacción eliminada')
     } catch (error) {
       console.error('Error:', error)
       toast.error('Error al eliminar la transacción')
+      setDeletingId('')
     }
   }
 
@@ -211,10 +312,21 @@ export function TransactionsClient({
           <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Transacciones</h1>
           <p className="text-text-secondary mt-1">Historial de ingresos y gastos</p>
         </div>
-        <GradientButton onClick={handleCreateNew} className="rounded-full hidden md:flex">
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva transacción
-        </GradientButton>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSelectionMode(!selectionMode)}
+            className={`text-xs px-3 py-1.5 rounded-full transition-all hidden md:flex ${
+              selectionMode
+                ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40'
+                : 'text-gray-400 border border-white/10 hover:border-purple-500/40'
+            }`}>
+            {selectionMode ? 'Cancelar' : 'Seleccionar'}
+          </button>
+          <GradientButton onClick={handleCreateNew} className="rounded-full hidden md:flex">
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva transacción
+          </GradientButton>
+        </div>
       </div>
 
       {/* Filters */}
@@ -226,8 +338,8 @@ export function TransactionsClient({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
               <Input
                 placeholder="Buscar transacción..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pl-10 w-full bg-surface-secondary border-surface-border"
               />
             </div>
@@ -330,6 +442,53 @@ export function TransactionsClient({
         </div>
       )}
 
+      {/* Selection mode indicator (mobile) */}
+      {selectionMode && (
+        <div className="md:hidden bg-purple-900/20 border border-purple-500/30 rounded-lg p-3 text-center">
+          <span className="text-sm text-purple-300">
+            Modo selección activo — toca las transacciones para seleccionar
+          </span>
+        </div>
+      )}
+
+      {/* Batch actions bar */}
+      {selectedIds.size > 0 && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          background: 'rgba(15, 10, 30, 0.95)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(168,85,247,0.3)',
+          borderRadius: '12px',
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '12px',
+        }}>
+          <div className="flex items-center gap-3">
+            <button onClick={selectAll} className="text-xs text-purple-400 hover:text-purple-300">
+              Seleccionar todo
+            </button>
+            <span className="text-xs text-white font-medium">
+              {selectedIds.size} seleccionadas
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-500/20 transition-colors"
+              style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+              <Trash2 size={12}/> Eliminar ({selectedIds.size})
+            </button>
+            <button onClick={clearSelection} className="text-xs text-gray-500 hover:text-gray-300 p-1">
+              <X size={14}/>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Transactions list */}
       {filteredTransactions.length === 0 ? (
         <EmptyState
@@ -372,96 +531,42 @@ export function TransactionsClient({
 
                 {/* Transactions */}
                 <div className="space-y-2">
-                  {dayTransactions.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      onClick={() => handleEdit(transaction)}
-                      className="flex items-center gap-4 p-3 rounded-xl glass-card transition-all hover:bg-surface-hover group cursor-pointer"
-                    >
-                      {/* Icon */}
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-base shrink-0 transition-all group-hover:scale-105"
-                        style={{ backgroundColor: (transaction.categories?.color ?? '#8B5CF6') + '20' }}
-                      >
-                        {transaction.categories?.icon ?? '💸'}
-                      </div>
+                  {dayTransactions.map((transaction) => {
+                    const isSelected = selectedIds.has(transaction.id)
+                    const isDeleting = deletingId === transaction.id
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-text-primary truncate">
-                          {transaction.description || transaction.categories?.name || 'Sin descripción'}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-text-tertiary">{transaction.categories?.name}</span>
-                          {transaction.source !== 'manual' && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-violet-primary/10 text-violet-light">
-                              {transaction.source === 'receipt' ? '📸 Recibo' : '📄 PDF'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Time - hidden on mobile */}
-                      <div className="text-xs text-text-tertiary flex items-center gap-1 hidden md:flex">
-                        <Clock className="h-3 w-3" />
-                        <span>{new Date(transaction.created_at).toLocaleTimeString('es', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}</span>
-                      </div>
-
-                      {/* Amount & Actions */}
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`font-bold text-sm font-mono tabular-nums ${
-                            transaction.type === 'income' ? 'text-success' : 'text-danger'
-                          }`}
-                        >
-                          {transaction.type === 'income' ? '+' : '-'}{formatCLP(transaction.amount)}
-                        </span>
-
-                        {/* Actions (visible on hover) */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEdit(transaction)
-                            }}
-                            className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-primary transition-colors"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger className="p-1.5 rounded-lg text-text-tertiary hover:text-danger hover:bg-danger/10 transition-colors" onClick={(e) => e.stopPropagation()}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>¿Eliminar transacción?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta acción no se puede deshacer.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteTransaction(transaction.id)}
-                                  className="bg-danger hover:bg-danger/90"
-                                >
-                                  Eliminar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    return (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                        isSelected={isSelected}
+                        isDeleting={isDeleting}
+                        selectionMode={selectionMode}
+                        onToggleSelection={() => toggleSelection(transaction.id)}
+                        onEdit={() => handleEdit(transaction)}
+                        onDelete={() => handleDeleteTransaction(transaction.id)}
+                        onStartDelete={() => setDeletingId(transaction.id)}
+                        onCancelDelete={() => setDeletingId('')}
+                        onLongPress={() => {
+                          if (!selectionMode) {
+                            setSelectionMode(true)
+                            toggleSelection(transaction.id)
+                          }
+                        }}
+                      />
+                    )
+                  })}
                 </div>
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Infinite scroll sentinel */}
+      {hasMore && filteredTransactions.length > 0 && (
+        <div ref={sentinelRef} style={{ height: '20px' }} className="flex justify-center">
+          <div className="text-xs text-text-tertiary">Cargando más...</div>
         </div>
       )}
 
