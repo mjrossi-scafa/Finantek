@@ -248,7 +248,8 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
         {/* KATANA ELEGANTE - comportamiento por modo */}
         <div className={mode === 'zen' ? 'zen-float' : 'k-float k-glow'} style={{
           position: 'absolute',
-          top: '50%', left: '50%',
+          top: mode === 'zen' ? '45%' : '50%',
+          left: '50%',
           transform: mode === 'zen'
             ? 'translate(-50%, -50%) rotate(0deg)'
             : 'translate(-50%, -50%) rotate(-45deg)',
@@ -306,15 +307,17 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
           <div>道</div>
         </div>
 
-        {/* Círculo de energía sutil */}
+        {/* Círculo de energía sutil - sombra bajo la katana */}
         <div style={{
           position: 'absolute',
-          bottom: '5%', left: '50%',
+          bottom: mode === 'zen' ? '15%' : '5%',
+          left: '50%',
           transform: 'translateX(-50%)',
-          width: '60px', height: '3px',
+          width: mode === 'zen' ? '80px' : '60px',
+          height: '3px',
           background: 'radial-gradient(ellipse, #7C3AED, rgba(124,58,237,0.3), transparent)',
           borderRadius: '50%',
-          opacity: 0.4
+          opacity: mode === 'zen' ? 0.6 : 0.4
         }}/>
       </div>
 
