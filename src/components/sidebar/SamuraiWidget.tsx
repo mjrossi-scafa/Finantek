@@ -147,11 +147,11 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
       <div style={{
         position: 'relative',
         width: '100%',
-        height: '160px',
+        height: mode === 'zen' ? '200px' : '160px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden'
+        overflow: 'visible'
       }}>
 
         {/* ENSO para modo ZEN */}
@@ -161,16 +161,17 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '120px',
-            height: '120px',
-            opacity: 0.15
+            width: '130px',
+            height: '130px',
+            opacity: 0.12,
+            overflow: 'visible'
           }}>
             <circle
-              cx="60" cy="60" r="50"
+              cx="65" cy="65" r="55"
               fill="none"
               stroke="#7C3AED"
-              strokeWidth="3"
-              strokeDasharray="280 40"
+              strokeWidth="2.5"
+              strokeDasharray="300 50"
               strokeLinecap="round"
             />
           </svg>

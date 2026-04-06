@@ -51,7 +51,7 @@ export function SamuraiFallback() {
       `}</style>
 
       {/* Katana SVG animada */}
-      <div style={{ position: 'relative', width: '100%', height: '120px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', height: '120px', overflow: 'visible' }}>
 
         {/* Partículas de energía */}
         <div className="k-particle" style={{
