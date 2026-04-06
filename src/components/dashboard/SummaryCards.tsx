@@ -10,8 +10,9 @@ interface SummaryCardsProps {
 export function SummaryCards({ income, expense }: SummaryCardsProps) {
   const balance = income - expense
   const savingsRate = income > 0 ? Math.round((balance / income) * 100) : 0
-  const total = income + expense
-  const porcentajeIngresos = income === 0 ? 0 : Math.round((income / (income + expense)) * 100)
+
+  // Fixed: More intuitive calculations
+  const incomeProgress = 100 // Ingresos siempre 100% de sí mismos
   const expenseRate = income > 0 ? Math.round((expense / income) * 100) : 0
 
   return (
@@ -108,11 +109,11 @@ export function SummaryCards({ income, expense }: SummaryCardsProps) {
               <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-bamboo-take to-green-400 transition-all duration-700"
-                  style={{ width: `${porcentajeIngresos}%` }}
+                  style={{ width: `${incomeProgress}%` }}
                 />
               </div>
-              <span className={`text-xs font-mono ${porcentajeIngresos === 0 ? 'text-red-400' : porcentajeIngresos > 50 ? 'text-green-500' : 'text-red-400'}`}>
-                {porcentajeIngresos}%
+              <span className={`text-xs font-mono ${income === 0 ? 'text-red-400' : 'text-green-500'}`}>
+                {incomeProgress}%
               </span>
             </div>
           </div>

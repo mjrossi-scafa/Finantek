@@ -9,7 +9,8 @@
       "Bash(curl:*)",
       "Bash(python3 -m json.tool public/animations/test.json)",
       "Bash(npm install:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(find .:*)"
     ]
   }
 }
