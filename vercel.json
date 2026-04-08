@@ -1,3 +1,20 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/telegram/daily-reminders",
+      "schedule": "0 18 * * *",
+      "headers": { "x-reminder-type": "15h" }
+    },
+    {
+      "path": "/api/telegram/daily-reminders",
+      "schedule": "0 0 * * *",
+      "headers": { "x-reminder-type": "21h" }
+    },
+    {
+      "path": "/api/telegram/daily-reminders",
+      "schedule": "0 12 * * *",
+      "headers": { "x-reminder-type": "9h" }
+    }
+  ]
 }
