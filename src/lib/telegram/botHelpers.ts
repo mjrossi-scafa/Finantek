@@ -2,6 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { sendMessage } from './bot'
 import { formatCLP } from '@/lib/utils/currency'
 import { getChileToday, getChileNow } from '@/lib/utils/timezone'
+import {
+  getUserFinancialContext,
+  buildSmartResumen,
+  checkSmartAlerts,
+  getRandomQuote
+} from './financialContext'
 
 function getSupabase() {
   return createClient(
@@ -16,13 +22,11 @@ export async function handleGreeting(chatId: number): Promise<void> {
                    hour < 20 ? 'Buenas tardes' : 'Buenas noches'
 
   await sendMessage(chatId,
-    `${greeting}! ⚔️\n\n` +
-    `¿Qué necesitas?\n\n` +
-    `💰 Registrar gasto: "Almuerzo 8500"\n` +
-    `📊 Ver resumen: "resumen" o "cuánto llevo"\n` +
-    `📸 Escanear recibo: envía una foto\n` +
-    `❓ Preguntas: "cuánto gasté hoy?"\n` +
-    `🗑️ Editar: "borra el último gasto"\n` +
+    `${greeting} ⚔️\n\n` +
+    `Soy Katana, tu guardián financiero.\n\n` +
+    `💰 Registrar: "Almuerzo 8500"\n` +
+    `📊 Consultar: "resumen" o "cuánto llevo"\n` +
+    `📸 Recibo: envía una foto\n` +
     `❓ Ayuda: "ayuda"`
   )
 }
@@ -134,38 +138,20 @@ async function handleWeekQuery(chatId: number, userId: string): Promise<void> {
 }
 
 async function handleMonthQuery(chatId: number, userId: string): Promise<void> {
-  const supabase = getSupabase()
-  const now = getChileNow()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
+  const ctx = await getUserFinancialContext(userId)
+  const msg = buildSmartResumen(ctx)
+  await sendMessage(chatId, msg)
+}
 
-  const { data: transactions } = await supabase
-    .from('transactions')
-    .select('type, amount, categories(name, icon)')
-    .eq('user_id', userId)
-    .gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`)
-    .lt('transaction_date', month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`)
-
-  if (!transactions || transactions.length === 0) {
-    await sendMessage(chatId, "✅ Este mes no has registrado gastos. ¡Increíble autocontrol! 🗡️")
-    return
-  }
-
-  const expenses = transactions.filter(t => t.type === 'expense')
-  const income = transactions.filter(t => t.type === 'income')
-
-  const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0)
-  const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0)
-
-  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
-
-  await sendMessage(chatId,
-    `📊 **Resumen de ${months[month - 1]} ${year}:**\n\n` +
-    `💚 Ingresos: ${formatCLP(totalIncome)}\n` +
-    `🔴 Gastos: ${formatCLP(totalExpense)}\n` +
-    `${(totalIncome - totalExpense) >= 0 ? '💙' : '⚠️'} Balance: ${formatCLP(totalIncome - totalExpense)}\n\n` +
-    `📈 Total transacciones: ${transactions.length}`
-  )
+export async function handleMonthSummary(
+  chatId: number,
+  userId: string,
+  year?: number,
+  month?: number
+): Promise<void> {
+  const ctx = await getUserFinancialContext(userId)
+  const msg = buildSmartResumen(ctx)
+  await sendMessage(chatId, msg)
 }
 
 async function handleCategoryQuery(chatId: number, userId: string): Promise<void> {

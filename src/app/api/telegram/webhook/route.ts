@@ -14,6 +14,12 @@ import {
   clearPendingData,
   clearConversation
 } from '@/lib/telegram/conversationMemory'
+import {
+  getUserFinancialContext,
+  buildSmartResumen,
+  checkSmartAlerts,
+  getRandomQuote
+} from '@/lib/telegram/financialContext'
 
 export const maxDuration = 30
 
@@ -76,12 +82,13 @@ async function linkUserWithCode(chatId: number, username: string | undefined, li
 
   return {
     success: true,
-    message: "✅ ¡Cuenta vinculada exitosamente!\n\n" +
-             "Ya puedes registrar gastos:\n" +
-             "• 'Almuerzo 8500'\n" +
-             "• 'Ingreso sueldo 150000'\n" +
-             "• Foto de un recibo\n\n" +
-             "Escribe 'ayuda' para ver todos los comandos.",
+    message: "✅ Vínculo establecido.\n\n" +
+             "El camino comienza hoy.\n" +
+             "Registra tu primer gasto cuando estés listo.\n\n" +
+             "• \"Almuerzo 8500\"\n" +
+             "• \"Ingreso sueldo 150000\"\n" +
+             "• Foto de un recibo 📸\n\n" +
+             "Escribe \"ayuda\" para ver todos los comandos.",
     userId: profile.id
   }
 }
@@ -125,13 +132,12 @@ export async function POST(request: NextRequest) {
     } else {
       // Send registration message
       await sendMessage(chatId,
-        "👋 ¡Hola! Soy el asistente de Katana.\n\n" +
-        "Para vincular tu cuenta necesitas:\n" +
-        "1️⃣ Registrarte en katana-omega.vercel.app\n" +
-        "2️⃣ Ir a Configuración → Bot de Telegram\n" +
-        "3️⃣ Copiar tu código de vinculación\n" +
-        "4️⃣ Enviarlo aquí\n\n" +
-        "O escribe /vincular [tu-código] para conectar tu cuenta."
+        "⚔️ Bienvenido al dojo.\n\n" +
+        "Para comenzar necesitas vincular tu cuenta:\n" +
+        "1. Regístrate en " + (process.env.NEXT_PUBLIC_APP_URL || "katana-omega.vercel.app") + "\n" +
+        "2. Ve a Configuración → Bot de Telegram\n" +
+        "3. Copia tu código y envíalo aquí\n\n" +
+        "Ya tienes cuenta? Envía tu código de 6 dígitos."
       )
       return NextResponse.json({ ok: true })
     }
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
       const result = await parseReceipt(fileBuffer, 'image/jpeg', categories)
 
       if (result.error || result.transactions.length === 0) {
-        await sendMessage(chatId, '❌ No pude extraer transacciones de esta imagen. Intenta con una foto más clara.')
+        await sendMessage(chatId, 'No pude leer esa imagen. Intenta con mejor luz.')
         return NextResponse.json({ ok: true })
       }
 
@@ -180,7 +186,7 @@ export async function POST(request: NextRequest) {
       addMessage(chatId, 'assistant', botResponse)
       await sendMessage(chatId, botResponse)
     } catch {
-      await sendMessage(chatId, '❌ Error al procesar la imagen.')
+      await sendMessage(chatId, 'Algo falló. Intenta enviar la imagen de nuevo.')
     }
     return NextResponse.json({ ok: true })
   }
@@ -193,7 +199,7 @@ export async function POST(request: NextRequest) {
       const result = await parseReceipt(fileBuffer, 'application/pdf', categories)
 
       if (result.error || result.transactions.length === 0) {
-        await sendMessage(chatId, '❌ No pude extraer transacciones del PDF.')
+        await sendMessage(chatId, 'No pude procesar ese PDF. Intenta con la imagen.')
         return NextResponse.json({ ok: true })
       }
 
@@ -264,39 +270,24 @@ export async function POST(request: NextRequest) {
   }
 
   if (text === '/ayuda' || text.toLowerCase() === 'ayuda' || text.toLowerCase() === 'help') {
-    await sendMessage(chatId,
-      `<b>⚔️ Katana Bot - Guía Completa</b>\n\n` +
+    const helpMsg =
+      `⚔️ <b>Comandos del dojo:</b>\n\n` +
+      `💰 <b>REGISTRAR</b>\n` +
+      `• "Almuerzo 8500"\n` +
+      `• "Café 2500 y taxi 3000"\n` +
+      `• "Ingreso sueldo 900000"\n` +
+      `• Foto de boleta 📸\n\n` +
+      `📊 <b>CONSULTAR</b>\n` +
+      `• "resumen" — balance del mes\n` +
+      `• "cuánto gasté hoy"\n` +
+      `• "gastos de esta semana"\n` +
+      `• "insights" — análisis semanal\n\n` +
+      `✏️ <b>CORREGIR</b>\n` +
+      `• "borra el último"\n` +
+      `• "corregir"\n\n` +
+      `🌐 ${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
 
-      `<b>💰 REGISTRAR GASTOS:</b>\n` +
-      `• "Almuerzo 8500", "Uber 3200"\n` +
-      `• "Café 2500 y pan 1500" (múltiples)\n` +
-      `• "Ingreso sueldo 1500000"\n\n` +
-
-      `<b>📸 RECIBOS:</b>\n` +
-      `• Envía foto o PDF del recibo\n` +
-      `• Elige si guardar todo junto o separado\n\n` +
-
-      `<b>❓ PREGUNTAS (lenguaje natural):</b>\n` +
-      `• "¿Cuánto gasté hoy?"\n` +
-      `• "¿Cuánto llevo esta semana?"\n` +
-      `• "¿En qué gasté más este mes?"\n` +
-      `• "¿Cuál fue mi último gasto?"\n` +
-      `• "¿Se registró como alimentación...?"\n\n` +
-
-      `<b>🗑️ EDITAR:</b>\n` +
-      `• "Borra el último gasto"\n` +
-      `• "Edita el último gasto"\n\n` +
-
-      `<b>📊 INFORMES:</b>\n` +
-      `• "resumen" - Balance mensual\n` +
-      `• "insights" - Análisis IA\n` +
-      `• "dashboard" - Ver gráficos web\n\n` +
-
-      `<b>💬 CONVERSACIÓN:</b>\n` +
-      `• Salúdame con "hola", "buenas"\n` +
-      `• Haz preguntas en español natural\n` +
-      `• Confirma con "sí" o números (1,2,3)`
-    )
+    await sendMessage(chatId, helpMsg)
     return NextResponse.json({ ok: true })
   }
 
@@ -338,7 +329,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error('Telegram webhook error:', err)
-    await sendMessage(chatId, '❌ Hubo un error procesando tu mensaje. Intenta de nuevo.')
+    await sendMessage(chatId, 'No pude procesar eso. Intenta de nuevo.')
   }
 
   return NextResponse.json({ ok: true })
@@ -459,6 +450,25 @@ async function handleSeparateConfirmation(chatId: number, userId: string, pendin
   const successMsg = `✅ ${pendingData.items.length} transacciones registradas:\n\n${lines.join('\n')}`
   addMessage(chatId, 'assistant', successMsg)
   await sendMessage(chatId, successMsg)
+
+  // Alertas inteligentes post-transacción
+  try {
+    const ctx = await getUserFinancialContext(userId)
+    await checkSmartAlerts(
+      userId,
+      chatId,
+      {
+        category: pendingData.items[0]?.category,
+        type: 'expense',
+        amount: pendingData.items[0]?.amount || 0
+      },
+      ctx,
+      sendMessage
+    )
+  } catch (e) {
+    // No interrumpir el flujo si falla la alerta
+    console.error('Smart alert error:', e)
+  }
 }
 
 async function handleItemExclusion(chatId: number, pendingData: any, excludeIndices: number[]): Promise<void> {
@@ -501,21 +511,39 @@ async function handleFreeConversation(
     .order('transaction_date', { ascending: false })
     .limit(10)
 
-  const systemPrompt = `Eres el asistente financiero de Katana.
-Eres conciso, directo y usas emojis moderadamente.
-Hablas en español chileno informal.
+  const ctx = await getUserFinancialContext(userId)
+  const contextString = `
+Ingresos este mes: ${formatCLP(ctx.currentMonth.income)}
+Gastos este mes: ${formatCLP(ctx.currentMonth.expense)}
+Balance: ${formatCLP(ctx.currentMonth.balance)}
+Mes avanzado: ${ctx.monthProgress}%
+Variación vs mes anterior: ${ctx.variationVsLastMonth}%
+  `.trim()
 
-Contexto del usuario:
-- Últimas transacciones: ${JSON.stringify(recentTx?.slice(0, 5))}
+  const systemPrompt = `Eres Katana, asesor financiero personal con filosofía samurai.
 
-Puedes:
-- Responder preguntas sobre sus finanzas
-- Registrar gastos si te los dicen
-- Dar consejos financieros breves
-- Ayudar a entender sus patrones de gasto
+PERSONALIDAD:
+- Directo y preciso como un analista
+- Motivador como un sensei, sin exagerar
+- Sabio: conecta cada acción con disciplina
+- Usa palabras japonesas solo cuando aporten (máximo una por mensaje)
+- Nunca alarmista, siempre constructivo
 
-Responde en máximo 3 oraciones. Si debes registrar
-algo, termina con [REGISTRAR: descripción, monto, tipo]`
+CONOCIMIENTO QUE APLICAS:
+- Regla 50/30/20 (necesidades/deseos/ahorro)
+- Fondo de emergencia: 3-6 meses de gastos
+- Diferencia entre deuda buena y mala
+- Patrones de gasto y comportamiento financiero
+- Alertas cuando el gasto supera lo habitual
+
+CONTEXTO DEL USUARIO:
+${contextString}
+
+REGLAS:
+- Máximo 4 líneas por respuesta
+- Máximo 1 emoji por mensaje
+- Usa los datos reales del usuario si están disponibles
+- Si algo no tiene que ver con finanzas, redirige amablemente al tema`
 
   try {
     const response = await anthropic.messages.create({
@@ -695,32 +723,12 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
       await handleCorrectionRequest(chatId, userId)
       break
 
-    case 'resumen':
-      const now = getChileNow()
-      const year = now.getFullYear()
-      const month = now.getMonth() + 1
-
-      const { data: transactions } = await supabase
-        .from('transactions')
-        .select('type, amount')
-        .eq('user_id', userId)
-        .gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`)
-        .lt('transaction_date', month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`)
-
-      const income = (transactions ?? []).filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
-      const expense = (transactions ?? []).filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
-      const balance = income - expense
-
-      const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
-
-      await sendMessage(chatId,
-        `<b>📊 Resumen de ${months[month - 1]} ${year}:</b>\n\n` +
-        `💚 Ingresos: ${formatCLP(income)}\n` +
-        `🔴 Gastos: ${formatCLP(expense)}\n` +
-        `${balance >= 0 ? '💙' : '⚠️'} Balance: ${formatCLP(balance)}\n\n` +
-        `📈 Ve los gráficos completos en el dashboard.`
-      )
+    case 'resumen': {
+      const ctx = await getUserFinancialContext(userId)
+      const msg = buildSmartResumen(ctx)
+      await sendMessage(chatId, msg)
       break
+    }
 
     case 'insights':
       await sendMessage(chatId, '💡 Generando análisis...')
@@ -785,7 +793,7 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
       break
 
     default:
-      await sendMessage(chatId, '🤔 No reconozco ese comando. Escribe "ayuda" para ver las opciones.')
+      await sendMessage(chatId, 'No comprendí ese movimiento.\nEscribe "ayuda" para ver las opciones.')
   }
 }
 

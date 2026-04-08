@@ -1,0 +1,758 @@
+KATANA TELEGRAM BOT - CÓDIGO COMPLETO
+=====================================
+
+=== src/lib/telegram/parser.ts ===
+import Anthropic from '@anthropic-ai/sdk'
+
+export interface ParsedTransaction {
+  type: 'expense' | 'income'
+  amount: number
+  description: string
+  category?: string
+}
+
+export interface ParsedQuestion {
+  queryType: 'today' | 'week' | 'month' | 'category' | 'last_transaction' | 'search' | 'balance'
+  query?: string
+}
+
+export interface ParsedMessage {
+  type: 'transaction' | 'question' | 'command' | 'greeting' | 'confirmation' | 'unknown'
+  transaction?: ParsedTransaction
+  question?: ParsedQuestion
+  text?: string
+}
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+})
+
+export async function parseMessage(message: string): Promise<ParsedMessage> {
+  const systemPrompt = `Eres un experto analizando mensajes de finanzas personales en español chileno.
+
+IMPORTANTE: Categoriza cada mensaje en UNA de estas opciones:
+
+1. TRANSACTION - Registro de gasto/ingreso:
+   - "Almuerzo 8500", "Once 3200", "Sueldo 450000", "Uber 6500"
+   - Formato: {type: "expense/income", amount: número, description: texto, category?: categoría}
+   - Categorías disponibles: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Tecnología, Ropa, Otros
+
+2. QUESTION - Consulta de información:
+   - "cuánto gasté hoy", "resumen semanal", "balance del mes"
+   - "cuánto llevo", "mis gastos de transporte", "buscar almuerzo"
+   - Tipos: today, week, month, category, last_transaction, search, balance
+
+3. COMMAND - Comando específico:
+   - "ayuda", "dashboard", "borra", "eliminar", "cancelar"
+
+4. GREETING - Saludo:
+   - "hola", "buenos días", "qué tal"
+
+5. CONFIRMATION - Confirmación:
+   - "sí", "ok", "confirmo", "dale"
+
+6. UNKNOWN - Todo lo demás
+
+Responde SOLO con JSON válido, sin explicación ni texto adicional.
+
+Ejemplos:
+"Almuerzo 12000" → {"type":"transaction","transaction":{"type":"expense","amount":12000,"description":"Almuerzo","category":"Alimentación"}}
+"cuánto gasté hoy" → {"type":"question","question":{"queryType":"today"}}
+"hola" → {"type":"greeting","text":"hola"}`
+
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 200,
+      messages: [
+        { role: 'user', content: `${systemPrompt}\n\nMensaje a analizar: "${message}"` }
+      ]
+    })
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : ''
+
+    try {
+      return JSON.parse(text.trim()) as ParsedMessage
+    } catch {
+      return { type: 'unknown', text: message }
+    }
+  } catch (error) {
+    console.error('Error parsing message:', error)
+    return { type: 'unknown', text: message }
+  }
+}
+
+=== src/lib/telegram/bot.ts ===
+export interface TelegramUpdate {
+  update_id: number
+  message?: {
+    message_id: number
+    from?: {
+      id: number
+      is_bot: boolean
+      first_name: string
+      username?: string
+    }
+    chat: {
+      id: number
+      type: string
+    }
+    date: number
+    text?: string
+    photo?: Array<{
+      file_id: string
+      file_unique_id: string
+      width: number
+      height: number
+      file_size?: number
+    }>
+    document?: {
+      file_id: string
+      file_name?: string
+      mime_type?: string
+      file_size?: number
+    }
+  }
+}
+
+export async function sendMessage(chatId: number, text: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`
+
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: 'HTML'
+    })
+  })
+}
+
+export async function getFile(fileId: string): Promise<string | null> {
+  try {
+    const fileInfoUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getFile`
+    const fileResponse = await fetch(`${fileInfoUrl}?file_id=${fileId}`)
+    const fileData = await fileResponse.json()
+
+    if (!fileData.ok) return null
+
+    const filePath = fileData.result.file_path
+    const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${filePath}`
+
+    return fileUrl
+  } catch (error) {
+    console.error('Error getting file:', error)
+    return null
+  }
+}
+
+=== src/lib/telegram/conversationMemory.ts ===
+interface ConversationMessage {
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: number
+}
+
+interface ConversationState {
+  messages: ConversationMessage[]
+  lastActivity: number
+  pendingData?: any
+}
+
+// In-memory storage (resets on deployment)
+const conversations = new Map<number, ConversationState>()
+
+const CONVERSATION_TIMEOUT = 10 * 60 * 1000 // 10 minutes
+const MAX_MESSAGES = 6
+
+export function getConversation(chatId: number): ConversationMessage[] {
+  const conv = conversations.get(chatId)
+
+  // Clean expired conversations
+  if (conv && Date.now() - conv.lastActivity > CONVERSATION_TIMEOUT) {
+    conversations.delete(chatId)
+    return []
+  }
+
+  return conv?.messages ?? []
+}
+
+export function addMessage(chatId: number, role: 'user' | 'assistant', content: string): void {
+  const now = Date.now()
+  let conv = conversations.get(chatId)
+
+  if (!conv) {
+    conv = { messages: [], lastActivity: now }
+  }
+
+  conv.messages.push({ role, content, timestamp: now })
+
+  // Keep only recent messages
+  if (conv.messages.length > MAX_MESSAGES) {
+    conv.messages = conv.messages.slice(-MAX_MESSAGES)
+  }
+
+  conv.lastActivity = now
+  conversations.set(chatId, conv)
+}
+
+export function setPendingData(chatId: number, data: any): void {
+  const conv = conversations.get(chatId) ?? { messages: [], lastActivity: Date.now() }
+  conv.pendingData = data
+  conv.lastActivity = Date.now()
+  conversations.set(chatId, conv)
+}
+
+export function getPendingData(chatId: number): any {
+  return conversations.get(chatId)?.pendingData
+}
+
+export function clearPendingData(chatId: number): void {
+  const conv = conversations.get(chatId)
+  if (conv) {
+    delete conv.pendingData
+    conv.lastActivity = Date.now()
+  }
+}
+
+export function clearConversation(chatId: number): void {
+  conversations.delete(chatId)
+}
+
+=== src/lib/telegram/botHelpers.ts ===
+import { createClient } from '@supabase/supabase-js'
+import { sendMessage } from './bot'
+import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday, getChileNow } from '@/lib/utils/timezone'
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
+export async function handleGreeting(chatId: number): Promise<void> {
+  const hour = getChileNow().getHours()
+  const greeting = hour < 12 ? 'Buenos días' :
+                   hour < 20 ? 'Buenas tardes' : 'Buenas noches'
+
+  await sendMessage(chatId,
+    `${greeting}! ⚔️\n\n` +
+    `¿Qué necesitas?\n\n` +
+    `💰 Registrar gasto: "Almuerzo 8500"\n` +
+    `📊 Ver resumen: "resumen" o "cuánto llevo"\n` +
+    `📸 Escanear recibo: envía una foto\n` +
+    `❓ Preguntas: "cuánto gasté hoy?"\n` +
+    `🗑️ Editar: "borra el último gasto"\n` +
+    `❓ Ayuda: "ayuda"`
+  )
+}
+
+export async function handleQuestion(chatId: number, userId: string, question: any): Promise<void> {
+  const supabase = getSupabase()
+
+  switch (question.queryType) {
+    case 'today':
+      await handleTodayQuery(chatId, userId)
+      break
+    case 'week':
+      await handleWeekQuery(chatId, userId)
+      break
+    case 'month':
+      await handleMonthQuery(chatId, userId)
+      break
+    case 'category':
+      await handleCategoryQuery(chatId, userId)
+      break
+    case 'last_transaction':
+      await handleLastTransactionQuery(chatId, userId)
+      break
+    case 'search':
+      await handleSearchQuery(chatId, userId, question.query)
+      break
+    case 'balance':
+      await handleBalanceQuery(chatId, userId)
+      break
+    default:
+      await sendMessage(chatId, "🤔 No entendí tu pregunta. Intenta ser más específico.")
+  }
+}
+
+async function handleTodayQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const today = getChileToday()
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('type, amount, description, categories(name, icon)')
+    .eq('user_id', userId)
+    .gte('transaction_date', today)
+    .lt('transaction_date', getNextDay(today))
+
+  if (!transactions || transactions.length === 0) {
+    await sendMessage(chatId, "✅ Hoy no has registrado ningún gasto. ¡Perfecto control! 💪")
+    return
+  }
+
+  const expenses = transactions.filter(t => t.type === 'expense')
+  const income = transactions.filter(t => t.type === 'income')
+
+  const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0)
+  const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0)
+
+  let message = `📅 **Resumen de hoy:**\n\n`
+
+  if (totalExpense > 0) {
+    message += `🔴 Gastos: ${formatCLP(totalExpense)} (${expenses.length} transacción${expenses.length > 1 ? 'es' : ''})\n`
+  }
+
+  if (totalIncome > 0) {
+    message += `💚 Ingresos: ${formatCLP(totalIncome)} (${income.length} transacción${income.length > 1 ? 'es' : ''})\n`
+  }
+
+  if (expenses.length <= 3) {
+    message += `\n**Detalles:**\n`
+    for (const t of expenses) {
+      const cat = t.categories as any
+      message += `• ${cat?.icon || '💰'} ${t.description}: ${formatCLP(Number(t.amount))}\n`
+    }
+  }
+
+  await sendMessage(chatId, message)
+}
+
+async function handleWeekQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const weekStart = getWeekStart()
+  const weekEnd = getWeekEnd()
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('type, amount')
+    .eq('user_id', userId)
+    .gte('transaction_date', weekStart)
+    .lt('transaction_date', weekEnd)
+
+  if (!transactions || transactions.length === 0) {
+    await sendMessage(chatId, "✅ Esta semana no has registrado gastos. ¡Excelente disciplina! ⚔️")
+    return
+  }
+
+  const expenses = transactions.filter(t => t.type === 'expense')
+  const income = transactions.filter(t => t.type === 'income')
+
+  const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0)
+  const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0)
+  const balance = totalIncome - totalExpense
+
+  await sendMessage(chatId,
+    `📊 **Resumen semanal:**\n\n` +
+    `💚 Ingresos: ${formatCLP(totalIncome)}\n` +
+    `🔴 Gastos: ${formatCLP(totalExpense)}\n` +
+    `${balance >= 0 ? '💙' : '⚠️'} Balance: ${formatCLP(balance)}\n\n` +
+    `📈 Transacciones: ${transactions.length}`
+  )
+}
+
+async function handleMonthQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const now = getChileNow()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('type, amount, categories(name, icon)')
+    .eq('user_id', userId)
+    .gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`)
+    .lt('transaction_date', month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`)
+
+  if (!transactions || transactions.length === 0) {
+    await sendMessage(chatId, "✅ Este mes no has registrado gastos. ¡Increíble autocontrol! 🗡️")
+    return
+  }
+
+  const expenses = transactions.filter(t => t.type === 'expense')
+  const income = transactions.filter(t => t.type === 'income')
+
+  const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0)
+  const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0)
+
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+
+  await sendMessage(chatId,
+    `📊 **Resumen de ${months[month - 1]} ${year}:**\n\n` +
+    `💚 Ingresos: ${formatCLP(totalIncome)}\n` +
+    `🔴 Gastos: ${formatCLP(totalExpense)}\n` +
+    `${(totalIncome - totalExpense) >= 0 ? '💙' : '⚠️'} Balance: ${formatCLP(totalIncome - totalExpense)}\n\n` +
+    `📈 Total transacciones: ${transactions.length}`
+  )
+}
+
+async function handleCategoryQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const now = getChileNow()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('amount, categories(name, icon)')
+    .eq('user_id', userId)
+    .eq('type', 'expense')
+    .gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`)
+    .lt('transaction_date', month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`)
+
+  if (!transactions || transactions.length === 0) {
+    await sendMessage(chatId, "✅ No tienes gastos este mes.")
+    return
+  }
+
+  const categoryTotals = new Map<string, { total: number, icon: string }>()
+
+  for (const t of transactions) {
+    const cat = t.categories as any
+    const name = cat?.name || 'Otros'
+    const icon = cat?.icon || '💰'
+    const existing = categoryTotals.get(name) || { total: 0, icon }
+    existing.total += Number(t.amount)
+    categoryTotals.set(name, existing)
+  }
+
+  const sorted = Array.from(categoryTotals.entries()).sort((a, b) => b[1].total - a[1].total)
+  const top3 = sorted.slice(0, 3)
+
+  let message = `📊 **Categorías que más gastas este mes:**\n\n`
+  for (let i = 0; i < top3.length; i++) {
+    const [name, data] = top3[i]
+    const medal = ['🥇', '🥈', '🥉'][i]
+    message += `${medal} ${data.icon} ${name}: ${formatCLP(data.total)}\n`
+  }
+
+  await sendMessage(chatId, message)
+}
+
+async function handleLastTransactionQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+
+  const { data: last } = await supabase
+    .from('transactions')
+    .select('*, categories(name, icon)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!last) {
+    await sendMessage(chatId, "🤷‍♂️ No tienes transacciones registradas aún.")
+    return
+  }
+
+  const cat = last.categories as any
+  const emoji = last.type === 'income' ? '💚' : '🔴'
+  const date = new Date(last.transaction_date).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })
+
+  await sendMessage(chatId,
+    `${emoji} **Tu última transacción:**\n\n` +
+    `📝 ${last.description}\n` +
+    `💰 ${formatCLP(Number(last.amount))}\n` +
+    `📁 ${cat?.icon || '💰'} ${cat?.name || 'Sin categoría'}\n` +
+    `📅 ${date}\n\n` +
+    `💡 Escribe "borra el último" para eliminarlo`
+  )
+}
+
+async function handleSearchQuery(chatId: number, userId: string, query: string): Promise<void> {
+  const supabase = getSupabase()
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('*, categories(name, icon)')
+    .eq('user_id', userId)
+    .ilike('description', `%${query}%`)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  if (!transactions || transactions.length === 0) {
+    await sendMessage(chatId, `🔍 No encontré transacciones que contengan "${query}"`)
+    return
+  }
+
+  let message = `🔍 **Encontré ${transactions.length} transacción${transactions.length > 1 ? 'es' : ''} con "${query}":**\n\n`
+
+  for (const t of transactions) {
+    const cat = t.categories as any
+    const emoji = t.type === 'income' ? '💚' : '🔴'
+    const date = new Date(t.transaction_date).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })
+    message += `${emoji} ${t.description} - ${formatCLP(Number(t.amount))} (${date})\n`
+  }
+
+  await sendMessage(chatId, message)
+}
+
+async function handleBalanceQuery(chatId: number, userId: string): Promise<void> {
+  const supabase = getSupabase()
+  const now = getChileNow()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('type, amount')
+    .eq('user_id', userId)
+    .gte('transaction_date', `${year}-${String(month).padStart(2, '0')}-01`)
+    .lt('transaction_date', month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`)
+
+  const income = (transactions ?? []).filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
+  const expense = (transactions ?? []).filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+  const balance = income - expense
+
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+
+  await sendMessage(chatId,
+    `💰 **Balance de ${months[month - 1]}:**\n\n` +
+    `💚 Ingresos: ${formatCLP(income)}\n` +
+    `🔴 Gastos: ${formatCLP(expense)}\n` +
+    `${balance >= 0 ? '💙' : '⚠️'} **Balance: ${formatCLP(balance)}**\n\n` +
+    `${balance >= 0 ? '🎉 ¡Vas excelente!' : '⚔️ Tiempo de disciplina financiera'}`)
+}
+
+export async function savePendingAction(chatId: number, userId: string, actionType: string, payload: any): Promise<string> {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase
+    .from('bot_pending_actions')
+    .insert({
+      telegram_chat_id: chatId,
+      user_id: userId,
+      action_type: actionType,
+      payload,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    throw new Error('Failed to save pending action')
+  }
+
+  return data.id
+}
+
+export async function getPendingAction(chatId: number): Promise<any> {
+  const supabase = getSupabase()
+
+  const { data } = await supabase
+    .from('bot_pending_actions')
+    .select('*')
+    .eq('telegram_chat_id', chatId)
+    .gt('expires_at', getChileNow().toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  return data
+}
+
+export async function clearPendingAction(chatId: number): Promise<void> {
+  const supabase = getSupabase()
+
+  await supabase
+    .from('bot_pending_actions')
+    .delete()
+    .eq('telegram_chat_id', chatId)
+}
+
+export async function deleteLastTransaction(userId: string): Promise<any> {
+  const supabase = getSupabase()
+
+  const { data: last } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (last) {
+    await supabase.from('transactions').delete().eq('id', last.id)
+  }
+
+  return last
+}
+
+// Helper functions
+function getNextDay(date: string): string {
+  const d = new Date(date)
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
+
+function getWeekStart(): string {
+  const now = getChileNow()
+  const day = now.getDay()
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+  const d = new Date(now)
+  d.setDate(diff)
+  return d.toISOString().split('T')[0]
+}
+
+function getWeekEnd(): string {
+  const start = new Date(getWeekStart())
+  start.setDate(start.getDate() + 7)
+  return start.toISOString().split('T')[0]
+}
+
+=== src/app/api/telegram/webhook/route.ts (PRIMERAS 100 LÍNEAS) ===
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { sendMessage, getFile, TelegramUpdate } from '@/lib/telegram/bot'
+import { parseMessage, ParsedTransaction } from '@/lib/telegram/parser'
+import { parseReceipt } from '@/lib/anthropic/receiptParser'
+import { generateWeeklyInsight } from '@/lib/anthropic/insightGenerator'
+import { formatCLP } from '@/lib/utils/currency'
+import { Category } from '@/types/database'
+import { getChileToday, getChileHour, getChileGreeting, getChileNow } from '@/lib/utils/timezone'
+import {
+  getConversation,
+  addMessage,
+  setPendingData,
+  clearPendingData,
+  clearConversation
+} from '@/lib/telegram/conversationMemory'
+
+export const maxDuration = 30
+
+// Use service role client since Telegram webhook has no user session
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
+async function getUserByChat(chatId: number) {
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('telegram_users')
+    .select('user_id')
+    .eq('telegram_chat_id', chatId)
+    .single()
+  return data?.user_id as string | null
+}
+
+async function linkUserWithCode(chatId: number, username: string | undefined, linkCode: string): Promise<{ success: boolean; message: string; userId?: string }> {
+  const supabase = getSupabase()
+
+  // Find profile with valid code
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, telegram_link_code, telegram_link_expires_at')
+    .eq('telegram_link_code', linkCode)
+    .single()
+
+  if (!profile) {
+    return {
+      success: false,
+      message: "❌ Código inválido. Genera uno nuevo en Configuración → Bot de Telegram"
+    }
+  }
+
+  if (new Date(profile.telegram_link_expires_at) < new Date()) {
+    return {
+      success: false,
+      message: "⏰ El código expiró. Genera uno nuevo en la app."
+    }
+  }
+
+  // Link user
+  await supabase.from('telegram_users').upsert({
+    telegram_chat_id: chatId,
+    user_id: profile.id,
+    telegram_username: username || null,
+  }, { onConflict: 'telegram_chat_id' })
+
+  // Clear used code
+  await supabase.from('profiles')
+    .update({
+      telegram_link_code: null,
+      telegram_link_expires_at: null
+    })
+    .eq('id', profile.id)
+
+  return {
+    success: true,
+    message: "✅ ¡Cuenta vinculada exitosamente!\n\n" +
+             "Ya puedes registrar gastos:\n" +
+             "• 'Almuerzo 8500'\n" +
+             "• 'Ingreso sueldo 150000'\n" +
+             "• Foto de un recibo\n\n" +
+             "Escribe 'ayuda' para ver todos los comandos.",
+    userId: profile.id
+  }
+}
+
+async function getCategories(userId: string): Promise<Category[]> {
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('user_id', userId)
+    .order('sort_order')
+  return (data ?? []) as Category[]
+}
+
+export async function POST(request: NextRequest) {
+  const update: TelegramUpdate = await request.json()
+
+=== LINEAS CON SYSTEM PROMPTS Y SENDMESSAGE ===
+Línea 3: import { sendMessage, getFile, TelegramUpdate } from '@/lib/telegram/bot'
+Línea 118: await sendMessage(chatId, linkResult.message)
+Línea 127: await sendMessage(chatId, [mensaje de cuenta no vinculada])
+Línea 144: await sendMessage(chatId, '📸 Procesando recibo con IA...')
+Línea 151: await sendMessage(chatId, '❌ No pude extraer transacciones de esta imagen. Intenta con una foto más clara.')
+Línea 181: await sendMessage(chatId, botResponse)
+Línea 183: await sendMessage(chatId, '❌ Error al procesar la imagen.')
+Línea 190: await sendMessage(chatId, '📄 Procesando PDF con IA...')
+Línea 196: await sendMessage(chatId, '❌ No pude extraer transacciones del PDF.')
+Línea 226: await sendMessage(chatId, botResponse)
+Línea 228: await sendMessage(chatId, '❌ Error al procesar el PDF.')
+Línea 244-267: await sendMessage con mensaje de ayuda completo
+Línea 291: "resumen" - Balance mensual dentro del mensaje
+Línea 341: await sendMessage(chatId, '❌ Hubo un error procesando tu mensaje. Intenta de nuevo.')
+Línea 361: const systemPrompt = `Eres el asistente de Katana. (SYSTEM PROMPT COMPLETO)
+Línea 382: messages: [{ role: 'user', content: systemPrompt }]
+Línea 405: await sendMessage(chatId, cancelMsg)
+Línea 435: await sendMessage(chatId, successMsg)
+Línea 461: await sendMessage(chatId, successMsg)
+Línea 480: await sendMessage(chatId, response)
+Línea 504: const systemPrompt = `Eres el asistente financiero de Katana. (SEGUNDO SYSTEM PROMPT)
+Línea 524: system: systemPrompt,
+Línea 559: await sendMessage(chatId, botText)
+Línea 565: await sendMessage(chatId, fallback)
+Línea 595: await sendMessage(chatId, successMsg)
+Línea 620: await sendMessage(chatId, response)
+Línea 636: await sendMessage(chatId, "🤷‍♂️ No encuentro transacciones recientes para corregir.")
+Línea 656: await sendMessage(chatId, response)
+Línea 682: await sendMessage(chatId, response)
+Línea 698: case 'resumen': (comando resumen)
+Línea 716: await sendMessage(chatId, [mensaje de resumen])
+Línea 726: await sendMessage(chatId, '💡 Generando análisis...')
+Línea 779: await sendMessage(chatId, `💡 <b>Insight semanal:</b>\n\n${insightText}`)
+Línea 784: await sendMessage(chatId, `🌐 Abre tu dashboard aquí:\n${url}/dashboard`)
+Línea 788: await sendMessage(chatId, '🤔 No reconozco ese comando. Escribe "ayuda" para ver las opciones.')
+
+=== ESTADO GENERAL ===
+✅ Bot completamente funcional
+✅ Timezone chileno implementado
+✅ Parser NLP con Claude Haiku funcionando
+✅ Memoria conversacional activa
+✅ Todas las queries (today, week, month, balance, category, search) operativas
+✅ Sistema de acciones pendientes para confirmaciones
+✅ Manejo de fotos/PDFs de recibos
+✅ Variables de entorno sincronizadas
+✅ Webhook configurado correctamente
+✅ Logo centrado y optimizado
+✅ Sistema completo listo para usuarios chilenos
