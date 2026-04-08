@@ -27,12 +27,11 @@ export function KatanaLogo({ variant = "sidebar", className }: KatanaLogoProps) 
           <rect x="114" y="100" width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="128" y="100" width="10" height="12" rx="3" fill="#7C3AED"/>
           {/* T */}
+          <rect x="156" y="58"  width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="170" y="58"  width="10" height="12" rx="3" fill="#5B21B6"/>
           <rect x="184" y="58"  width="10" height="90" rx="3" fill="#A855F7"/>
           <rect x="198" y="58"  width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="212" y="58"  width="10" height="12" rx="3" fill="#5B21B6"/>
-          {/* Punto de la T */}
-          <circle cx="189" cy="155" r="4" fill="#84CC16"/>
           {/* A */}
           <rect x="240" y="76"  width="10" height="72" rx="3" fill="#A855F7"/>
           <rect x="254" y="58"  width="10" height="24" rx="3" fill="#84CC16"/>
@@ -53,9 +52,7 @@ export function KatanaLogo({ variant = "sidebar", className }: KatanaLogoProps) 
           <rect x="394" y="100" width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="408" y="100" width="10" height="12" rx="3" fill="#7C3AED"/>
           {/* Baseline */}
-          <rect x="30" y="153" width="412" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
-          {/* Punto verde al final */}
-          <circle cx="455" cy="143" r="6" fill="#84CC16"/>
+          <rect x="30" y="153" width="392" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
           {/* Subtítulo */}
           <text x="30" y="174" fill="#E9D5FF" fontFamily="monospace"
                 fontSize="9" letterSpacing="3">財務インテリジェンス</text>
@@ -84,12 +81,11 @@ export function KatanaLogo({ variant = "sidebar", className }: KatanaLogoProps) 
           <rect x="114" y="50"  width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="128" y="50"  width="10" height="12" rx="3" fill="#7C3AED"/>
           {/* T */}
+          <rect x="156" y="8"   width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="170" y="8"   width="10" height="12" rx="3" fill="#5B21B6"/>
           <rect x="184" y="8"   width="10" height="90" rx="3" fill="#A855F7"/>
           <rect x="198" y="8"   width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="212" y="8"   width="10" height="12" rx="3" fill="#5B21B6"/>
-          {/* Punto de la T */}
-          <circle cx="189" cy="105" r="4" fill="#84CC16"/>
           {/* A */}
           <rect x="240" y="26"  width="10" height="72" rx="3" fill="#A855F7"/>
           <rect x="254" y="8"   width="10" height="24" rx="3" fill="#84CC16"/>
@@ -110,9 +106,7 @@ export function KatanaLogo({ variant = "sidebar", className }: KatanaLogoProps) 
           <rect x="394" y="50"  width="10" height="12" rx="3" fill="#7C3AED"/>
           <rect x="408" y="50"  width="10" height="12" rx="3" fill="#7C3AED"/>
           {/* Baseline */}
-          <rect x="30" y="103" width="412" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
-          {/* Punto verde al final */}
-          <circle cx="455" cy="93" r="6" fill="#84CC16"/>
+          <rect x="30" y="103" width="392" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
         </svg>
       </div>
     )

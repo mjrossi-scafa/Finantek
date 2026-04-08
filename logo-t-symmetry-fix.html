@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T Simétrica - Fix de Simetría</title>
+    <style>
+        body {
+            background: #0A0A0F;
+            color: white;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .comparison {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .logo-box {
+            background: #1A0A2E;
+            border: 1px solid #2D1F4E;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .t-detail {
+            background: #2D1F4E;
+            border: 1px solid #4C1D95;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        h1 {
+            color: #A855F7;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #84CC16;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .wrong { color: #EF4444; }
+        .correct { color: #22C55E; }
+
+        .structure {
+            font-size: 11px;
+            color: #9CA3AF;
+            text-align: left;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗾 KATANA T - Fix de Simetría</h1>
+
+    <h2>ANTES (❌ T Asimétrica)</h2>
+    <div class="comparison">
+        <div class="logo-box">
+            <!-- Solo mostramos la T para enfocarnos en el problema -->
+            <div style="display: inline-block; width: 200px;">
+                <svg width="100%" height="auto" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- T ASIMÉTRICA ACTUAL -->
+                    <rect x="5" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>     <!-- Izq: 1 -->
+                    <rect x="19" y="8" width="10" height="90" rx="3" fill="#A855F7"/>    <!-- Centro -->
+                    <rect x="33" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>    <!-- Der: 1 -->
+                    <rect x="47" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>    <!-- Der: 2 -->
+                    <!-- PUNTO MALO abajo -->
+                    <circle cx="24" cy="105" r="4" fill="#84CC16"/>
+                </svg>
+            </div>
+            <div class="status wrong">❌ T Asimétrica + punto abajo mal ubicado</div>
+            <div class="t-detail">
+                <div class="structure">
+                    <strong>Estructura actual:</strong><br>
+                    • Izquierda: 1 rectángulo (#5B21B6)<br>
+                    • Centro: barra vertical (#A855F7)<br>
+                    • Derecha: 2 rectángulos (#7C3AED + #5B21B6)<br>
+                    <br>
+                    <span style="color: #EF4444">❌ NO SIMÉTRICA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>DESPUÉS (✅ T Simétrica)</h2>
+    <div class="comparison">
+        <div class="logo-box">
+            <div style="display: inline-block; width: 200px;">
+                <svg width="100%" height="auto" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- T SIMÉTRICA CORREGIDA -->
+                    <rect x="-2" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>    <!-- Izq: 1 -->
+                    <rect x="12" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>    <!-- Izq: 2 -->
+                    <rect x="26" y="8" width="10" height="90" rx="3" fill="#A855F7"/>    <!-- Centro -->
+                    <rect x="40" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>    <!-- Der: 1 -->
+                    <rect x="54" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>    <!-- Der: 2 -->
+                    <!-- SIN punto abajo -->
+                </svg>
+            </div>
+            <div class="status correct">✅ T perfectamente simétrica + sin punto innecesario</div>
+            <div class="t-detail">
+                <div class="structure">
+                    <strong>Estructura corregida:</strong><br>
+                    • Izquierda: 2 rectángulos (#7C3AED + #5B21B6)<br>
+                    • Centro: barra vertical (#A855F7)<br>
+                    • Derecha: 2 rectángulos (#7C3AED + #5B21B6)<br>
+                    <br>
+                    <span style="color: #22C55E">✅ PERFECTAMENTE SIMÉTRICA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>LOGO COMPLETO CORREGIDO</h2>
+    <div class="comparison">
+        <div class="logo-box">
+            <div style="display: inline-block; width: 300px;">
+                <svg width="100%" height="auto" viewBox="0 0 485 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- K -->
+                    <rect x="30" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="44" y="40" width="10" height="30" rx="3" fill="#84CC16"/>
+                    <rect x="58" y="22" width="10" height="34" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="8" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <rect x="58" y="62" width="10" height="36" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="76" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <!-- A -->
+                    <rect x="100" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="128" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="142" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="128" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- T SIMÉTRICA CORREGIDA -->
+                    <rect x="156" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="170" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <rect x="184" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="198" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="212" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <!-- A -->
+                    <rect x="240" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="268" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="282" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="268" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- N -->
+                    <rect x="310" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="324" y="22" width="10" height="76" rx="3" fill="#7C3AED"/>
+                    <rect x="338" y="36" width="10" height="62" rx="3" fill="#5B21B6"/>
+                    <rect x="352" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <!-- A -->
+                    <rect x="380" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="408" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="422" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="408" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- Baseline -->
+                    <rect x="30" y="103" width="392" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
+                    <!-- SIN punto verde final -->
+                </svg>
+            </div>
+            <div class="status correct">✅ Logo completo con T simétrica + sin puntos decorativos</div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(124,58,237,0.1); border-radius: 8px; border: 1px solid rgba(124,58,237,0.2);">
+        <h3 style="color: #84CC16; margin: 0 0 10px;">🔧 Cambios aplicados:</h3>
+        <ul style="color: #E9D5FF; margin: 0; text-align: left; list-style: none; padding: 0;">
+            <li>✅ <strong>Agregar rectángulo izquierdo:</strong> x="156" para simetrizar la T</li>
+            <li>✅ <strong>Eliminar punto verde abajo:</strong> de la T</li>
+            <li>✅ <strong>Eliminar punto verde final:</strong> al final de KATANA</li>
+            <li>✅ <strong>T perfectamente simétrica:</strong> 2 rectángulos izq + centro + 2 rectángulos der</li>
+        </ul>
+    </div>
+
+</body>
+</html>

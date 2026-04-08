@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katana Logo Fix - Punto de la T</title>
+    <style>
+        body {
+            background: #0A0A0F;
+            color: white;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .comparison {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .logo-box {
+            background: #1A0A2E;
+            border: 1px solid #2D1F4E;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        h1 {
+            color: #A855F7;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #84CC16;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .wrong { color: #EF4444; }
+        .correct { color: #22C55E; }
+    </style>
+</head>
+<body>
+    <h1>🗾 KATANA LOGO FIX - Corrección del punto de la T</h1>
+
+    <h2>ANTES (❌ Incorrecto)</h2>
+    <div class="comparison">
+        <div class="logo-box">
+            <div style="display: inline-block; width: 300px;">
+                <svg width="100%" height="auto" viewBox="0 0 485 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- K -->
+                    <rect x="30" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="44" y="40" width="10" height="30" rx="3" fill="#84CC16"/>
+                    <rect x="58" y="22" width="10" height="34" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="8" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <rect x="58" y="62" width="10" height="36" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="76" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <!-- A -->
+                    <rect x="100" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="128" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="142" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="128" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- T CON PUNTO ABAJO (MALO) -->
+                    <rect x="170" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <rect x="184" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="198" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="212" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <!-- PUNTO MALO ABAJO -->
+                    <circle cx="189" cy="105" r="4" fill="#84CC16"/>
+                    <!-- A -->
+                    <rect x="240" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="268" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="282" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="268" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- N -->
+                    <rect x="310" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="324" y="22" width="10" height="76" rx="3" fill="#7C3AED"/>
+                    <rect x="338" y="36" width="10" height="62" rx="3" fill="#5B21B6"/>
+                    <rect x="352" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <!-- A -->
+                    <rect x="380" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="408" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="422" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="408" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- Baseline -->
+                    <rect x="30" y="103" width="412" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
+                    <!-- PUNTO VERDE FINAL (MALO) -->
+                    <circle cx="455" cy="93" r="6" fill="#84CC16"/>
+                </svg>
+            </div>
+            <div class="status wrong">❌ Punto abajo + punto final innecesario</div>
+        </div>
+    </div>
+
+    <h2>DESPUÉS (✅ Correcto)</h2>
+    <div class="comparison">
+        <div class="logo-box">
+            <div style="display: inline-block; width: 300px;">
+                <svg width="100%" height="auto" viewBox="0 0 485 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- K -->
+                    <rect x="30" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="44" y="40" width="10" height="30" rx="3" fill="#84CC16"/>
+                    <rect x="58" y="22" width="10" height="34" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="8" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <rect x="58" y="62" width="10" height="36" rx="3" fill="#7C3AED"/>
+                    <rect x="72" y="76" width="10" height="22" rx="3" fill="#5B21B6"/>
+                    <!-- A -->
+                    <rect x="100" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="128" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="142" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="114" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="128" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- T CON PUNTO ARRIBA A LA DERECHA (CORRECTO) -->
+                    <rect x="170" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <rect x="184" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="198" y="8" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="212" y="8" width="10" height="12" rx="3" fill="#5B21B6"/>
+                    <!-- PUNTO CORRECTO: arriba a la derecha de la T -->
+                    <circle cx="218" cy="26" r="3" fill="#84CC16"/>
+                    <!-- A -->
+                    <rect x="240" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="268" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="282" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="254" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="268" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- N -->
+                    <rect x="310" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <rect x="324" y="22" width="10" height="76" rx="3" fill="#7C3AED"/>
+                    <rect x="338" y="36" width="10" height="62" rx="3" fill="#5B21B6"/>
+                    <rect x="352" y="8" width="10" height="90" rx="3" fill="#A855F7"/>
+                    <!-- A -->
+                    <rect x="380" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="408" y="8" width="10" height="24" rx="3" fill="#84CC16"/>
+                    <rect x="422" y="26" width="10" height="72" rx="3" fill="#A855F7"/>
+                    <rect x="394" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <rect x="408" y="50" width="10" height="12" rx="3" fill="#7C3AED"/>
+                    <!-- Baseline -->
+                    <rect x="30" y="103" width="412" height="2" fill="#7C3AED" opacity="0.35" rx="1"/>
+                    <!-- SIN punto verde final -->
+                </svg>
+            </div>
+            <div class="status correct">✅ Punto arriba a la derecha + sin punto final</div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(124,58,237,0.1); border-radius: 8px; border: 1px solid rgba(124,58,237,0.2);">
+        <h3 style="color: #84CC16; margin: 0 0 10px;">📝 Cambios aplicados:</h3>
+        <ul style="color: #E9D5FF; margin: 0; text-align: left; list-style: none; padding: 0;">
+            <li>✅ <strong>Mover punto de la T:</strong> de abajo → arriba a la derecha (como una "i")</li>
+            <li>✅ <strong>Eliminar punto verde final:</strong> al final de KATANA</li>
+            <li>✅ <strong>Logo más limpio:</strong> sin elementos decorativos innecesarios</li>
+        </ul>
+    </div>
+
+</body>
+</html>
