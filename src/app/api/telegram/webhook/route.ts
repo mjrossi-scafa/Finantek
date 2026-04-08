@@ -6,6 +6,7 @@ import { parseReceipt } from '@/lib/anthropic/receiptParser'
 import { generateWeeklyInsight } from '@/lib/anthropic/insightGenerator'
 import { formatCLP } from '@/lib/utils/currency'
 import { Category } from '@/types/database'
+import { getChileToday, getChileHour, getChileGreeting, getChileNow } from '@/lib/utils/timezone'
 import {
   getConversation,
   addMessage,
@@ -424,7 +425,7 @@ async function handleSingleConfirmation(chatId: number, userId: string, pendingD
     type: 'expense',
     amount: pendingData.total,
     description: name,
-    transaction_date: new Date().toISOString().split('T')[0],
+    transaction_date: getChileToday(),
     source: pendingData.type,
   })
 
@@ -447,7 +448,7 @@ async function handleSeparateConfirmation(chatId: number, userId: string, pendin
       type: 'expense',
       amount: item.amount,
       description: item.description,
-      transaction_date: new Date().toISOString().split('T')[0],
+      transaction_date: getChileToday(),
       source: pendingData.type,
     })
 
@@ -543,7 +544,7 @@ algo, termina con [REGISTRAR: descripción, monto, tipo]`
         type: type as 'income' | 'expense',
         amount: parseInt(amount),
         description: desc,
-        transaction_date: new Date().toISOString().split('T')[0],
+        transaction_date: getChileToday(),
         source: 'manual'
       })
 
@@ -637,7 +638,7 @@ async function handleCorrectionRequest(chatId: number, userId: string): Promise<
   }
 
   const cat = lastTx.categories as any
-  const date = new Date(lastTx.transaction_date).toLocaleDateString('es-CL')
+  const date = new Date(lastTx.transaction_date).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })
 
   const response =
     `🔧 Última transacción:\n` +
@@ -658,8 +659,8 @@ async function handleCorrectionRequest(chatId: number, userId: string): Promise<
 async function handleGreeting(chatId: number, userId: string): Promise<void> {
   const supabase = getSupabase()
 
-  // Get today's expenses
-  const today = new Date().toISOString().split('T')[0]
+  // Get today's expenses (Chile time)
+  const today = getChileToday()
   const { data: todayTx } = await supabase
     .from('transactions')
     .select('amount')
@@ -669,11 +670,7 @@ async function handleGreeting(chatId: number, userId: string): Promise<void> {
 
   const todayTotal = (todayTx || []).reduce((s, t) => s + Number(t.amount), 0)
 
-  const timeOfDay = new Date().getHours()
-  let greeting = '👋'
-  if (timeOfDay < 12) greeting = '🌅 ¡Buenos días!'
-  else if (timeOfDay < 18) greeting = '☀️ ¡Buenas tardes!'
-  else greeting = '🌙 ¡Buenas noches!'
+  const greeting = getChileGreeting()
 
   const todayMsg = todayTotal > 0
     ? `\n\n💰 Hoy has gastado ${formatCLP(todayTotal)}`
@@ -699,7 +696,7 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
       break
 
     case 'resumen':
-      const now = new Date()
+      const now = getChileNow()
       const year = now.getFullYear()
       const month = now.getMonth() + 1
 
@@ -795,7 +792,7 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
 
 
 function getWeekStart(offset: number): string {
-  const now = new Date()
+  const now = getChileNow()
   const day = now.getDay()
   const diff = now.getDate() - day + (day === 0 ? -6 : 1) + offset * 7
   const d = new Date(now)

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { sendMessage } from './bot'
 import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday, getChileNow } from '@/lib/utils/timezone'
 
 function getSupabase() {
   return createClient(
@@ -10,7 +11,7 @@ function getSupabase() {
 }
 
 export async function handleGreeting(chatId: number): Promise<void> {
-  const hour = new Date().getHours()
+  const hour = getChileNow().getHours()
   const greeting = hour < 12 ? 'Buenos días' :
                    hour < 20 ? 'Buenas tardes' : 'Buenas noches'
 
@@ -58,7 +59,7 @@ export async function handleQuestion(chatId: number, userId: string, question: a
 
 async function handleTodayQuery(chatId: number, userId: string): Promise<void> {
   const supabase = getSupabase()
-  const today = new Date().toISOString().split('T')[0]
+  const today = getChileToday()
 
   const { data: transactions } = await supabase
     .from('transactions')
@@ -134,7 +135,7 @@ async function handleWeekQuery(chatId: number, userId: string): Promise<void> {
 
 async function handleMonthQuery(chatId: number, userId: string): Promise<void> {
   const supabase = getSupabase()
-  const now = new Date()
+  const now = getChileNow()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
@@ -169,7 +170,7 @@ async function handleMonthQuery(chatId: number, userId: string): Promise<void> {
 
 async function handleCategoryQuery(chatId: number, userId: string): Promise<void> {
   const supabase = getSupabase()
-  const now = new Date()
+  const now = getChileNow()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
@@ -228,7 +229,7 @@ async function handleLastTransactionQuery(chatId: number, userId: string): Promi
 
   const cat = last.categories as any
   const emoji = last.type === 'income' ? '💚' : '🔴'
-  const date = new Date(last.transaction_date).toLocaleDateString('es-CL')
+  const date = new Date(last.transaction_date).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })
 
   await sendMessage(chatId,
     `${emoji} **Tu última transacción:**\n\n` +
@@ -261,7 +262,7 @@ async function handleSearchQuery(chatId: number, userId: string, query: string):
   for (const t of transactions) {
     const cat = t.categories as any
     const emoji = t.type === 'income' ? '💚' : '🔴'
-    const date = new Date(t.transaction_date).toLocaleDateString('es-CL')
+    const date = new Date(t.transaction_date).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })
     message += `${emoji} ${t.description} - ${formatCLP(Number(t.amount))} (${date})\n`
   }
 
@@ -270,7 +271,7 @@ async function handleSearchQuery(chatId: number, userId: string, query: string):
 
 async function handleBalanceQuery(chatId: number, userId: string): Promise<void> {
   const supabase = getSupabase()
-  const now = new Date()
+  const now = getChileNow()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
@@ -324,7 +325,7 @@ export async function getPendingAction(chatId: number): Promise<any> {
     .from('bot_pending_actions')
     .select('*')
     .eq('telegram_chat_id', chatId)
-    .gt('expires_at', new Date().toISOString())
+    .gt('expires_at', getChileNow().toISOString())
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
@@ -367,7 +368,7 @@ function getNextDay(date: string): string {
 }
 
 function getWeekStart(): string {
-  const now = new Date()
+  const now = getChileNow()
   const day = now.getDay()
   const diff = now.getDate() - day + (day === 0 ? -6 : 1)
   const d = new Date(now)
