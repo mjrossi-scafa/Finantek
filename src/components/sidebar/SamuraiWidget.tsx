@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { CherryBlossoms } from './CherryBlossoms'
+// Cherry blossoms removidos por request del usuario
 
 interface SamuraiWidgetProps {
   transitioning?: boolean
@@ -12,31 +12,31 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
   const [visible, setVisible] = useState(true)
   const katanaContainerRef = useRef<HTMLDivElement>(null)
 
-  // FRASES BUSHIDO SAKURA - VERSION ESTACIONAL
+  // FRASES BUSHIDO SIMPLIFICADAS
   const quotes = [
     {
-      text: '"Como los cerezos florecen,\ntu riqueza crecerá"',
-      kanji: '桜',
-      romaji: 'Sakura · Flor de cerezo',
-      color: '#F9A8D4'
+      text: '"El presupuesto es el\nmapa del guerrero"',
+      kanji: '武',
+      romaji: 'Bu · Disciplina',
+      color: '#A855F7'
     },
     {
-      text: '"Cada peso ahorrado\nes un pétalo de primavera"',
-      kanji: '春',
-      romaji: 'Haru · Primavera',
+      text: '"Cada peso, una victoria"',
+      kanji: '勝',
+      romaji: 'Katsu · Victoria',
       color: '#84CC16'
     },
     {
-      text: '"La belleza del ahorro\nes como la sakura efímera"',
-      kanji: '美',
-      romaji: 'Bi · Belleza',
-      color: '#E9D5FF'
+      text: '"Ahorra con intención.\nGasta con propósito"',
+      kanji: '道',
+      romaji: 'Dō · El camino',
+      color: '#C084FC'
     },
     {
-      text: '"En cada flor hay una\nlección de economía"',
-      kanji: '花',
-      romaji: 'Hana · Flor',
-      color: '#C084FC'
+      text: '"Recorta lo innecesario.\nPreserva lo esencial"',
+      kanji: '整',
+      romaji: 'Sei · Orden',
+      color: '#7C3AED'
     },
   ]
 
@@ -129,8 +129,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           overflow: 'hidden'
         }}
       >
-        {/* Cherry blossoms sakura estacional */}
-        <CherryBlossoms />
+        {/* Cherry blossoms eliminados */}
 
         {/* Círculo de meditación sutil */}
         <div style={{
@@ -189,11 +188,8 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
               fill="#4C1D95" opacity="0.8"/>
             {/* Kashira (pommel) */}
             <ellipse cx="50" cy="94" rx="5" ry="3" fill="#6D28D9"/>
-            {/* Pétalos sakura decorativos */}
-            <circle cx="50" cy="96" r="2.5" fill="#F9A8D4" opacity="0.8"/>
-            <circle cx="35" cy="25" r="1.5" fill="#FFC0CB" opacity="0.6"/>
-            <circle cx="65" cy="35" r="1" fill="#E9D5FF" opacity="0.7"/>
-            <circle cx="45" cy="55" r="1.2" fill="#F9A8D4" opacity="0.5"/>
+            {/* Punto verde acento */}
+            <circle cx="50" cy="96" r="2.5" fill="#84CC16"/>
           </svg>
         </div>
 
@@ -297,17 +293,17 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
         </p>
       </div>
 
-      {/* FOOTER SAKURA ESTACIONAL */}
+      {/* FOOTER BUSHIDO */}
       <div style={{
-        borderTop: '1px solid rgba(249,168,212,0.25)',
+        borderTop: '1px solid rgba(76,29,149,0.25)',
         marginTop: '10px',
         paddingTop: '8px',
         textAlign: 'center',
         fontSize: '7px',
-        color: '#8B5A80',
+        color: '#2D1F4E',
         letterSpacing: '0.1em',
       }}>
-        桜の季節 · Sakura no Kisetsu
+        武士道 · Bushido
       </div>
     </div>
   )
