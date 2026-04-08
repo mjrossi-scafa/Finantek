@@ -2,19 +2,16 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/telegram/daily-reminders",
-      "schedule": "0 18 * * *",
-      "headers": { "x-reminder-type": "15h" }
+      "path": "/api/telegram/daily-reminders/15h",
+      "schedule": "0 18 * * *"
     },
     {
-      "path": "/api/telegram/daily-reminders",
-      "schedule": "0 0 * * *",
-      "headers": { "x-reminder-type": "21h" }
+      "path": "/api/telegram/daily-reminders/21h",
+      "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/telegram/daily-reminders",
-      "schedule": "0 12 * * *",
-      "headers": { "x-reminder-type": "9h" }
+      "path": "/api/telegram/daily-reminders/9h",
+      "schedule": "0 12 * * *"
     }
   ]
 }
