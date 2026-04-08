@@ -1,50 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+// Cherry blossoms removidos por request del usuario
 
 interface SamuraiWidgetProps {
-  mode?: 'active' | 'zen'
   transitioning?: boolean
 }
 
-export function SamuraiWidget({ mode = 'active', transitioning = false }: SamuraiWidgetProps) {
+export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
   const [current, setCurrent] = useState(0)
   const [visible, setVisible] = useState(true)
+  const katanaContainerRef = useRef<HTMLDivElement>(null)
 
-  // FRASES ACTUALIZADAS POR MODO
-  const zenQuotes = [
+  // FRASES BUSHIDO SIMPLIFICADAS
+  const quotes = [
     {
       text: '"El presupuesto es el\nmapa del guerrero"',
-      kanji: '禅',
-      romaji: 'Zen · Meditación',
-      color: '#9F7AEA'
-    },
-    {
-      text: '"Recorta lo innecesario.\nPreserva lo esencial"',
-      kanji: '静',
-      romaji: 'Shizuka · Quietud',
-      color: '#7C3AED'
-    },
-    {
-      text: '"El orden en tus gastos\nes orden en tu vida"',
-      kanji: '整',
-      romaji: 'Sei · Orden',
-      color: '#9F7AEA'
-    },
-    {
-      text: '"Ahorra con intención.\nGasta con propósito"',
-      kanji: '律',
-      romaji: 'Ritsu · Disciplina',
-      color: '#7C3AED'
-    },
-  ]
-
-  const activeQuotes = [
-    {
-      text: '"No gastes sin intención"',
       kanji: '武',
       romaji: 'Bu · Disciplina',
-      color: '#C084FC'
+      color: '#A855F7'
     },
     {
       text: '"Cada peso, una victoria"',
@@ -53,21 +27,20 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
       color: '#84CC16'
     },
     {
-      text: '"Ahorra hoy, domina mañana"',
+      text: '"Ahorra con intención.\nGasta con propósito"',
       kanji: '道',
       romaji: 'Dō · El camino',
-      color: '#A855F7'
+      color: '#C084FC'
     },
     {
-      text: '"Corta gastos.\nMultiplica libertad"',
-      kanji: '斬',
-      romaji: 'Zan · El corte',
-      color: '#84CC16'
+      text: '"Recorta lo innecesario.\nPreserva lo esencial"',
+      kanji: '整',
+      romaji: 'Sei · Orden',
+      color: '#7C3AED'
     },
   ]
 
-  const quotes = mode === 'zen' ? zenQuotes : activeQuotes
-  const quoteInterval = mode === 'zen' ? 8000 : 5000
+  const quoteInterval = 6000 // Más lento para ser relajante
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -143,149 +116,80 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
         .k-energy { animation: energyLine 2s ease-in-out infinite; }
       `}</style>
 
-      {/* WIDGET DIFERENCIADO POR MODO */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: mode === 'zen' ? '200px' : '160px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'visible'
-      }}>
+      {/* WIDGET SAMURAI ORIGINAL */}
+      <div
+        ref={katanaContainerRef}
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '160px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Cherry blossoms eliminados */}
 
-        {/* ENSO para modo ZEN */}
-        {mode === 'zen' && (
-          <svg style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '130px',
-            height: '130px',
-            opacity: 0.12,
-            overflow: 'visible'
-          }}>
-            <circle
-              cx="65" cy="65" r="55"
-              fill="none"
-              stroke="#7C3AED"
-              strokeWidth="2.5"
-              strokeDasharray="300 50"
-              strokeLinecap="round"
-            />
-          </svg>
-        )}
+        {/* Círculo de meditación sutil */}
+        <div style={{
+          position: 'absolute',
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '120px', height: '120px',
+          borderRadius: '50%',
+          border: '1px solid rgba(124,58,237,0.08)',
+          background: 'radial-gradient(circle, rgba(124,58,237,0.02) 0%, transparent 70%)',
+        }}/>
 
-        {/* Partículas - solo en modo activo */}
-        {mode === 'active' && (
-          <>
-            <div className="k-particle" style={{
-              position: 'absolute',
-              top: '25%', left: '15%',
-              width: '6px', height: '6px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, #84CC16, #22C55E)',
-              boxShadow: '0 0 12px #84CC16',
-              animationDelay: '0s'
-            }}/>
-            <div className="k-particle" style={{
-              position: 'absolute',
-              top: '65%', right: '20%',
-              width: '4px', height: '4px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, #C084FC, #A855F7)',
-              boxShadow: '0 0 10px #C084FC',
-              animationDelay: '1.8s'
-            }}/>
-            <div className="k-particle" style={{
-              position: 'absolute',
-              top: '45%', left: '70%',
-              width: '3px', height: '3px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, #7C3AED, #6D28D9)',
-              boxShadow: '0 0 8px #7C3AED',
-              animationDelay: '3.2s'
-            }}/>
-          </>
-        )}
-
-        {/* Líneas de energía - solo en modo activo */}
-        {mode === 'active' && (
-          <>
-            <div className="k-energy" style={{
-              position: 'absolute',
-              top: '20%', left: '25%',
-              width: '2px', height: '40px',
-              background: 'linear-gradient(to bottom, #C084FC, rgba(192,132,252,0.3), transparent)',
-              transform: 'rotate(-25deg)',
-              borderRadius: '1px',
-              animationDelay: '0.5s'
-            }}/>
-            <div className="k-energy" style={{
-              position: 'absolute',
-              top: '30%', right: '28%',
-              width: '1.5px', height: '30px',
-              background: 'linear-gradient(to bottom, #84CC16, rgba(132,204,22,0.3), transparent)',
-              transform: 'rotate(35deg)',
-              borderRadius: '1px',
-              animationDelay: '1.2s'
-            }}/>
-          </>
-        )}
-
-        {/* Aura diferenciada por modo */}
-        <div className={mode === 'zen' ? 'k-aura-zen' : 'k-aura'} style={{
+        {/* Aura dinámica original */}
+        <div className="k-aura" style={{
           position: 'absolute',
           top: '15%', left: '15%', right: '15%', bottom: '15%',
           borderRadius: '50%',
-          background: mode === 'zen'
-            ? 'radial-gradient(circle, #4C1D95 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0.15) 30%, rgba(76,29,149,0.08) 60%, transparent 80%)',
-          border: `1px solid rgba(124,58,237,${mode === 'zen' ? '0.05' : '0.1'})`,
+          background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0.15) 30%, rgba(76,29,149,0.08) 60%, transparent 80%)',
+          border: '1px solid rgba(124,58,237,0.1)',
         }}/>
 
-        {/* KATANA ELEGANTE - comportamiento por modo */}
-        <div className={mode === 'zen' ? 'zen-float' : 'k-float k-glow'} style={{
+        {/* KATANA ELEGANTE - animación original diagonal */}
+        <div className="k-float k-glow" style={{
           position: 'absolute',
-          top: mode === 'zen' ? '45%' : '50%',
+          top: '50%',
           left: '50%',
-          transform: mode === 'zen'
-            ? 'translate(-50%, -50%) rotate(0deg)'
-            : 'translate(-50%, -50%) rotate(-45deg)',
+          transform: 'translate(-50%, -50%) rotate(-45deg)',
           transformOrigin: 'center',
           zIndex: 10,
         }}>
           <svg width="100" height="100" viewBox="0 0 100 100">
             {/* Hoja larga y delgada — diagonal */}
-            <rect x="48" y="2" width="3" height="65" rx="1.5"
+            <rect x="48.5" y="2" width="3" height="65" rx="1.5"
               fill="#C084FC" transform="rotate(0 50 50)"/>
-            <rect x="48.5" y="2" width="1" height="63" rx="1"
+            <rect x="49" y="2" width="1" height="63" rx="1"
               fill="#EDE9FE" opacity="0.8"
               transform="rotate(0 50 50)"/>
             {/* Punta afilada */}
-            <polygon points="47,2 51,2 49,0" fill="#EDE9FE"/>
+            <polygon points="47.5,2 51.5,2 50,0" fill="#EDE9FE"/>
             {/* Hamon (línea de temple) sutil */}
-            <path d="M 48.5 10 Q 50 20 48.5 30 Q 50 40 48.5 50 Q 50 60 48.5 65"
+            <path d="M 49 10 Q 50 20 49 30 Q 50 40 49 50 Q 50 60 49 65"
               fill="none" stroke="#9F7AEA" strokeWidth="0.5" opacity="0.5"/>
             {/* Tsuba más detallada */}
-            <ellipse cx="49" cy="68" rx="10" ry="4" fill="#7C3AED"/>
-            <ellipse cx="49" cy="68" rx="8" ry="3" fill="#6D28D9"/>
+            <ellipse cx="50" cy="68" rx="10" ry="4" fill="#7C3AED"/>
+            <ellipse cx="50" cy="68" rx="8" ry="3" fill="#6D28D9"/>
             {/* Mango con grip */}
-            <rect x="46" y="71" width="6" height="22" rx="2" fill="#1A0A2E"/>
+            <rect x="47" y="71" width="6" height="22" rx="2" fill="#1A0A2E"/>
             {/* Ito (vendaje) diagonal */}
-            <rect x="46" y="73" width="6" height="2" rx="0"
+            <rect x="47" y="73" width="6" height="2" rx="0"
               fill="#4C1D95" opacity="0.8"/>
-            <rect x="46" y="77" width="6" height="2" rx="0"
+            <rect x="47" y="77" width="6" height="2" rx="0"
               fill="#4C1D95" opacity="0.8"/>
-            <rect x="46" y="81" width="6" height="2" rx="0"
+            <rect x="47" y="81" width="6" height="2" rx="0"
               fill="#4C1D95" opacity="0.8"/>
-            <rect x="46" y="85" width="6" height="2" rx="0"
+            <rect x="47" y="85" width="6" height="2" rx="0"
               fill="#4C1D95" opacity="0.8"/>
             {/* Kashira (pommel) */}
-            <ellipse cx="49" cy="94" rx="5" ry="3" fill="#6D28D9"/>
+            <ellipse cx="50" cy="94" rx="5" ry="3" fill="#6D28D9"/>
             {/* Punto verde acento */}
-            <circle cx="49" cy="96" r="2.5" fill="#84CC16"/>
+            <circle cx="50" cy="96" r="2.5" fill="#84CC16"/>
           </svg>
         </div>
 
@@ -307,17 +211,17 @@ export function SamuraiWidget({ mode = 'active', transitioning = false }: Samura
           <div>道</div>
         </div>
 
-        {/* Círculo de energía sutil - sombra bajo la katana */}
+        {/* Sombra bajo la katana */}
         <div style={{
           position: 'absolute',
-          bottom: mode === 'zen' ? '15%' : '5%',
+          bottom: '5%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: mode === 'zen' ? '80px' : '60px',
+          width: '60px',
           height: '3px',
           background: 'radial-gradient(ellipse, #7C3AED, rgba(124,58,237,0.3), transparent)',
           borderRadius: '50%',
-          opacity: mode === 'zen' ? 0.6 : 0.4
+          opacity: 0.4
         }}/>
       </div>
 
