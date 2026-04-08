@@ -49,9 +49,9 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       <div className="absolute top-0 left-0 w-[1px] h-full gradient-indigo opacity-30" />
 
       {/* Logo KATANA con barras SVG */}
-      <div className="pt-6 pb-2 px-4">
+      <div className="pt-8 pb-4 px-4">
         <div>
-          <KatanaLogo variant="sidebar" />
+          <KatanaLogo variant="sidebar" className="!min-w-[200px] !max-w-[200px]" />
         </div>
       </div>
 
@@ -95,16 +95,71 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       {/* Samurai Widget */}
       <SamuraiContainer />
 
-      {/* Bot connection with subtle zen indicator */}
+      {/* CTA Telegram Bot útil */}
       <div className="px-4 mb-4">
-        <div className="glass-card flex items-center gap-3 px-3.5 py-3 transition-wa hover:bg-surface-subtle/40">
-          <Bot className="h-4 w-4 text-indigo-light" />
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-weight-medium text-text-secondary tracking-zen">Telegram Bot</p>
-            <p className="text-[10px] text-text-muted font-weight-light">@risky_finance_bot</p>
+        <a
+          href="https://t.me/risky_finance_bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '10px 12px',
+            margin: '0 8px 8px',
+            background: 'rgba(124,58,237,0.08)',
+            border: '1px solid rgba(124,58,237,0.2)',
+            borderRadius: '10px',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.15)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,58,237,0.08)'}
+        >
+          {/* Ícono Telegram */}
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            background: 'rgba(124,58,237,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#A855F7">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.965-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.983.892z"/>
+            </svg>
           </div>
-          <span className="h-1.5 w-1.5 rounded-full bg-bamboo-take animate-pulse shadow-sm" />
-        </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#C084FC',
+              margin: '0 0 2px',
+            }}>
+              Registra desde Telegram
+            </p>
+            <p style={{
+              fontSize: '10px',
+              color: '#4C1D95',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              @risky_finance_bot
+            </p>
+          </div>
+
+          {/* Flecha -->  */}
+          <svg width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="#4C1D95" strokeWidth="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
       </div>
 
       {/* Bottom actions with zen separation */}
