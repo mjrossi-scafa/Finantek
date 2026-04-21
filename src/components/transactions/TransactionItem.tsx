@@ -4,18 +4,20 @@ import { useState, useRef } from 'react'
 import { Transaction, Category } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit2, Trash2, Clock, Check, X } from 'lucide-react'
+import { Edit2, Trash2, Clock, Check, X, Copy, Sparkles } from 'lucide-react'
 
 interface TransactionItemProps {
   transaction: Transaction & { categories?: Category }
   isSelected: boolean
   isDeleting: boolean
   selectionMode: boolean
+  isRecent?: boolean
   onToggleSelection: () => void
   onEdit: () => void
   onDelete: () => void
   onStartDelete: () => void
   onCancelDelete: () => void
+  onDuplicate?: () => void
   onLongPress: () => void
 }
 
@@ -24,11 +26,13 @@ export function TransactionItem({
   isSelected,
   isDeleting,
   selectionMode,
+  isRecent = false,
   onToggleSelection,
   onEdit,
   onDelete,
   onStartDelete,
   onCancelDelete,
+  onDuplicate,
   onLongPress
 }: TransactionItemProps) {
   const [swipeX, setSwipeX] = useState(0)
@@ -164,9 +168,17 @@ export function TransactionItem({
             </div>
           ) : (
             <>
-              <p className="font-semibold text-sm text-text-primary truncate">
-                {transaction.description || transaction.categories?.name || 'Sin descripción'}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-sm text-text-primary truncate">
+                  {transaction.description || transaction.categories?.name || 'Sin descripción'}
+                </p>
+                {isRecent && (
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-violet-300 border border-violet-500/30 shrink-0">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    Nuevo
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs text-text-tertiary">{transaction.categories?.name}</span>
                 {transaction.source !== 'manual' && (
@@ -203,12 +215,26 @@ export function TransactionItem({
               {/* Actions (visible on hover, hidden in selection mode) */}
               {!selectionMode && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {onDuplicate && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDuplicate()
+                      }}
+                      className="p-1.5 rounded-lg text-text-tertiary hover:text-violet-300 hover:bg-violet-500/10 transition-colors"
+                      title="Duplicar con fecha de hoy"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       onEdit()
                     }}
                     className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-primary transition-colors"
+                    title="Editar"
                   >
                     <Edit2 className="h-3.5 w-3.5" />
                   </button>
@@ -219,6 +245,7 @@ export function TransactionItem({
                       onStartDelete()
                     }}
                     className="p-1.5 rounded-lg text-text-tertiary hover:text-danger hover:bg-danger/10 transition-colors"
+                    title="Eliminar"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
