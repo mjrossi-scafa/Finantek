@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   // Get user profile for personalized greeting
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, email')
+    .select('display_name, email')
     .eq('id', user.id)
     .single()
 
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
 
   // Extract user's first name for greeting and capitalize it
-  const rawName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
+  const rawName = profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
   const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
 
   return (
