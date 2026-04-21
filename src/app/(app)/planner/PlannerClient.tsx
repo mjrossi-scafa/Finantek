@@ -501,6 +501,13 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
               const isSelected = day.date === selectedDate
               const isPast = day.date < today
               const hasPendingPlanned = dayPlanned.some((e) => !e.is_paid)
+              const hasPaidPlanned = dayPlanned.some((e) => e.is_paid)
+
+              // Color del total: priorizar real > pendiente > pagado
+              let totalColor = 'text-text-muted'
+              if (hasReal) totalColor = 'text-vermillion-shu'
+              else if (hasPendingPlanned) totalColor = 'text-yellow-400'
+              else if (hasPaidPlanned) totalColor = 'text-bamboo-take'
 
               // Mix of dots (max 4 total)
               const dots: Array<'real' | 'paid' | 'pending'> = [
@@ -550,9 +557,7 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
                       </div>
 
                       {/* Total */}
-                      <span className={`text-[9px] font-mono mt-auto ${
-                        isPast ? 'text-vermillion-shu' : hasPendingPlanned ? 'text-yellow-400' : 'text-bamboo-take'
-                      }`}>
+                      <span className={`text-[9px] font-mono mt-auto ${totalColor}`}>
                         {formatCLP(dayTotal).replace('$', '')}
                       </span>
                     </>
