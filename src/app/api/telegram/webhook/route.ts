@@ -368,7 +368,7 @@ Solo JSON, sin texto extra.`
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-sonnet-4-6',
       max_tokens: 150,
       messages: [{ role: 'user', content: systemPrompt }]
     })
@@ -547,7 +547,7 @@ REGLAS:
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-sonnet-4-6',
       max_tokens: 200,
       system: systemPrompt,
       messages: conv.messages.slice(-4).map((m: any) => ({
@@ -613,11 +613,10 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
       source: 'manual',
     })
 
-    const emoji = tx.type === 'income' ? '🟢' : '🔴'
-    const successMsg =
-      `✅ ${tx.description}: ${formatCLP(tx.amount)}\n` +
-      `📁 ${matchedCat.icon || '💰'} ${matchedCat.name} · ${emoji}\n\n` +
-      `_¿Incorrecto? Di "corregir"_`
+    // Smart, contextual responses based on transaction type
+    const smartResponse = generateSmartResponse(tx, matchedCat)
+
+    const successMsg = smartResponse
 
     addMessage(chatId, 'assistant', successMsg)
     await sendMessage(chatId, successMsg)
@@ -798,6 +797,48 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
 }
 
 
+
+function generateSmartResponse(tx: ParsedTransaction, category: Category): string {
+  const amount = formatCLP(tx.amount)
+  const catIcon = category.icon || '💰'
+  const desc = tx.description.toLowerCase()
+
+  // Detect context and generate intelligent responses
+  let response = ""
+  let contextualMsg = ""
+
+  if (tx.type === 'income') {
+    if (desc.includes('sueldo') || desc.includes('salario')) {
+      contextualMsg = "💪 Excelente, tu sueldo está registrado. ¡El dojo crece!"
+    } else if (desc.includes('freelance') || desc.includes('trabajo')) {
+      contextualMsg = "🚀 Buen trabajo extra, samurai. Cada peso cuenta."
+    } else {
+      contextualMsg = "💚 Ingreso registrado con precisión."
+    }
+    response = `✅ ${contextualMsg}\n\n💰 **${tx.description}**: ${amount}\n📁 ${catIcon} ${category.name}\n\n💡 *¿Algo no está bien? Escribe "corregir"*`
+  } else {
+    // Expense - be more contextual and friendly
+    if (desc.includes('restaurant') || desc.includes('resto') || desc.includes('comida')) {
+      contextualMsg = `🍽️ ¡Qué rico! Restaurant registrado`
+    } else if (desc.includes('almuerzo') || desc.includes('almorzar')) {
+      contextualMsg = `🥗 Almuerzo del día registrado`
+    } else if (desc.includes('café') || desc.includes('coffee')) {
+      contextualMsg = `☕ Tu dosis de café contabilizada`
+    } else if (desc.includes('uber') || desc.includes('taxi') || desc.includes('transporte')) {
+      contextualMsg = `🚗 Viaje registrado en tu historial`
+    } else if (desc.includes('super') || desc.includes('mercado')) {
+      contextualMsg = `🛒 Compras del super anotadas`
+    } else if (desc.includes('farmacia') || desc.includes('medicina')) {
+      contextualMsg = `💊 Salud es prioridad, gasto registrado`
+    } else {
+      contextualMsg = `✅ Gasto registrado con disciplina`
+    }
+
+    response = `${contextualMsg}\n\n💰 **${amount}** en ${tx.description}\n📁 ${catIcon} ${category.name}\n\n⚔️ *Un samurai controla cada peso. ¿Correcto? Si no, di "corregir"*`
+  }
+
+  return response
+}
 
 function getWeekStart(offset: number): string {
   const now = getChileNow()
