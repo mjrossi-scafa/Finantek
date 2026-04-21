@@ -94,10 +94,11 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
         })}
       </nav>
 
-      {/* Samurai Widget - flex-1 with overflow hidden to not stretch */}
-      <div className="flex-1 flex flex-col justify-end min-h-0 overflow-hidden">
-        <SamuraiContainer />
-      </div>
+      {/* Samurai Widget - right after menu, no stretching */}
+      <SamuraiContainer />
+
+      {/* Spacer to push telegram + footer to bottom */}
+      <div className="flex-1 min-h-0" />
 
       {/* CTA Telegram Bot útil - compact */}
       <div className="px-4 mb-2 flex-shrink-0">
