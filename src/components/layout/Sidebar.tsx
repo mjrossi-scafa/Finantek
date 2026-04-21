@@ -69,7 +69,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       )}
 
       {/* Navigation with zen spacing */}
-      <nav className="flex-1 px-4 space-y-0.5 overflow-y-auto scrollbar-zen mt-2 min-h-0">
+      <nav className="px-4 space-y-0.5 mt-2">
         <p className="text-[10px] text-gray-600 font-medium tracking-[0.2em] uppercase px-3 mb-2 opacity-60">
           MENÚ
         </p>
@@ -94,8 +94,10 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
         })}
       </nav>
 
-      {/* Samurai Widget */}
-      <SamuraiContainer />
+      {/* Samurai Widget - centered between nav and footer */}
+      <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
+        <SamuraiContainer />
+      </div>
 
       {/* CTA Telegram Bot útil - compact */}
       <div className="px-4 mb-2 flex-shrink-0">
