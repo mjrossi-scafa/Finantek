@@ -55,7 +55,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
 
   return (
     <div
-      className="px-3 py-2 hidden lg:block"
+      className="px-3 py-1 hidden lg:block"
       style={{
         opacity: transitioning ? 0 : 1,
         transition: 'opacity 0.4s ease, all 0.8s ease',
@@ -116,13 +116,13 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
         .k-energy { animation: energyLine 2s ease-in-out infinite; }
       `}</style>
 
-      {/* WIDGET SAMURAI ORIGINAL */}
+      {/* WIDGET SAMURAI ORIGINAL - compact */}
       <div
         ref={katanaContainerRef}
         style={{
           position: 'relative',
           width: '100%',
-          height: '160px',
+          height: '110px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -136,7 +136,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           position: 'absolute',
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '120px', height: '120px',
+          width: '90px', height: '90px',
           borderRadius: '50%',
           border: '1px solid rgba(124,58,237,0.08)',
           background: 'radial-gradient(circle, rgba(124,58,237,0.02) 0%, transparent 70%)',
@@ -160,7 +160,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           transformOrigin: 'center',
           zIndex: 10,
         }}>
-          <svg width="100" height="100" viewBox="0 0 100 100">
+          <svg width="75" height="75" viewBox="0 0 100 100">
             {/* Hoja larga y delgada — diagonal */}
             <rect x="48.5" y="2" width="3" height="65" rx="1.5"
               fill="#C084FC" transform="rotate(0 50 50)"/>
@@ -228,8 +228,8 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
       {/* SEPARADOR DECORATIVO */}
       <div style={{
         borderTop: '1px solid rgba(76,29,149,0.4)',
-        marginTop: '12px',
-        paddingTop: '10px',
+        marginTop: '6px',
+        paddingTop: '6px',
         position: 'relative',
       }}>
         {/* Ornamento central */}
@@ -237,38 +237,27 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           position: 'absolute',
           top: '-4px', left: '50%',
           transform: 'translateX(-50%)',
-          width: '8px', height: '8px',
+          width: '6px', height: '6px',
           background: 'radial-gradient(circle, #7C3AED, #4C1D95)',
           borderRadius: '50%',
           border: '2px solid #1F2937',
-          boxShadow: '0 0 8px rgba(124,58,237,0.5)'
+          boxShadow: '0 0 6px rgba(124,58,237,0.5)'
         }}/>
       </div>
 
       {/* FRASES JAPONESAS REVERENTES */}
       <div style={{
-        height: '80px',
+        height: '54px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '0 8px',
+        padding: '0 6px',
         overflow: 'hidden',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.5s ease',
-        marginTop: '6px',
+        marginTop: '2px',
       }}>
-        {/* Kanji grande y sutil */}
-        <div style={{
-          fontSize: '20px',
-          fontFamily: 'serif',
-          color: quotes[current].color,
-          opacity: 0.08,
-          lineHeight: 1,
-          marginBottom: '4px',
-        }}>
-          {quotes[current].kanji}
-        </div>
         {/* Frase */}
         <p style={{
           fontSize: '9.5px',
@@ -276,34 +265,22 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           fontWeight: '500',
           fontStyle: 'italic',
           whiteSpace: 'pre-line',
-          lineHeight: '1.5',
+          lineHeight: '1.4',
           textAlign: 'center',
+          margin: 0,
         }}>
           {quotes[current].text}
         </p>
         {/* Romaji */}
         <p style={{
-          fontSize: '8px',
+          fontSize: '7.5px',
           color: '#7C3AED',
           letterSpacing: '0.12em',
-          marginTop: '5px',
+          marginTop: '3px',
           textTransform: 'uppercase',
         }}>
           {quotes[current].romaji}
         </p>
-      </div>
-
-      {/* FOOTER BUSHIDO */}
-      <div style={{
-        borderTop: '1px solid rgba(76,29,149,0.25)',
-        marginTop: '10px',
-        paddingTop: '8px',
-        textAlign: 'center',
-        fontSize: '7px',
-        color: '#2D1F4E',
-        letterSpacing: '0.1em',
-      }}>
-        武士道 · Bushido
       </div>
     </div>
   )

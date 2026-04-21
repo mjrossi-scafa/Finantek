@@ -51,7 +51,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       <div className="absolute top-0 left-0 w-[1px] h-full gradient-indigo opacity-30" />
 
       {/* Logo KATANA con barras SVG */}
-      <div className="pt-8 pb-4 px-4">
+      <div className="pt-6 pb-3 px-4">
         <div>
           <KatanaLogo variant="sidebar" className="!min-w-[200px] !max-w-[200px]" />
         </div>
@@ -59,8 +59,8 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
 
       {/* Achievement badge with wabi-sabi aesthetics */}
       {totalPoints > 0 && (
-        <div className="mx-5 mb-5 mt-8">
-          <div className="glass-card flex items-center gap-3 px-4 py-3 transition-wa hover:glow-indigo">
+        <div className="mx-5 mb-3 mt-4">
+          <div className="glass-card flex items-center gap-3 px-4 py-2 transition-wa hover:glow-indigo">
             <Star className="h-4 w-4 text-yellow-400" />
             <span className="text-sm font-bold font-mono text-text-primary tracking-zen">{totalPoints}</span>
             <span className="text-xs text-text-tertiary font-weight-light">pts</span>
@@ -69,8 +69,8 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       )}
 
       {/* Navigation with zen spacing */}
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-zen mt-6">
-        <p className="text-[10px] text-gray-600 font-medium tracking-[0.2em] uppercase px-3 mb-4 opacity-60">
+      <nav className="flex-1 px-4 space-y-0.5 overflow-y-auto scrollbar-zen mt-2 min-h-0">
+        <p className="text-[10px] text-gray-600 font-medium tracking-[0.2em] uppercase px-3 mb-2 opacity-60">
           MENÚ
         </p>
         {navItems.map((item) => {
@@ -81,7 +81,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-weight-medium transition-wa',
+                'flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-weight-medium transition-wa',
                 isActive
                   ? 'gradient-indigo text-white shadow-lg glow-indigo'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-subtle/60'
@@ -97,8 +97,8 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       {/* Samurai Widget */}
       <SamuraiContainer />
 
-      {/* CTA Telegram Bot útil */}
-      <div className="px-4 mb-4">
+      {/* CTA Telegram Bot útil - compact */}
+      <div className="px-4 mb-2 flex-shrink-0">
         <a
           href="https://t.me/risky_finance_bot"
           target="_blank"
@@ -106,9 +106,9 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            padding: '10px 12px',
-            margin: '0 8px 8px',
+            gap: '8px',
+            padding: '8px 10px',
+            margin: '0 4px',
             background: 'rgba(124,58,237,0.08)',
             border: '1px solid rgba(124,58,237,0.2)',
             borderRadius: '10px',
@@ -121,31 +121,31 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
         >
           {/* Ícono Telegram */}
           <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
             background: 'rgba(124,58,237,0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#A855F7">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#A855F7">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.965-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.983.892z"/>
             </svg>
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{
-              fontSize: '12px',
+              fontSize: '11px',
               fontWeight: '600',
               color: '#C084FC',
-              margin: '0 0 2px',
+              margin: '0 0 1px',
             }}>
-              Registra desde Telegram
+              Telegram bot
             </p>
             <p style={{
-              fontSize: '10px',
+              fontSize: '9px',
               color: '#4C1D95',
               margin: 0,
               overflow: 'hidden',
@@ -156,20 +156,19 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
             </p>
           </div>
 
-          {/* Flecha -->  */}
-          <svg width="12" height="12" viewBox="0 0 24 24"
+          <svg width="10" height="10" viewBox="0 0 24 24"
             fill="none" stroke="#4C1D95" strokeWidth="2">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </a>
       </div>
 
-      {/* Bottom actions with zen separation */}
-      <div className="ma-md border-t border-sidebar-border/50 space-y-1">
+      {/* Bottom actions with zen separation - compact */}
+      <div className="px-4 py-2 border-t border-sidebar-border/50 space-y-0.5 flex-shrink-0">
         <Link
           href="/settings"
           className={cn(
-            'flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-weight-medium transition-wa',
+            'flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-weight-medium transition-wa',
             pathname === '/settings'
               ? 'gradient-indigo text-white shadow-lg glow-indigo'
               : 'text-text-secondary hover:text-text-primary hover:bg-surface-subtle/60'
@@ -180,7 +179,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
         </Link>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-weight-medium text-text-muted hover:text-vermillion-shu hover:bg-vermillion-shu/5 transition-wa w-full group"
+          className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-weight-medium text-text-muted hover:text-vermillion-shu hover:bg-vermillion-shu/5 transition-wa w-full group"
         >
           <LogOut className="h-[18px] w-[18px] group-hover:rotate-6 transition-transform duration-300" />
           Salir
