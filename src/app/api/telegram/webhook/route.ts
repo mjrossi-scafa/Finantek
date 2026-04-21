@@ -344,11 +344,6 @@ async function handlePendingDataResponse(
   conv: any,
   categories: Category[]
 ): Promise<void> {
-  const Anthropic = await import('@anthropic-ai/sdk')
-  const anthropic = new Anthropic.default({
-    apiKey: process.env.ANTHROPIC_API_KEY!,
-  })
-
   const systemPrompt = `Eres el asistente de Katana.
 El usuario tiene una acción pendiente con estos datos:
 ${JSON.stringify(conv.pendingData)}
@@ -359,22 +354,34 @@ Clasifica la intención en JSON:
 {
   "action": "confirm_single" | "confirm_separate" |
             "exclude_items" | "cancel" | "unclear",
-  "excludeIndices": [1,3],  // si excluye items (índices base 1)
-  "customName": "string",   // si da nombre personalizado
-  "category": "string"      // si menciona categoría
+  "excludeIndices": [1,3],
+  "customName": "string",
+  "category": "string"
 }
 
 Solo JSON, sin texto extra.`
 
   try {
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 150,
-      messages: [{ role: 'user', content: systemPrompt }]
-    })
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 200,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    )
 
-    const content = response.content[0]
-    const intent = JSON.parse(content.type === 'text' ? content.text : '{}')
+    if (!response.ok) throw new Error(`Gemini error ${response.status}`)
+    const data = await response.json()
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}'
+    const intent = JSON.parse(text)
 
     switch (intent.action) {
       case 'confirm_single':
@@ -496,11 +503,6 @@ async function handleFreeConversation(
   conv: any,
   userId: string
 ): Promise<void> {
-  const Anthropic = await import('@anthropic-ai/sdk')
-  const anthropic = new Anthropic.default({
-    apiKey: process.env.ANTHROPIC_API_KEY!,
-  })
-
   const supabase = getSupabase()
 
   // Get user financial context
@@ -546,18 +548,30 @@ REGLAS:
 - Si algo no tiene que ver con finanzas, redirige amablemente al tema`
 
   try {
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 200,
-      system: systemPrompt,
-      messages: conv.messages.slice(-4).map((m: any) => ({
-        role: m.role,
-        content: m.content
-      }))
-    })
+    // Build conversation as text with system prompt
+    const conversationHistory = conv.messages.slice(-4)
+      .map((m: any) => `${m.role === 'user' ? 'Usuario' : 'Asistente'}: ${m.content}`)
+      .join('\n')
+    const fullPrompt = `${systemPrompt}\n\nConversación reciente:\n${conversationHistory}\n\nUsuario: ${message}\nAsistente:`
 
-    const content = response.content[0]
-    let botText = content.type === 'text' ? content.text : 'No entendí tu mensaje.'
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: fullPrompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 300,
+          },
+        }),
+      }
+    )
+
+    if (!response.ok) throw new Error(`Gemini error ${response.status}`)
+    const data = await response.json()
+    let botText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No entendí tu mensaje.'
 
     // Check if AI wants to register something
     const registerMatch = botText.match(/\[REGISTRAR: (.+), (\d+), (income|expense)\]/)

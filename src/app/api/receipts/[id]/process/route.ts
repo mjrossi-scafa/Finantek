@@ -26,12 +26,16 @@ export async function POST(
     return NextResponse.json({ error: 'Recibo no encontrado' }, { status: 404 })
   }
 
-  if (receipt.status !== 'pending') {
+  // Allow processing if pending or failed (retry)
+  if (receipt.status !== 'pending' && receipt.status !== 'failed') {
     return NextResponse.json({ error: 'El recibo ya fue procesado' }, { status: 400 })
   }
 
-  // Update status to processing
-  await supabase.from('receipts').update({ status: 'processing' }).eq('id', id)
+  // Update status to processing (and clear previous error if retrying)
+  await supabase
+    .from('receipts')
+    .update({ status: 'processing', error_message: null })
+    .eq('id', id)
 
   try {
     // Download file from Supabase Storage
