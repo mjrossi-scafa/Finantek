@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { PlannedExpense, Category } from '@/types/database'
+import { useState, useMemo, useEffect } from 'react'
+import { PlannedExpense, Category, Transaction } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { formatCLP } from '@/lib/utils/currency'
 import { toast } from 'sonner'
@@ -16,13 +16,18 @@ import {
   Repeat,
   Calendar as CalendarIcon,
   TrendingUp,
+  Sparkles,
+  X,
 } from 'lucide-react'
 import { PlannedExpenseModal } from '@/components/planner/PlannedExpenseModal'
+import { RecurringSuggestionsModal } from '@/components/planner/RecurringSuggestionsModal'
 import { GradientButton } from '@/components/shared/GradientButton'
+import { detectRecurringExpenses } from '@/lib/planner/detectRecurring'
 
 interface PlannerClientProps {
   initialPlanned: PlannedExpense[]
   categories: Category[]
+  transactions: Transaction[]
   userId: string
 }
 
@@ -39,13 +44,41 @@ const RECURRENCE_LABELS = {
   yearly: '🔁 Anual',
 }
 
-export function PlannerClient({ initialPlanned, categories, userId }: PlannerClientProps) {
+const SEEN_SUGGESTIONS_KEY = 'katana-planner-suggestions-seen'
+
+export function PlannerClient({ initialPlanned, categories, transactions, userId }: PlannerClientProps) {
   const supabase = createClient()
   const [planned, setPlanned] = useState<PlannedExpense[]>(initialPlanned)
   const [viewDate, setViewDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<PlannedExpense | undefined>()
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+  const [showBanner, setShowBanner] = useState(false)
+
+  // Detect recurring expenses from transaction history
+  const recurringSuggestions = useMemo(
+    () => detectRecurringExpenses(transactions, planned),
+    [transactions, planned]
+  )
+
+  // Show banner on first visit if there are suggestions
+  useEffect(() => {
+    const seen = localStorage.getItem(SEEN_SUGGESTIONS_KEY)
+    if (!seen && recurringSuggestions.length > 0) {
+      setShowBanner(true)
+    }
+  }, [recurringSuggestions.length])
+
+  const dismissBanner = () => {
+    setShowBanner(false)
+    localStorage.setItem(SEEN_SUGGESTIONS_KEY, 'true')
+  }
+
+  const openSuggestions = () => {
+    setSuggestionsOpen(true)
+    dismissBanner()
+  }
 
   const currentYear = viewDate.getFullYear()
   const currentMonth = viewDate.getMonth()
@@ -143,29 +176,52 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
     return map
   }, [expandedPlanned])
 
-  // Stats for current month
+  // Index real transactions by date (for unified view)
+  const transactionsByDate = useMemo(() => {
+    const map: Record<string, Transaction[]> = {}
+    for (const tx of transactions) {
+      if (!map[tx.transaction_date]) map[tx.transaction_date] = []
+      map[tx.transaction_date].push(tx)
+    }
+    return map
+  }, [transactions])
+
+  // Stats for current month (real + planned)
   const monthStats = useMemo(() => {
     const monthStart = new Date(currentYear, currentMonth, 1).toISOString().split('T')[0]
     const monthEnd = new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0]
 
-    const monthExpenses = expandedPlanned.filter(
+    // Real transactions this month
+    const monthTransactions = transactions.filter(
+      (t) => t.transaction_date >= monthStart && t.transaction_date <= monthEnd
+    )
+    const realTotal = monthTransactions.reduce((sum, t) => sum + t.amount, 0)
+
+    // Planned expenses this month
+    const monthPlanned = expandedPlanned.filter(
       (e) => e.planned_date >= monthStart && e.planned_date <= monthEnd
     )
-    const total = monthExpenses.reduce((sum, e) => sum + e.amount, 0)
-    const pending = monthExpenses.filter((e) => !e.is_paid)
+    const plannedTotal = monthPlanned.reduce((sum, e) => sum + e.amount, 0)
+    const pending = monthPlanned.filter((e) => !e.is_paid)
     const pendingTotal = pending.reduce((sum, e) => sum + e.amount, 0)
-    const paid = monthExpenses.filter((e) => e.is_paid)
+    const paid = monthPlanned.filter((e) => e.is_paid)
     const paidTotal = paid.reduce((sum, e) => sum + e.amount, 0)
 
+    // Projected: real + pending planned (paid planned already become transactions)
+    const projected = realTotal + pendingTotal
+
     return {
-      total,
+      realTotal,
+      realCount: monthTransactions.length,
+      plannedTotal,
       pendingCount: pending.length,
       pendingTotal,
       paidCount: paid.length,
       paidTotal,
-      totalCount: monthExpenses.length,
+      totalCount: monthPlanned.length,
+      projected,
     }
-  }, [expandedPlanned, currentYear, currentMonth])
+  }, [expandedPlanned, transactions, currentYear, currentMonth])
 
   // Upcoming expenses (next 30 days)
   const upcomingExpenses = useMemo(() => {
@@ -296,6 +352,8 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
 
   const today = new Date().toISOString().split('T')[0]
   const selectedDayExpenses = selectedDate ? plannedByDate[selectedDate] || [] : []
+  const selectedDayReal = selectedDate ? transactionsByDate[selectedDate] || [] : []
+  const selectedIsPast = selectedDate ? selectedDate < today : false
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -310,35 +368,77 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
             Pronostica tus gastos futuros y visualiza tu cierre de mes
           </p>
         </div>
-        <GradientButton onClick={() => handleAddForDate(today)} className="rounded-full">
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo gasto
-        </GradientButton>
+        <div className="flex items-center gap-2 flex-wrap">
+          {recurringSuggestions.length > 0 && (
+            <button
+              onClick={openSuggestions}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-light text-sm font-semibold hover:bg-violet-500/20 transition-all"
+              title="Detectar gastos recurrentes"
+            >
+              <Sparkles className="h-4 w-4" />
+              {recurringSuggestions.length} {recurringSuggestions.length === 1 ? 'sugerencia' : 'sugerencias'}
+            </button>
+          )}
+          <GradientButton onClick={() => handleAddForDate(today)} className="rounded-full">
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo gasto
+          </GradientButton>
+        </div>
       </div>
 
-      {/* Month stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="glass-card rounded-xl p-4">
-          <p className="text-xs text-text-muted mb-1">Total del mes</p>
-          <p className="text-xl font-bold font-mono text-text-primary">{formatCLP(monthStats.total)}</p>
-          <p className="text-xs text-text-muted mt-1">{monthStats.totalCount} gastos</p>
+      {/* Suggestions banner (first visit) */}
+      {showBanner && recurringSuggestions.length > 0 && (
+        <div className="glass-card rounded-2xl p-4 border border-violet-500/30 bg-gradient-to-r from-violet-500/10 to-indigo-500/10 relative">
+          <button
+            onClick={dismissBanner}
+            className="absolute top-3 right-3 p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="flex items-start gap-3 pr-8">
+            <div className="h-10 w-10 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-5 w-5 text-violet-300" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-text-primary mb-1">
+                ✨ Detectamos {recurringSuggestions.length} {recurringSuggestions.length === 1 ? 'gasto recurrente' : 'gastos recurrentes'}
+              </h3>
+              <p className="text-sm text-text-secondary mb-3">
+                Basado en tus últimos 3 meses, podrías planificarlos automáticamente y tener mejor control de tu mes.
+              </p>
+              <button
+                onClick={openSuggestions}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold hover:shadow-lg transition-all"
+              >
+                <Sparkles className="h-4 w-4" />
+                Revisar sugerencias
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Month stats cards - Real + Planned + Projected */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="glass-card rounded-xl p-4 border-l-4 border-vermillion-shu">
-          <p className="text-xs text-text-muted mb-1">Pendiente</p>
-          <p className="text-xl font-bold font-mono text-vermillion-shu">{formatCLP(monthStats.pendingTotal)}</p>
+          <p className="text-xs text-text-muted mb-1">Gastado real</p>
+          <p className="text-xl font-bold font-mono text-vermillion-shu">{formatCLP(monthStats.realTotal)}</p>
+          <p className="text-xs text-text-muted mt-1">{monthStats.realCount} transacciones</p>
+        </div>
+        <div className="glass-card rounded-xl p-4 border-l-4 border-yellow-400">
+          <p className="text-xs text-text-muted mb-1">Planificado pendiente</p>
+          <p className="text-xl font-bold font-mono text-yellow-400">{formatCLP(monthStats.pendingTotal)}</p>
           <p className="text-xs text-text-muted mt-1">{monthStats.pendingCount} gastos</p>
         </div>
-        <div className="glass-card rounded-xl p-4 border-l-4 border-bamboo-take">
-          <p className="text-xs text-text-muted mb-1">Pagado</p>
-          <p className="text-xl font-bold font-mono text-bamboo-take">{formatCLP(monthStats.paidTotal)}</p>
-          <p className="text-xs text-text-muted mt-1">{monthStats.paidCount} gastos</p>
+        <div className="glass-card rounded-xl p-4 border-l-4 border-violet-light bg-violet-500/5">
+          <p className="text-xs text-violet-light mb-1 font-semibold">Proyectado mes</p>
+          <p className="text-xl font-bold font-mono text-violet-light">{formatCLP(monthStats.projected)}</p>
+          <p className="text-xs text-text-muted mt-1">real + pendiente</p>
         </div>
-        <div className="glass-card rounded-xl p-4 border-l-4 border-violet-light">
-          <p className="text-xs text-text-muted mb-1">Próximos 30 días</p>
-          <p className="text-xl font-bold font-mono text-violet-light">
-            {formatCLP(upcomingExpenses.reduce((sum, e) => sum + e.amount, 0))}
-          </p>
-          <p className="text-xs text-text-muted mt-1">{upcomingExpenses.length} gastos</p>
+        <div className="glass-card rounded-xl p-4 border-l-4 border-bamboo-take">
+          <p className="text-xs text-text-muted mb-1">Planificado pagado</p>
+          <p className="text-xl font-bold font-mono text-bamboo-take">{formatCLP(monthStats.paidTotal)}</p>
+          <p className="text-xs text-text-muted mt-1">{monthStats.paidCount} gastos ya pagados</p>
         </div>
       </div>
 
@@ -387,12 +487,26 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
           {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, i) => {
-              const dayExpenses = plannedByDate[day.date] || []
-              const hasExpenses = dayExpenses.length > 0
-              const dayTotal = dayExpenses.reduce((sum, e) => sum + e.amount, 0)
+              const dayPlanned = plannedByDate[day.date] || []
+              const dayReal = transactionsByDate[day.date] || []
+              const hasPlanned = dayPlanned.length > 0
+              const hasReal = dayReal.length > 0
+              const hasAnything = hasPlanned || hasReal
+
+              const plannedTotal = dayPlanned.reduce((sum, e) => sum + e.amount, 0)
+              const realTotal = dayReal.reduce((sum, t) => sum + t.amount, 0)
+              const dayTotal = plannedTotal + realTotal
+
               const isToday = day.date === today
               const isSelected = day.date === selectedDate
-              const allPaid = hasExpenses && dayExpenses.every((e) => e.is_paid)
+              const isPast = day.date < today
+              const hasPendingPlanned = dayPlanned.some((e) => !e.is_paid)
+
+              // Mix of dots (max 4 total)
+              const dots: Array<'real' | 'paid' | 'pending'> = [
+                ...dayReal.map(() => 'real' as const),
+                ...dayPlanned.map((e) => (e.is_paid ? ('paid' as const) : ('pending' as const))),
+              ].slice(0, 4)
 
               return (
                 <button
@@ -414,26 +528,30 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
                     {day.day}
                   </span>
 
-                  {hasExpenses && (
+                  {hasAnything && (
                     <>
                       {/* Dots indicator */}
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        {dayExpenses.slice(0, 3).map((exp, idx) => (
+                      <div className="flex items-center gap-0.5 mt-0.5 flex-wrap justify-center">
+                        {dots.map((type, idx) => (
                           <div
                             key={idx}
                             className={`w-1.5 h-1.5 rounded-full ${
-                              exp.is_paid ? 'bg-bamboo-take' : 'bg-vermillion-shu'
+                              type === 'real'
+                                ? 'bg-vermillion-shu'
+                                : type === 'paid'
+                                  ? 'bg-bamboo-take'
+                                  : 'bg-yellow-400'
                             }`}
                           />
                         ))}
-                        {dayExpenses.length > 3 && (
+                        {(dayReal.length + dayPlanned.length) > 4 && (
                           <span className="text-[8px] text-text-muted">+</span>
                         )}
                       </div>
 
-                      {/* Total on hover (desktop) */}
+                      {/* Total */}
                       <span className={`text-[9px] font-mono mt-auto ${
-                        allPaid ? 'text-bamboo-take' : 'text-vermillion-shu'
+                        isPast ? 'text-vermillion-shu' : hasPendingPlanned ? 'text-yellow-400' : 'text-bamboo-take'
                       }`}>
                         {formatCLP(dayTotal).replace('$', '')}
                       </span>
@@ -445,9 +563,13 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 mt-4 text-xs text-text-muted pt-3 border-t border-surface-border/50">
+          <div className="flex items-center gap-4 mt-4 text-xs text-text-muted pt-3 border-t border-surface-border/50 flex-wrap">
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-vermillion-shu" />
+              <span>Gastado real</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-yellow-400" />
               <span>Pendiente</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -482,27 +604,76 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
                 </button>
               </div>
 
-              {selectedDayExpenses.length === 0 ? (
+              {selectedDayExpenses.length === 0 && selectedDayReal.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-sm text-text-muted">Sin gastos planificados</p>
-                  <button
-                    onClick={() => handleAddForDate(selectedDate)}
-                    className="mt-3 text-sm text-violet-light hover:text-violet-primary transition-colors"
-                  >
-                    + Agregar uno
-                  </button>
+                  <p className="text-sm text-text-muted">
+                    {selectedIsPast ? 'Sin gastos registrados este día' : 'Sin gastos planificados'}
+                  </p>
+                  {!selectedIsPast && (
+                    <button
+                      onClick={() => handleAddForDate(selectedDate)}
+                      className="mt-3 text-sm text-violet-light hover:text-violet-primary transition-colors"
+                    >
+                      + Agregar uno
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {selectedDayExpenses.map((exp) => (
-                    <ExpenseItem
-                      key={exp.id}
-                      expense={exp}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onTogglePaid={handleTogglePaid}
-                    />
-                  ))}
+                  {/* Real transactions */}
+                  {selectedDayReal.length > 0 && (
+                    <>
+                      <p className="text-[10px] text-vermillion-shu uppercase tracking-wide font-semibold mt-2">
+                        🔴 Ya gastado
+                      </p>
+                      {selectedDayReal.map((tx) => (
+                        <div
+                          key={tx.id}
+                          className="rounded-xl p-3 bg-vermillion-shu/5 border border-vermillion-shu/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+                              style={{ backgroundColor: (tx.categories?.color ?? '#EF4444') + '20' }}
+                            >
+                              {tx.categories?.icon ?? '💸'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm text-text-primary truncate">
+                                {tx.description || tx.categories?.name}
+                              </p>
+                              <p className="text-xs text-text-muted">
+                                {tx.categories?.name || 'Sin categoría'}
+                              </p>
+                            </div>
+                            <span className="font-mono font-bold text-sm text-vermillion-shu">
+                              {formatCLP(tx.amount)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {/* Planned expenses */}
+                  {selectedDayExpenses.length > 0 && (
+                    <>
+                      {selectedDayReal.length > 0 && (
+                        <p className="text-[10px] text-yellow-400 uppercase tracking-wide font-semibold mt-3">
+                          🟡 Planificado
+                        </p>
+                      )}
+                      {selectedDayExpenses.map((exp) => (
+                        <ExpenseItem
+                          key={exp.id}
+                          expense={exp}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          onTogglePaid={handleTogglePaid}
+                        />
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </>
@@ -554,6 +725,20 @@ export function PlannerClient({ initialPlanned, categories, userId }: PlannerCli
         userId={userId}
         defaultDate={selectedDate || today}
         editing={editingExpense}
+      />
+
+      {/* Suggestions modal */}
+      <RecurringSuggestionsModal
+        open={suggestionsOpen}
+        onClose={() => setSuggestionsOpen(false)}
+        suggestions={recurringSuggestions}
+        categories={categories}
+        userId={userId}
+        onSuccess={(created) => {
+          setPlanned((prev) => [...prev, ...created])
+          setSuggestionsOpen(false)
+          toast.success(`✨ ${created.length} ${created.length === 1 ? 'gasto planificado creado' : 'gastos planificados creados'}`)
+        }}
       />
     </div>
   )
