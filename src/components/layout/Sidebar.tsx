@@ -94,8 +94,8 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
         })}
       </nav>
 
-      {/* Samurai Widget - centered between nav and footer */}
-      <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
+      {/* Samurai Widget - flex-1 with overflow hidden to not stretch */}
+      <div className="flex-1 flex flex-col justify-end min-h-0 overflow-hidden">
         <SamuraiContainer />
       </div>
 

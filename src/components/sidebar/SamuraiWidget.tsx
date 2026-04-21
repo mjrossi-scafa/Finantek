@@ -116,13 +116,13 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
         .k-energy { animation: energyLine 2s ease-in-out infinite; }
       `}</style>
 
-      {/* WIDGET SAMURAI ORIGINAL - compact */}
+      {/* WIDGET SAMURAI ORIGINAL */}
       <div
         ref={katanaContainerRef}
         style={{
           position: 'relative',
           width: '100%',
-          height: '110px',
+          height: '140px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -136,7 +136,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           position: 'absolute',
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '90px', height: '90px',
+          width: '110px', height: '110px',
           borderRadius: '50%',
           border: '1px solid rgba(124,58,237,0.08)',
           background: 'radial-gradient(circle, rgba(124,58,237,0.02) 0%, transparent 70%)',
@@ -160,7 +160,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           transformOrigin: 'center',
           zIndex: 10,
         }}>
-          <svg width="75" height="75" viewBox="0 0 100 100">
+          <svg width="90" height="90" viewBox="0 0 100 100">
             {/* Hoja larga y delgada — diagonal */}
             <rect x="48.5" y="2" width="3" height="65" rx="1.5"
               fill="#C084FC" transform="rotate(0 50 50)"/>
