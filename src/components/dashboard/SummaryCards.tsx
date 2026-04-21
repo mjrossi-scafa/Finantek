@@ -1,19 +1,36 @@
 import { formatCLP } from '@/lib/utils/currency'
-import { TrendingUp, TrendingDown, Wallet, Target, DollarSign } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, Target, DollarSign, Calendar } from 'lucide-react'
 import { BalanceInsights } from './BalanceInsights'
 
 interface SummaryCardsProps {
   income: number
   expense: number
+  prevIncome?: number
+  prevExpense?: number
+  daysRemaining?: number
+  projectedMonthEnd?: number
 }
 
-export function SummaryCards({ income, expense }: SummaryCardsProps) {
+export function SummaryCards({
+  income,
+  expense,
+  prevIncome = 0,
+  prevExpense = 0,
+  daysRemaining = 0,
+  projectedMonthEnd = 0,
+}: SummaryCardsProps) {
   const balance = income - expense
   const savingsRate = income > 0 ? Math.round((balance / income) * 100) : 0
 
-  // Fixed: More intuitive calculations
-  const incomeProgress = 100 // Ingresos siempre 100% de sí mismos
   const expenseRate = income > 0 ? Math.round((expense / income) * 100) : 0
+
+  // REAL comparison with previous month (replacing Math.random() bug)
+  const incomeChange = prevIncome > 0 ? Math.round(((income - prevIncome) / prevIncome) * 100) : 0
+  const expenseChange = prevExpense > 0 ? Math.round(((expense - prevExpense) / prevExpense) * 100) : 0
+
+  // Projection vs current expense
+  const projectionDiff = projectedMonthEnd - expense
+  const isOverspending = prevExpense > 0 && projectedMonthEnd > prevExpense
 
   return (
     <div className="space-y-6">
@@ -104,23 +121,27 @@ export function SummaryCards({ income, expense }: SummaryCardsProps) {
               {formatCLP(income)}
             </p>
 
-            {/* Mini barra de progreso corregida */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-bamboo-take to-green-400 transition-all duration-700"
-                  style={{ width: `${incomeProgress}%` }}
-                />
+            {/* Comparación REAL vs mes anterior */}
+            {prevIncome > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 text-xs font-mono font-semibold ${
+                  incomeChange >= 0 ? 'text-bamboo-take' : 'text-vermillion-shu'
+                }`}>
+                  {incomeChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {incomeChange >= 0 ? '+' : ''}{incomeChange}%
+                </span>
+                <span className="text-xs text-text-muted">vs mes anterior</span>
               </div>
-              <span className={`text-xs font-mono ${income === 0 ? 'text-red-400' : 'text-green-500'}`}>
-                {incomeProgress}%
-              </span>
-            </div>
+            ) : (
+              <p className="text-xs text-text-muted">Sin comparación disponible</p>
+            )}
           </div>
 
           {/* Estado de hover mejorado */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <p className="text-xs text-bamboo-take font-medium">+{Math.round(Math.random() * 15 + 5)}% vs mes anterior</p>
+            <p className="text-xs text-text-muted">
+              {prevIncome > 0 ? `Antes: ${formatCLP(prevIncome)}` : 'Primer mes registrando'}
+            </p>
           </div>
         </div>
 
@@ -145,22 +166,46 @@ export function SummaryCards({ income, expense }: SummaryCardsProps) {
               {formatCLP(expense)}
             </p>
 
-            {/* Mini barra de progreso */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-vermillion-shu to-red-500 transition-all duration-700"
-                  style={{ width: `${Math.min(expenseRate, 100)}%` }}
-                />
+            {/* Comparación REAL vs mes anterior */}
+            {prevExpense > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 text-xs font-mono font-semibold ${
+                  expenseChange <= 0 ? 'text-bamboo-take' : 'text-vermillion-shu'
+                }`}>
+                  {expenseChange <= 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                  {expenseChange >= 0 ? '+' : ''}{expenseChange}%
+                </span>
+                <span className="text-xs text-text-muted">vs mes anterior</span>
               </div>
-              <span className="text-xs font-mono text-text-muted">{expenseRate}%</span>
-            </div>
+            ) : (
+              <p className="text-xs text-text-muted">Sin comparación disponible</p>
+            )}
           </div>
 
-          {/* Estado de hover mejorado */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <p className="text-xs text-vermillion-shu font-medium">{expenseRate}% de los ingresos</p>
-          </div>
+          {/* Proyección de gasto al fin de mes */}
+          {daysRemaining > 0 && projectedMonthEnd > 0 && (
+            <div className="pt-3 border-t border-surface-border/50">
+              <div className="flex items-center gap-2 text-xs">
+                <Calendar className="h-3 w-3 text-text-muted" />
+                <span className="text-text-muted">Proyección fin de mes:</span>
+                <span className={`font-mono font-bold ${
+                  isOverspending ? 'text-vermillion-shu' : 'text-text-primary'
+                }`}>
+                  {formatCLP(projectedMonthEnd)}
+                </span>
+              </div>
+              {prevExpense > 0 && (
+                <p className={`text-[10px] mt-1 ${
+                  isOverspending ? 'text-vermillion-shu' : 'text-bamboo-take'
+                }`}>
+                  {isOverspending
+                    ? `⚠️ ${formatCLP(projectionDiff)} más si sigues el ritmo`
+                    : `✓ Vas mejor que el mes pasado`
+                  }
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

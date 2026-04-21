@@ -133,7 +133,7 @@ function StructuredInsight({ insight, parsed }: { insight: WeeklyInsight; parsed
 
       {/* Footer */}
       <div className="text-[10px] text-white/30 tracking-wide">
-        Actualizado · {getDaysAgo()} · Claude AI
+        Actualizado · {getDaysAgo()} · Gemini AI
       </div>
     </div>
   )
@@ -167,7 +167,7 @@ function PlainTextInsight({ insight }: { insight: WeeklyInsight }) {
 
       {/* Footer */}
       <div className="text-[10px] text-white/30 tracking-wide">
-        Actualizado · {getDaysAgo()} · Claude AI
+        Actualizado · {getDaysAgo()} · Gemini AI
       </div>
     </div>
   )

@@ -21,8 +21,20 @@ export default async function DashboardPage() {
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
+  // Calculate previous month for real comparison
+  const prevMonth = month === 1 ? 12 : month - 1
+  const prevYear = month === 1 ? year - 1 : year
+
+  // Get user profile for personalized greeting
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, email')
+    .eq('id', user.id)
+    .single()
+
   const [
     monthlySummaryResult,
+    prevMonthlySummaryResult,
     categorySpendingResult,
     monthlyTrendsResult,
     weeklyComparisonResult,
@@ -30,6 +42,7 @@ export default async function DashboardPage() {
     budgetAlertsResult,
   ] = await Promise.all([
     supabase.rpc('get_monthly_summary', { p_year: year, p_month: month }),
+    supabase.rpc('get_monthly_summary', { p_year: prevYear, p_month: prevMonth }),
     supabase.rpc('get_spending_by_category', { p_year: year, p_month: month }),
     supabase.rpc('get_monthly_trends', { p_months: 12 }),
     supabase.rpc('get_weekly_comparison'),
@@ -48,11 +61,15 @@ export default async function DashboardPage() {
   ])
 
   const summaryData = (monthlySummaryResult.data ?? []) as MonthlySummary[]
+  const prevSummaryData = (prevMonthlySummaryResult.data ?? []) as MonthlySummary[]
   const categorySpending = (categorySpendingResult.data ?? []) as CategorySpending[]
   const monthlyTrends = (monthlyTrendsResult.data ?? []) as MonthlyTrend[]
   const weeklyComparison = (weeklyComparisonResult.data ?? []) as WeeklyComparison[]
   const recentTransactions = (recentTransactionsResult.data ?? []) as Transaction[]
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
+
+  // Extract user's first name for greeting
+  const userName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -70,8 +87,10 @@ export default async function DashboardPage() {
       {/* Client-side dashboard with functional filters */}
       <DashboardClient
         userId={user.id}
+        userName={userName}
         initialData={{
           summaryData,
+          prevSummaryData,
           categorySpending,
           monthlyTrends,
           weeklyComparison,

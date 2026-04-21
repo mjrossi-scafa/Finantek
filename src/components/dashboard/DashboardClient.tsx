@@ -21,8 +21,10 @@ import {
 
 interface DashboardClientProps {
   userId: string
+  userName: string
   initialData: {
     summaryData: MonthlySummary[]
+    prevSummaryData: MonthlySummary[]
     categorySpending: CategorySpending[]
     monthlyTrends: MonthlyTrend[]
     weeklyComparison: WeeklyComparison[]
@@ -33,7 +35,7 @@ interface DashboardClientProps {
 
 type PeriodType = 'current' | 'previous' | '3months' | '6months'
 
-export function DashboardClient({ userId, initialData }: DashboardClientProps) {
+export function DashboardClient({ userId, userName, initialData }: DashboardClientProps) {
   const [period, setPeriod] = useState<PeriodType>('current')
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState(initialData)
@@ -62,9 +64,14 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
     setLoading(true)
     const { year, month, months } = getPeriodDates(periodType)
 
+    // Calculate previous month for comparison
+    const prevMonthNum = month === 1 ? 12 : month - 1
+    const prevYearNum = month === 1 ? year - 1 : year
+
     try {
       const [
         monthlySummaryResult,
+        prevMonthlySummaryResult,
         categorySpendingResult,
         monthlyTrendsResult,
         weeklyComparisonResult,
@@ -72,6 +79,7 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
         budgetAlertsResult,
       ] = await Promise.all([
         supabase.rpc('get_monthly_summary', { p_year: year, p_month: month }),
+        supabase.rpc('get_monthly_summary', { p_year: prevYearNum, p_month: prevMonthNum }),
         supabase.rpc('get_spending_by_category', { p_year: year, p_month: month }),
         supabase.rpc('get_monthly_trends', { p_months: months }),
         supabase.rpc('get_weekly_comparison'),
@@ -90,6 +98,7 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
       ])
 
       const summaryData = (monthlySummaryResult.data ?? []) as MonthlySummary[]
+      const prevSummaryData = (prevMonthlySummaryResult.data ?? []) as MonthlySummary[]
       const categorySpending = (categorySpendingResult.data ?? []) as CategorySpending[]
       const monthlyTrends = (monthlyTrendsResult.data ?? []) as MonthlyTrend[]
       const weeklyComparison = (weeklyComparisonResult.data ?? []) as WeeklyComparison[]
@@ -98,6 +107,7 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
 
       setData({
         summaryData,
+        prevSummaryData,
         categorySpending,
         monthlyTrends,
         weeklyComparison,
@@ -117,22 +127,40 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
     await loadPeriodData(newPeriod)
   }
 
-  const { summaryData, categorySpending, monthlyTrends, weeklyComparison, recentTransactions, budgetAlerts } = data
+  const { summaryData, prevSummaryData, categorySpending, monthlyTrends, weeklyComparison, recentTransactions, budgetAlerts } = data
 
   const income = summaryData.find((s) => s.type === 'income')?.total ?? 0
   const expense = summaryData.find((s) => s.type === 'expense')?.total ?? 0
+  const prevIncome = prevSummaryData.find((s) => s.type === 'income')?.total ?? 0
+  const prevExpense = prevSummaryData.find((s) => s.type === 'expense')?.total ?? 0
 
   const { label } = getPeriodDates(period)
+
+  // Calculate days remaining in current month and daily spending projection
+  const today = new Date()
+  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const currentDay = today.getDate()
+  const daysRemaining = lastDayOfMonth - currentDay
+  const daysElapsed = currentDay
+  const dailyAvg = daysElapsed > 0 ? expense / daysElapsed : 0
+  const projectedMonthEnd = Math.round(dailyAvg * lastDayOfMonth)
+
+  // Personalized greeting based on time of day
+  const hour = today.getHours()
+  const timeGreeting = hour < 12 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches'
+  const timeEmoji = hour < 12 ? '🌅' : hour < 20 ? '☀️' : '🌙'
 
   return (
     <div className="space-y-6">
       {/* Header with functional period selector */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-primary">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-primary">
+            {timeEmoji} {timeGreeting}, {userName} ⚔️
+          </h1>
           <p className="text-text-secondary mt-1 text-sm capitalize flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            {label}
+            {label} · {daysRemaining > 0 ? `Quedan ${daysRemaining} días del mes` : 'Último día del mes'}
           </p>
         </div>
 
@@ -167,7 +195,14 @@ export function DashboardClient({ userId, initialData }: DashboardClientProps) {
           <BudgetAlertBanner alerts={budgetAlerts} />
         )}
 
-        <SummaryCards income={income} expense={expense} />
+        <SummaryCards
+          income={income}
+          expense={expense}
+          prevIncome={prevIncome}
+          prevExpense={prevExpense}
+          daysRemaining={daysRemaining}
+          projectedMonthEnd={projectedMonthEnd}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SpendingByCategoryChart data={categorySpending} />
