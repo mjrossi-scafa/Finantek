@@ -68,8 +68,9 @@ export default async function DashboardPage() {
   const recentTransactions = (recentTransactionsResult.data ?? []) as Transaction[]
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
 
-  // Extract user's first name for greeting
-  const userName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
+  // Extract user's first name for greeting and capitalize it
+  const rawName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
+  const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">

@@ -154,13 +154,17 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
     <div className="space-y-6">
       {/* Header with functional period selector */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-primary">
-            {timeEmoji} {timeGreeting}, {userName} ⚔️
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary font-sans">
+            <span className="mr-2">{timeEmoji}</span>
+            {timeGreeting}, {userName}
+            <span className="ml-2">⚔️</span>
           </h1>
-          <p className="text-text-secondary mt-1 text-sm capitalize flex items-center gap-2">
+          <p className="text-text-secondary mt-2 text-sm flex items-center gap-2 font-sans">
             <Calendar className="h-4 w-4" />
-            {label} · {daysRemaining > 0 ? `Quedan ${daysRemaining} días del mes` : 'Último día del mes'}
+            <span className="capitalize">{label}</span>
+            <span className="text-text-muted">·</span>
+            <span>{daysRemaining > 0 ? `quedan ${daysRemaining} días del mes` : 'último día del mes'}</span>
           </p>
         </div>
 
