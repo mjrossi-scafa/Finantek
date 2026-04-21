@@ -1,6 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// Using Google Gemini API instead of Anthropic
 
 export interface ParsedTransaction {
   type: 'income' | 'expense'
@@ -94,17 +92,27 @@ export async function parseMessage(text: string): Promise<ParseResult> {
   }
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{
-        role: 'user',
-        content: `Fecha de hoy: ${today}\nMensaje del usuario: ${text}`,
-      }],
-    })
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${SYSTEM_PROMPT}\n\nFecha de hoy: ${today}\nMensaje del usuario: ${text}`
+            }]
+          }]
+        })
+      }
+    )
 
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
     return JSON.parse(jsonText) as ParseResult
