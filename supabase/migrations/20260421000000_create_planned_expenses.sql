@@ -34,6 +34,15 @@ CREATE POLICY "Users can update own planned expenses" ON planned_expenses
 CREATE POLICY "Users can delete own planned expenses" ON planned_expenses
   FOR DELETE USING (auth.uid() = user_id);
 
+-- Ensure updated_at function exists (idempotent)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- Trigger for updated_at
 CREATE TRIGGER update_planned_expenses_updated_at
   BEFORE UPDATE ON planned_expenses
