@@ -8,6 +8,7 @@ import { WeeklyComparisonChart } from './WeeklyComparisonChart'
 import { RecentTransactions } from './RecentTransactions'
 import { BudgetAlertBanner } from './BudgetAlertBanner'
 import { SavingsGoal } from './SavingsGoal'
+import { UpcomingExpenses } from './UpcomingExpenses'
 import { formatMonthYear } from '@/lib/utils/dates'
 import { formatCLP } from '@/lib/utils/currency'
 import { Calendar, Eye, EyeOff, TrendingUp } from 'lucide-react'
@@ -20,6 +21,7 @@ import {
   WeeklyComparison,
   Transaction,
   BudgetAlert,
+  PlannedExpense,
 } from '@/types/database'
 
 interface DashboardClientProps {
@@ -33,6 +35,7 @@ interface DashboardClientProps {
     weeklyComparison: WeeklyComparison[]
     recentTransactions: Transaction[]
     budgetAlerts: BudgetAlert[]
+    plannedExpenses: PlannedExpense[]
   }
 }
 
@@ -72,6 +75,10 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
     const prevMonthNum = month === 1 ? 12 : month - 1
     const prevYearNum = month === 1 ? year - 1 : year
 
+    // Calculate end of month for planned expenses query
+    const currentMonthEnd = new Date(year, month, 0).toISOString().split('T')[0]
+    const todayDate = new Date().toISOString().split('T')[0]
+
     try {
       const [
         monthlySummaryResult,
@@ -81,6 +88,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
         weeklyComparisonResult,
         recentTransactionsResult,
         budgetAlertsResult,
+        plannedExpensesResult,
       ] = await Promise.all([
         supabase.rpc('get_monthly_summary', { p_year: year, p_month: month }),
         supabase.rpc('get_monthly_summary', { p_year: prevYearNum, p_month: prevMonthNum }),
@@ -99,6 +107,14 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
           .eq('user_id', userId)
           .is('dismissed_at', null)
           .order('triggered_at', { ascending: false }),
+        supabase
+          .from('planned_expenses')
+          .select('*, categories(*)')
+          .eq('user_id', userId)
+          .eq('is_paid', false)
+          .gte('planned_date', todayDate)
+          .lte('planned_date', currentMonthEnd)
+          .order('planned_date', { ascending: true }),
       ])
 
       const summaryData = (monthlySummaryResult.data ?? []) as MonthlySummary[]
@@ -108,6 +124,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
       const weeklyComparison = (weeklyComparisonResult.data ?? []) as WeeklyComparison[]
       const recentTransactions = (recentTransactionsResult.data ?? []) as Transaction[]
       const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
+      const plannedExpenses = (plannedExpensesResult.data ?? []) as PlannedExpense[]
 
       setData({
         summaryData,
@@ -117,6 +134,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
         weeklyComparison,
         recentTransactions,
         budgetAlerts,
+        plannedExpenses,
       })
     } catch (error) {
       console.error('Error loading period data:', error)
@@ -131,7 +149,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
     await loadPeriodData(newPeriod)
   }
 
-  const { summaryData, prevSummaryData, categorySpending, monthlyTrends, weeklyComparison, recentTransactions, budgetAlerts } = data
+  const { summaryData, prevSummaryData, categorySpending, monthlyTrends, weeklyComparison, recentTransactions, budgetAlerts, plannedExpenses } = data
 
   const income = summaryData.find((s) => s.type === 'income')?.total ?? 0
   const expense = summaryData.find((s) => s.type === 'expense')?.total ?? 0
@@ -273,6 +291,13 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
 
         {/* Savings Goal Widget */}
         <SavingsGoal currentSavings={income - expense} isHidden={isHidden && focusMounted} />
+
+        {/* Upcoming Planned Expenses */}
+        <UpcomingExpenses
+          plannedExpenses={plannedExpenses}
+          currentExpense={expense}
+          isHidden={isHidden && focusMounted}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SpendingByCategoryChart data={categorySpending} />

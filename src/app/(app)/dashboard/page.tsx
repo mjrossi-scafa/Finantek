@@ -10,6 +10,7 @@ import {
   WeeklyComparison,
   Transaction,
   BudgetAlert,
+  PlannedExpense,
 } from '@/types/database'
 
 export default async function DashboardPage() {
@@ -32,6 +33,10 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
 
+  // Calculate end of current month for planned expenses query
+  const currentMonthEnd = new Date(year, month, 0).toISOString().split('T')[0]
+  const todayDate = now.toISOString().split('T')[0]
+
   const [
     monthlySummaryResult,
     prevMonthlySummaryResult,
@@ -40,6 +45,7 @@ export default async function DashboardPage() {
     weeklyComparisonResult,
     recentTransactionsResult,
     budgetAlertsResult,
+    plannedExpensesResult,
   ] = await Promise.all([
     supabase.rpc('get_monthly_summary', { p_year: year, p_month: month }),
     supabase.rpc('get_monthly_summary', { p_year: prevYear, p_month: prevMonth }),
@@ -58,6 +64,14 @@ export default async function DashboardPage() {
       .eq('user_id', user.id)
       .is('dismissed_at', null)
       .order('triggered_at', { ascending: false }),
+    supabase
+      .from('planned_expenses')
+      .select('*, categories(*)')
+      .eq('user_id', user.id)
+      .eq('is_paid', false)
+      .gte('planned_date', todayDate)
+      .lte('planned_date', currentMonthEnd)
+      .order('planned_date', { ascending: true }),
   ])
 
   const summaryData = (monthlySummaryResult.data ?? []) as MonthlySummary[]
@@ -67,6 +81,7 @@ export default async function DashboardPage() {
   const weeklyComparison = (weeklyComparisonResult.data ?? []) as WeeklyComparison[]
   const recentTransactions = (recentTransactionsResult.data ?? []) as Transaction[]
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
+  const plannedExpenses = (plannedExpensesResult.data ?? []) as PlannedExpense[]
 
   // Extract user's first name for greeting and capitalize it
   const rawName = profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
@@ -97,6 +112,7 @@ export default async function DashboardPage() {
           weeklyComparison,
           recentTransactions,
           budgetAlerts,
+          plannedExpenses,
         }}
       />
     </div>

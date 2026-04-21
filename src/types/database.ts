@@ -37,6 +37,25 @@ export interface Transaction {
   categories?: Category
 }
 
+export type RecurrenceType = 'none' | 'weekly' | 'monthly' | 'yearly'
+
+export interface PlannedExpense {
+  id: string
+  user_id: string
+  category_id: string | null
+  amount: number
+  description: string
+  planned_date: string
+  recurrence: RecurrenceType
+  is_paid: boolean
+  paid_transaction_id: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  categories?: Category
+}
+
 export interface Receipt {
   id: string
   user_id: string

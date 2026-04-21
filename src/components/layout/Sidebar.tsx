@@ -13,6 +13,7 @@ import {
   LogOut,
   Star,
   Bot,
+  CalendarClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -22,6 +23,7 @@ import { SamuraiContainer } from '@/components/sidebar/SamuraiContainer'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
+  { href: '/planner', label: 'Planificador', icon: CalendarClock },
   { href: '/receipts', label: 'Recibos', icon: Receipt },
   { href: '/budgets', label: 'Presupuestos', icon: Target },
   { href: '/insights', label: 'Insights', icon: Lightbulb },
