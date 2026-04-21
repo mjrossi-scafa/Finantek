@@ -23,48 +23,25 @@ interface ParseResult {
   message?: string
 }
 
-const SYSTEM_PROMPT = `Eres Katana, guardián financiero con filosofía samurai. Procesas mensajes en español de usuarios chilenos.
+const SYSTEM_PROMPT = `Analiza este mensaje de finanzas personales y responde SOLO con JSON.
 
-Clasifica el mensaje en uno de estos tipos:
-- TRANSACTION: registrar gasto o ingreso
-- QUESTION: pregunta sobre sus finanzas
-- COMMAND: comando específico (resumen, insights, dashboard, ayuda)
-- GREETING: saludo o mensaje casual
-- CONFIRMATION: confirmando una acción previa (sí, ok, confirmo, 1, 2, etc.)
-- CANCELLATION: cancelando una acción previa (no, cancelar, 3, salir)
+EJEMPLOS:
+"1500 restaurant" → {"action":"transaction","transactions":[{"type":"expense","amount":1500,"description":"restaurant","suggested_category":"Alimentación","date":"2026-04-21"}]}
+"almuerzo 2500" → {"action":"transaction","transactions":[{"type":"expense","amount":2500,"description":"almuerzo","suggested_category":"Alimentación","date":"2026-04-21"}]}
+"sueldo 500000" → {"action":"transaction","transactions":[{"type":"income","amount":500000,"description":"sueldo","suggested_category":"Sueldo","date":"2026-04-21"}]}
+"cuánto gasté hoy" → {"action":"question","question":{"queryType":"today"}}
+"hola" → {"action":"greeting"}
 
-Para TRANSACTION extrae:
-{ type, amount, description, suggested_category, date }
-Categorías exactas: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Ropa, Otros Gastos, Sueldo, Freelance, Inversiones, Otros Ingresos
+TIPOS:
+- transaction: cualquier gasto o ingreso con número
+- question: preguntas sobre dinero
+- greeting: saludos
+- unknown: todo lo demás
 
-Para QUESTION identifica qué información necesita:
-{ queryType: "today|week|month|category|last_transaction|search|balance", query?: "texto de búsqueda", category?: "nombre categoría" }
+CATEGORÍAS GASTOS: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Ropa, Otros Gastos
+CATEGORÍAS INGRESOS: Sueldo, Freelance, Inversiones, Otros Ingresos
 
-Ejemplos de QUESTION:
-- "cuánto gasté hoy?" → { queryType: "today" }
-- "cuánto llevo esta semana?" → { queryType: "week" }
-- "en qué gasté más este mes?" → { queryType: "category" }
-- "cuál fue mi último gasto?" → { queryType: "last_transaction" }
-- "se registró como alimentación rest tony?" → { queryType: "search", query: "rest tony" }
-- "cuánto tengo de balance?" → { queryType: "balance" }
-
-Para COMMAND:
-command: "resumen|insights|dashboard|ayuda|borra_ultimo|edita_ultimo"
-
-Para GREETING detecta saludos: hola, buenas, hey, buenos días, etc.
-
-Para CONFIRMATION: sí, ok, confirmo, 1, 2, correcto, etc.
-Para CANCELLATION: no, cancelar, 3, salir, etc.
-
-Responde SOLO en JSON válido:
-{
-  "action": "transaction|question|command|greeting|confirmation|cancellation|unknown",
-  "transactions": [{"type":"expense","amount":8500,"description":"Almuerzo","suggested_category":"Alimentación","date":"YYYY-MM-DD"}],
-  "question": {"queryType":"today","query":"texto opcional"},
-  "command": "resumen|insights|dashboard|ayuda|borra_ultimo|edita_ultimo",
-  "confirmationType": "numeric|boolean",
-  "message": "texto de respuesta"
-}`
+Responde SOLO JSON válido:`
 
 export async function parseMessage(text: string): Promise<ParseResult> {
   const today = new Date().toISOString().split('T')[0]
