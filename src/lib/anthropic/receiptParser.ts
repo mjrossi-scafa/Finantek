@@ -1,8 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk'
+// Migrated from Anthropic to Google Gemini Vision API
 import { z } from 'zod'
 import { Category, ExtractedTransaction } from '@/types/database'
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const ExtractedTransactionSchema = z.object({
   date: z.string(),
@@ -20,18 +18,19 @@ const ReceiptResponseSchema = z.object({
   extraction_notes: z.string().optional(),
 })
 
-const SYSTEM_PROMPT = `Eres un asistente especializado en extraer transacciones financieras de recibos, boletas, facturas y estados de cuenta bancarios chilenos. Tu tarea es identificar todas las transacciones presentes en el documento y devolverlas en formato JSON estricto. Siempre responde ÚNICAMENTE con JSON válido, sin texto adicional, sin bloques de código markdown.`
+const PROMPT = `Eres un asistente especializado en extraer transacciones financieras de recibos, boletas, facturas y estados de cuenta bancarios chilenos.
 
-const USER_PROMPT = `Analiza este documento financiero e identifica todas las transacciones.
+Analiza este documento financiero e identifica TODAS las transacciones presentes.
+
 Para cada transacción, extrae:
-- date: fecha en formato YYYY-MM-DD (si no hay año, usa el año actual ${new Date().getFullYear()})
+- date: fecha en formato YYYY-MM-DD (si no hay año, usa ${new Date().getFullYear()})
 - amount: número entero en pesos chilenos sin puntos ni comas (ej: 12500)
-- description: texto breve descriptivo de la transacción
-- type: "expense" si es un pago/débito/cargo/compra, "income" si es un depósito/abono/ingreso
+- description: texto breve descriptivo
+- type: "expense" si es pago/débito/cargo/compra, "income" si es depósito/abono/ingreso
 - suggested_category: una de estas opciones exactamente: Alimentación, Transporte, Entretenimiento, Salud, Educación, Hogar, Ropa, Otros Gastos, Sueldo, Freelance, Inversiones, Otros Ingresos
-- confidence: número entre 0 y 1 indicando confianza en la extracción
+- confidence: número entre 0 y 1
 
-Responde con este JSON exacto:
+Responde ÚNICAMENTE con este JSON (sin markdown, sin explicación adicional):
 {
   "transactions": [
     {
@@ -55,45 +54,58 @@ export async function parseReceipt(
 ): Promise<{ transactions: ExtractedTransaction[]; raw: unknown; error?: string }> {
   const base64Data = fileData.toString('base64')
 
-  let content: Anthropic.MessageParam['content']
-
-  if (fileType === 'application/pdf') {
-    content = [
-      {
-        type: 'document',
-        source: {
-          type: 'base64',
-          media_type: 'application/pdf',
-          data: base64Data,
+  // Build Gemini request with multimodal content
+  const geminiRequest = {
+    contents: [{
+      parts: [
+        { text: PROMPT },
+        {
+          inline_data: {
+            mime_type: fileType,
+            data: base64Data,
+          },
         },
-      } as Anthropic.DocumentBlockParam,
-      { type: 'text', text: USER_PROMPT },
-    ]
-  } else {
-    const mediaType = fileType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
-    content = [
-      {
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: mediaType,
-          data: base64Data,
-        },
-      },
-      { type: 'text', text: USER_PROMPT },
-    ]
+      ],
+    }],
+    generationConfig: {
+      temperature: 0.2,
+      maxOutputTokens: 4096,
+      responseMimeType: 'application/json',
+    },
   }
 
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content }],
-  })
+  let rawText = ''
 
-  const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiRequest),
+      }
+    )
 
-  // Strip markdown code fences if present
+    if (!response.ok) {
+      const errorText = await response.text()
+      return {
+        transactions: [],
+        raw: errorText,
+        error: `Gemini API error (${response.status}): ${errorText.slice(0, 200)}`,
+      }
+    }
+
+    const data = await response.json()
+    rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  } catch (err) {
+    return {
+      transactions: [],
+      raw: (err as Error).message,
+      error: `Error llamando a Gemini: ${(err as Error).message}`,
+    }
+  }
+
+  // Strip markdown code fences if present (Gemini usually returns clean JSON with responseMimeType)
   const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
   let parsed: z.infer<typeof ReceiptResponseSchema>
