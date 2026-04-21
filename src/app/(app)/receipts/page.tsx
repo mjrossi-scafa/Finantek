@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { ReceiptsClient } from './ReceiptsClient'
 import { Receipt } from '@/types/database'
+import { Receipt as ReceiptIcon } from 'lucide-react'
 
 export default async function ReceiptsPage() {
   const supabase = await createClient()
@@ -33,8 +34,9 @@ export default async function ReceiptsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
+        icon={<ReceiptIcon className="h-7 w-7 text-violet-light" />}
         title="Recibos y documentos"
-        description="Sube fotos de recibos o estados de cuenta para extraer transacciones automaticamente"
+        description="Sube fotos de recibos o estados de cuenta para extraer transacciones automáticamente"
       />
 
       <ReceiptsClient

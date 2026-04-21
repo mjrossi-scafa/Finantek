@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { ReceiptDetailClient } from './ReceiptDetailClient'
 import { Category, Receipt } from '@/types/database'
+import { FileSearch } from 'lucide-react'
 
 export default async function ReceiptDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -39,6 +40,7 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
       <PageHeader
+        icon={<FileSearch className="h-7 w-7 text-violet-light" />}
         title="Revisar recibo"
         description={r.file_name}
       />
