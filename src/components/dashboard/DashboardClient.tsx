@@ -7,9 +7,12 @@ import { MonthlyTrendChart } from './MonthlyTrendChart'
 import { WeeklyComparisonChart } from './WeeklyComparisonChart'
 import { RecentTransactions } from './RecentTransactions'
 import { BudgetAlertBanner } from './BudgetAlertBanner'
+import { SavingsGoal } from './SavingsGoal'
 import { formatMonthYear } from '@/lib/utils/dates'
-import { Calendar } from 'lucide-react'
+import { formatCLP } from '@/lib/utils/currency'
+import { Calendar, Eye, EyeOff, TrendingUp } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useFocusMode } from '@/hooks/useFocusMode'
 import {
   MonthlySummary,
   CategorySpending,
@@ -40,6 +43,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState(initialData)
   const supabase = createClient()
+  const { isHidden, toggle: toggleFocusMode, mounted: focusMounted } = useFocusMode()
 
   const getPeriodDates = (periodType: PeriodType) => {
     const now = new Date()
@@ -168,22 +172,80 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
           </p>
         </div>
 
-        {/* Functional period selector */}
-        <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-text-muted" />
-          <select
-            className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer"
-            value={period}
-            onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
-            disabled={loading}
+        <div className="flex items-center gap-2">
+          {/* Focus mode toggle */}
+          <button
+            onClick={toggleFocusMode}
+            className="glass-card rounded-xl p-2.5 hover:bg-surface-hover transition-colors group"
+            title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
           >
-            <option value="current">Este mes</option>
-            <option value="previous">Mes anterior</option>
-            <option value="3months">Últimos 3 meses</option>
-            <option value="6months">Últimos 6 meses</option>
-          </select>
+            {isHidden ? (
+              <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
+            ) : (
+              <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
+            )}
+          </button>
+
+          {/* Functional period selector */}
+          <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-text-muted" />
+            <select
+              className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer"
+              value={period}
+              onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
+              disabled={loading}
+            >
+              <option value="current">Este mes</option>
+              <option value="previous">Mes anterior</option>
+              <option value="3months">Últimos 3 meses</option>
+              <option value="6months">Últimos 6 meses</option>
+            </select>
+          </div>
         </div>
       </div>
+
+      {/* Daily spending rate + Top 3 categories quick stats */}
+      {expense > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Daily average */}
+          <div className="glass-card rounded-xl px-4 py-3 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="h-5 w-5 text-indigo-300" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-text-muted">Promedio diario</p>
+              <p className="text-lg font-bold font-mono text-text-primary">
+                {isHidden && focusMounted ? '•••••' : formatCLP(Math.round(dailyAvg))}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-text-muted">Día {daysElapsed} de {lastDayOfMonth}</p>
+            </div>
+          </div>
+
+          {/* Top 3 categories */}
+          {categorySpending.length > 0 && (
+            <div className="glass-card rounded-xl px-4 py-3">
+              <p className="text-xs text-text-muted mb-2">🏆 Top categorías del mes</p>
+              <div className="flex gap-2 flex-wrap">
+                {categorySpending.slice(0, 3).map((cat, i) => {
+                  const medals = ['🥇', '🥈', '🥉']
+                  return (
+                    <div key={cat.category_id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-surface-border text-xs">
+                      <span>{medals[i]}</span>
+                      <span>{cat.icon || '📁'}</span>
+                      <span className="text-text-primary font-medium">{cat.category_name}</span>
+                      <span className="font-mono text-text-muted">
+                        {isHidden && focusMounted ? '•••' : formatCLP(cat.total)}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Loading indicator */}
       {loading && (
@@ -206,7 +268,11 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
           prevExpense={prevExpense}
           daysRemaining={daysRemaining}
           projectedMonthEnd={projectedMonthEnd}
+          isHidden={isHidden && focusMounted}
         />
+
+        {/* Savings Goal Widget */}
+        <SavingsGoal currentSavings={income - expense} isHidden={isHidden && focusMounted} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SpendingByCategoryChart data={categorySpending} />
@@ -215,7 +281,12 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
 
         <MonthlyTrendChart data={monthlyTrends} />
 
-        <RecentTransactions transactions={recentTransactions} />
+        <RecentTransactions
+          transactions={recentTransactions}
+          userId={userId}
+          isHidden={isHidden && focusMounted}
+          onTransactionUpdated={() => loadPeriodData(period)}
+        />
       </div>
     </div>
   )

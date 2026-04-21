@@ -1,6 +1,7 @@
 import { formatCLP } from '@/lib/utils/currency'
 import { TrendingUp, TrendingDown, Wallet, Target, DollarSign, Calendar } from 'lucide-react'
 import { BalanceInsights } from './BalanceInsights'
+import { CountUp } from './CountUp'
 
 interface SummaryCardsProps {
   income: number
@@ -9,6 +10,7 @@ interface SummaryCardsProps {
   prevExpense?: number
   daysRemaining?: number
   projectedMonthEnd?: number
+  isHidden?: boolean
 }
 
 export function SummaryCards({
@@ -18,6 +20,7 @@ export function SummaryCards({
   prevExpense = 0,
   daysRemaining = 0,
   projectedMonthEnd = 0,
+  isHidden = false,
 }: SummaryCardsProps) {
   const balance = income - expense
   const savingsRate = income > 0 ? Math.round((balance / income) * 100) : 0
@@ -58,7 +61,7 @@ export function SummaryCards({
               <p className={`text-6xl font-black font-mono leading-none mb-2 ${
                 balance >= 0 ? 'text-white' : 'text-red-200'
               }`}>
-                {formatCLP(balance)}
+                {isHidden ? '•••••' : <CountUp value={balance} />}
               </p>
 
               {/* Badge de tendencia mejorado */}
@@ -118,7 +121,7 @@ export function SummaryCards({
           {/* Número más grande */}
           <div className="mb-4">
             <p className="text-4xl font-black font-mono text-bamboo-take leading-none mb-2">
-              {formatCLP(income)}
+              {isHidden ? '•••••' : <CountUp value={income} />}
             </p>
 
             {/* Comparación REAL vs mes anterior */}
@@ -163,7 +166,7 @@ export function SummaryCards({
           {/* Número más grande */}
           <div className="mb-4">
             <p className="text-4xl font-black font-mono text-vermillion-shu leading-none mb-2">
-              {formatCLP(expense)}
+              {isHidden ? '•••••' : <CountUp value={expense} />}
             </p>
 
             {/* Comparación REAL vs mes anterior */}

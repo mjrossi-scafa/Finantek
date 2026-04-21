@@ -1,14 +1,65 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { Transaction } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { formatDateShort } from '@/lib/utils/dates'
-import { ArrowRight, TrendingUp, TrendingDown } from 'lucide-react'
+import { ArrowRight, TrendingUp, TrendingDown, Trash2, Edit2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
+  userId?: string
+  isHidden?: boolean
+  onTransactionUpdated?: () => void
 }
 
-export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export function RecentTransactions({
+  transactions,
+  userId,
+  isHidden = false,
+  onTransactionUpdated,
+}: RecentTransactionsProps) {
+  const supabase = createClient()
+  const [deletingId, setDeletingId] = useState<string>('')
+
+  const handleDelete = async (tx: Transaction) => {
+    try {
+      const { error } = await supabase.from('transactions').delete().eq('id', tx.id)
+      if (error) throw error
+
+      toast.success('Transacción eliminada', {
+        description: `${tx.description} — ${formatCLP(tx.amount)}`,
+        action: {
+          label: 'Deshacer',
+          onClick: async () => {
+            await supabase.from('transactions').insert({
+              id: tx.id,
+              user_id: tx.user_id,
+              category_id: tx.category_id,
+              type: tx.type,
+              amount: tx.amount,
+              description: tx.description,
+              notes: tx.notes,
+              transaction_date: tx.transaction_date,
+              source: tx.source,
+              created_at: tx.created_at,
+            })
+            toast.success('Transacción restaurada ✓')
+            onTransactionUpdated?.()
+          },
+        },
+        duration: 5000,
+      })
+
+      onTransactionUpdated?.()
+      setDeletingId('')
+    } catch (err) {
+      toast.error('Error al eliminar')
+    }
+  }
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -79,23 +130,58 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
               </div>
 
               {/* Monto con mejor formato */}
-              <div className="text-right">
-                <div className="flex items-center gap-1">
-                  {t.type === 'income' ?
-                    <TrendingUp className="h-3.5 w-3.5 text-bamboo-take" /> :
-                    <TrendingDown className="h-3.5 w-3.5 text-vermillion-shu" />
-                  }
-                  <span
-                    className={`text-base font-bold font-mono tabular-nums ${
-                      t.type === 'income' ? 'text-bamboo-take' : 'text-vermillion-shu'
-                    }`}
-                  >
-                    {t.type === 'income' ? '+' : '-'}{formatCLP(t.amount)}
-                  </span>
+              <div className="text-right flex items-center gap-2">
+                <div>
+                  <div className="flex items-center gap-1 justify-end">
+                    {t.type === 'income' ?
+                      <TrendingUp className="h-3.5 w-3.5 text-bamboo-take" /> :
+                      <TrendingDown className="h-3.5 w-3.5 text-vermillion-shu" />
+                    }
+                    <span
+                      className={`text-base font-bold font-mono tabular-nums ${
+                        t.type === 'income' ? 'text-bamboo-take' : 'text-vermillion-shu'
+                      }`}
+                    >
+                      {isHidden ? '•••••' : `${t.type === 'income' ? '+' : '-'}${formatCLP(t.amount)}`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-muted mt-1 text-right">
+                    {t.type === 'income' ? 'Entrada' : 'Salida'}
+                  </p>
                 </div>
-                <p className="text-xs text-text-muted mt-1">
-                  {t.type === 'income' ? 'Entrada' : 'Salida'}
-                </p>
+
+                {/* Quick actions on hover */}
+                {userId && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <Link
+                      href={`/transactions?edit=${t.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-1.5 rounded-lg text-text-tertiary hover:text-violet-light hover:bg-violet-light/10 transition-colors"
+                      title="Editar"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (deletingId === t.id) {
+                          handleDelete(t)
+                        } else {
+                          setDeletingId(t.id)
+                          setTimeout(() => setDeletingId(''), 3000)
+                        }
+                      }}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        deletingId === t.id
+                          ? 'text-vermillion-shu bg-vermillion-shu/20 animate-pulse'
+                          : 'text-text-tertiary hover:text-vermillion-shu hover:bg-vermillion-shu/10'
+                      }`}
+                      title={deletingId === t.id ? 'Click de nuevo para confirmar' : 'Eliminar'}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
