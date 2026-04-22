@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { SamuraiKenji, KenjiPose } from '@/components/samurai/SamuraiKenji'
@@ -15,6 +15,9 @@ import {
   Palette,
   ArrowRight,
   Loader2,
+  Copy,
+  RotateCcw,
+  ExternalLink,
 } from 'lucide-react'
 
 interface OnboardingWizardProps {
@@ -26,14 +29,14 @@ interface OnboardingWizardProps {
 }
 
 const CURRENCIES = [
-  { code: 'CLP', label: 'Peso Chileno', symbol: '$', flag: '🇨🇱' },
-  { code: 'USD', label: 'Dólar USA', symbol: '$', flag: '🇺🇸' },
-  { code: 'EUR', label: 'Euro', symbol: '€', flag: '🇪🇺' },
-  { code: 'MXN', label: 'Peso Mexicano', symbol: '$', flag: '🇲🇽' },
-  { code: 'ARS', label: 'Peso Argentino', symbol: '$', flag: '🇦🇷' },
-  { code: 'JPY', label: 'Yen Japonés', symbol: '¥', flag: '🇯🇵' },
-  { code: 'GBP', label: 'Libra', symbol: '£', flag: '🇬🇧' },
-  { code: 'PEN', label: 'Sol Peruano', symbol: 'S/', flag: '🇵🇪' },
+  { code: 'CLP', label: 'Peso Chileno', symbol: '$', flag: '🇨🇱', max: 5000000, step: 50000 },
+  { code: 'USD', label: 'Dólar USA', symbol: '$', flag: '🇺🇸', max: 10000, step: 100 },
+  { code: 'EUR', label: 'Euro', symbol: '€', flag: '🇪🇺', max: 10000, step: 100 },
+  { code: 'MXN', label: 'Peso Mexicano', symbol: '$', flag: '🇲🇽', max: 200000, step: 2000 },
+  { code: 'ARS', label: 'Peso Argentino', symbol: '$', flag: '🇦🇷', max: 5000000, step: 50000 },
+  { code: 'JPY', label: 'Yen Japonés', symbol: '¥', flag: '🇯🇵', max: 1500000, step: 10000 },
+  { code: 'GBP', label: 'Libra', symbol: '£', flag: '🇬🇧', max: 8000, step: 100 },
+  { code: 'PEN', label: 'Sol Peruano', symbol: 'S/', flag: '🇵🇪', max: 30000, step: 500 },
 ]
 
 const PRESET_CATEGORIES = [
@@ -88,15 +91,18 @@ export function OnboardingWizard({
     receiptSkipped: false,
   })
 
-  const totalSteps = 7
+  const [telegramLinked, setTelegramLinked] = useState(false)
+
+  const totalSteps = 8
   const progress = (step / totalSteps) * 100
 
   const pose: KenjiPose = useMemo(() => {
     if (step === 1) return 'saludo'
-    if (step === 7) return 'meditando'
+    if (step === 8) return 'meditando'
     if (step === 4 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
+    if (step === 6 && telegramLinked) return 'celebrando'
     return 'explicando'
-  }, [step, data.firstTxAmount, data.firstTxCategory])
+  }, [step, data.firstTxAmount, data.firstTxCategory, telegramLinked])
 
   const dialogue = useMemo(() => {
     switch (step) {
@@ -111,13 +117,17 @@ export function OnboardingWizard({
       case 5:
         return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
       case 6:
-        return `Estos tres extras te harán más poderoso. Actívalos ahora o déjalos para otro día.`
+        return telegramLinked
+          ? `¡Conectado! Ahora puedes registrar gastos desde Telegram.`
+          : `Conecta el bot de Telegram ahora. Te va a ahorrar mucho tiempo después. Este paso no se salta.`
       case 7:
+        return `Dos extras opcionales para dejar Katana perfecto.`
+      case 8:
         return `Ya eres samurái. El dojo es tuyo. Domo arigatou.`
       default:
         return ''
     }
-  }, [step])
+  }, [step, telegramLinked])
 
   function update<K extends keyof WizardState>(key: K, value: WizardState[K]) {
     setData((prev) => ({ ...prev, [key]: value }))
@@ -213,6 +223,8 @@ export function OnboardingWizard({
       case 5:
         return true
       case 6:
+        return telegramLinked
+      case 7:
         return true
       default:
         return true
@@ -220,7 +232,7 @@ export function OnboardingWizard({
   }
 
   function handleNext() {
-    if (step === 7) {
+    if (step === 8) {
       finalizeOnboarding()
       return
     }
@@ -232,9 +244,15 @@ export function OnboardingWizard({
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-6 lg:p-10">
+    <div
+      className="min-h-[100dvh] flex flex-col p-4 sm:p-6 lg:p-10"
+      style={{
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+      }}
+    >
       {/* Top: progress */}
-      <div className="max-w-5xl w-full mx-auto mb-6 sm:mb-8">
+      <div className="max-w-5xl w-full mx-auto mb-4 sm:mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs sm:text-sm text-purple-300 font-mono tracking-wider">
             PASO {step} / {totalSteps}
@@ -271,22 +289,32 @@ export function OnboardingWizard({
           </div>
         </div>
 
-        {/* Mobile samurai (smaller) */}
-        <div className="md:hidden flex items-center gap-3 bg-gradient-to-br from-violet-950/60 to-black/40 border border-violet-500/20 rounded-2xl p-3">
-          <SamuraiKenji pose={pose} size={72} />
-          <p className="text-xs text-purple-200 italic flex-1">{dialogue}</p>
+        {/* Mobile samurai */}
+        <div
+          key={`mobile-${pose}`}
+          className="md:hidden flex items-center gap-3 bg-gradient-to-br from-violet-950/60 to-black/40 border border-violet-500/20 rounded-2xl p-3 animate-kenji-enter"
+        >
+          <SamuraiKenji pose={pose} size={84} animated={false} />
+          <p className="text-[13px] text-purple-200 italic flex-1 leading-snug">{dialogue}</p>
         </div>
 
         {/* Step content column */}
-        <div className="bg-[#13091F]/80 backdrop-blur-sm border border-violet-500/15 rounded-3xl p-6 sm:p-8 min-h-[420px] flex flex-col">
+        <div className="bg-[#13091F]/80 backdrop-blur-sm border border-violet-500/15 rounded-2xl sm:rounded-3xl p-5 sm:p-8 sm:min-h-[420px] flex flex-col">
           <div className="flex-1">
             {step === 1 && <Step1Welcome data={data} update={update} />}
             {step === 2 && <Step2Income data={data} update={update} />}
             {step === 3 && <Step3Categories data={data} update={update} existingCategories={existingCategories} />}
             {step === 4 && <Step4FirstTransaction data={data} update={update} />}
-            {step === 5 && <Step5Receipt data={data} update={update} />}
-            {step === 6 && <Step6Extras />}
-            {step === 7 && <Step7Farewell data={data} />}
+            {step === 5 && <Step5Receipt />}
+            {step === 6 && (
+              <Step6Telegram
+                userId={userId}
+                linked={telegramLinked}
+                onLinked={() => setTelegramLinked(true)}
+              />
+            )}
+            {step === 7 && <Step7Extras />}
+            {step === 8 && <Step8Farewell data={data} telegramLinked={telegramLinked} />}
           </div>
 
           {error && (
@@ -296,12 +324,12 @@ export function OnboardingWizard({
           )}
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-6 pt-6 border-t border-violet-500/10">
+          <div className="flex items-center justify-between mt-6 pt-5 border-t border-violet-500/10 gap-3">
             <button
               type="button"
               onClick={handleBack}
               disabled={step === 1 || loading}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-purple-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-3 rounded-xl text-sm text-purple-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px]"
             >
               <ChevronLeft className="h-4 w-4" />
               Atrás
@@ -312,9 +340,9 @@ export function OnboardingWizard({
               onClick={handleNext}
               disabled={!canAdvance() || loading}
               className={cn(
-                'flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all',
+                'flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm sm:text-base font-semibold transition-all min-h-[48px] flex-1 sm:flex-initial',
                 'bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-lg shadow-violet-500/20',
-                'hover:from-violet-500 hover:to-violet-400 hover:shadow-violet-500/40',
+                'hover:from-violet-500 hover:to-violet-400 hover:shadow-violet-500/40 active:scale-[0.98]',
                 'disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none'
               )}
             >
@@ -323,7 +351,7 @@ export function OnboardingWizard({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Guardando...
                 </>
-              ) : step === 7 ? (
+              ) : step === 8 ? (
                 <>
                   Entrar al dojo
                   <ArrowRight className="h-4 w-4" />
@@ -378,8 +406,8 @@ function Step1Welcome({
           value={data.name}
           onChange={(e) => update('name', e.target.value)}
           placeholder="Tu nombre"
-          autoFocus
-          className="w-full px-4 py-3 bg-violet-950/40 border border-violet-500/20 rounded-xl text-white placeholder:text-purple-400/40 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all"
+          autoComplete="given-name"
+          className="w-full px-4 py-3 bg-violet-950/40 border border-violet-500/20 rounded-xl text-white placeholder:text-purple-400/40 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all text-base"
         />
       </div>
 
@@ -419,6 +447,9 @@ function Step2Income({
   update: <K extends keyof WizardState>(k: K, v: WizardState[K]) => void
 }) {
   const income = data.monthlyIncome ?? 0
+  const currencyDef = CURRENCIES.find((c) => c.code === data.currency) ?? CURRENCIES[0]
+  const maxIncome = currencyDef.max
+  const stepIncome = currencyDef.step
 
   function handleSkip() {
     update('monthlyIncome', null)
@@ -430,8 +461,9 @@ function Step2Income({
     update('incomeSkipped', false)
   }
 
-  const currencySymbol = CURRENCIES.find((c) => c.code === data.currency)?.symbol ?? '$'
+  const currencySymbol = currencyDef.symbol
   const formatted = income > 0 ? `${currencySymbol}${income.toLocaleString('es-CL')}` : `${currencySymbol}0`
+  const formattedMax = `${currencySymbol}${maxIncome.toLocaleString('es-CL')}+`
 
   return (
     <div className="space-y-6">
@@ -455,21 +487,21 @@ function Step2Income({
         <input
           type="range"
           min="0"
-          max="5000000"
-          step="50000"
+          max={maxIncome}
+          step={stepIncome}
           value={income}
           disabled={data.incomeSkipped}
           onChange={(e) => handleSliderChange(parseInt(e.target.value, 10))}
-          className="w-full h-2 bg-violet-950/60 rounded-full appearance-none cursor-pointer accent-violet-500 disabled:opacity-40"
+          className="w-full h-3 bg-violet-950/60 rounded-full appearance-none cursor-pointer accent-violet-500 disabled:opacity-40 touch-manipulation"
           style={{
             background: data.incomeSkipped
               ? undefined
-              : `linear-gradient(to right, #A855F7 0%, #A855F7 ${(income / 5000000) * 100}%, rgba(67,13,93,0.6) ${(income / 5000000) * 100}%, rgba(67,13,93,0.6) 100%)`,
+              : `linear-gradient(to right, #A855F7 0%, #A855F7 ${(income / maxIncome) * 100}%, rgba(67,13,93,0.6) ${(income / maxIncome) * 100}%, rgba(67,13,93,0.6) 100%)`,
           }}
         />
         <div className="flex justify-between text-xs text-purple-400/60">
           <span>{currencySymbol}0</span>
-          <span>{currencySymbol}5M+</span>
+          <span>{formattedMax}</span>
         </div>
       </div>
 
@@ -600,6 +632,7 @@ function Step4FirstTransaction({
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             value={data.firstTxAmount}
             onChange={(e) => {
               const clean = e.target.value.replace(/\D/g, '')
@@ -648,20 +681,14 @@ function Step4FirstTransaction({
           value={data.firstTxDescription}
           onChange={(e) => update('firstTxDescription', e.target.value)}
           placeholder="Ej: Almuerzo en el trabajo"
-          className="w-full px-4 py-3 bg-violet-950/40 border border-violet-500/20 rounded-xl text-white placeholder:text-purple-400/30 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20"
+          className="w-full px-4 py-3 bg-violet-950/40 border border-violet-500/20 rounded-xl text-white placeholder:text-purple-400/30 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 text-base"
         />
       </div>
     </div>
   )
 }
 
-function Step5Receipt({
-  data,
-  update,
-}: {
-  data: WizardState
-  update: <K extends keyof WizardState>(k: K, v: WizardState[K]) => void
-}) {
+function Step5Receipt() {
   return (
     <div className="space-y-6">
       <div>
@@ -709,74 +736,316 @@ function Step5Receipt({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <a
-          href="/receipts"
-          target="_blank"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-violet-500/20 border border-violet-400 text-white font-semibold hover:bg-violet-500/30 transition-all"
-        >
-          Probar ahora
-          <ArrowRight className="h-4 w-4" />
-        </a>
-        <button
-          type="button"
-          onClick={() => update('receiptSkipped', true)}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all',
-            data.receiptSkipped
-              ? 'bg-violet-500/10 border-violet-500/30 text-violet-300'
-              : 'bg-violet-950/30 border-violet-500/10 text-purple-300 hover:border-violet-500/30'
-          )}
-        >
-          <SkipForward className="h-4 w-4" />
-          Después lo pruebo
-        </button>
+      <div className="bg-violet-950/30 border border-violet-500/20 rounded-xl px-4 py-3 text-center">
+        <p className="text-sm text-purple-200">
+          Al terminar el tutorial, entra al menú <strong className="text-white">Recibos</strong> y sube tu primera foto.
+        </p>
       </div>
     </div>
   )
 }
 
-function Step6Extras() {
+function Step6Telegram({
+  userId,
+  linked,
+  onLinked,
+}: {
+  userId: string
+  linked: boolean
+  onLinked: () => void
+}) {
+  const supabase = createClient()
+  const [code, setCode] = useState<string | null>(null)
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null)
+  const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [stepError, setStepError] = useState<string | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Generate or recover code on mount
+  useEffect(() => {
+    async function init() {
+      // 1. Check if already linked
+      const { data: linkRow } = await supabase
+        .from('telegram_users')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (linkRow) {
+        onLinked()
+        return
+      }
+
+      // 2. Check if there's a valid code already
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('telegram_link_code, telegram_link_expires_at')
+        .eq('id', userId)
+        .single()
+
+      if (profile?.telegram_link_code && profile?.telegram_link_expires_at) {
+        const exp = new Date(profile.telegram_link_expires_at)
+        if (exp > new Date()) {
+          setCode(profile.telegram_link_code)
+          setExpiresAt(exp)
+          return
+        }
+      }
+
+      // 3. Generate fresh code
+      await generateCode()
+    }
+
+    init()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Poll for link status every 3 seconds while not linked
+  useEffect(() => {
+    if (linked) {
+      if (pollRef.current) clearInterval(pollRef.current)
+      return
+    }
+
+    pollRef.current = setInterval(async () => {
+      const { data: linkRow } = await supabase
+        .from('telegram_users')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (linkRow) {
+        onLinked()
+        if (pollRef.current) clearInterval(pollRef.current)
+      }
+    }, 3000)
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linked, userId])
+
+  async function generateCode() {
+    setGenerating(true)
+    setStepError(null)
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const exp = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        telegram_link_code: newCode,
+        telegram_link_expires_at: exp.toISOString(),
+      })
+      .eq('id', userId)
+
+    if (updateError) {
+      setStepError('No se pudo generar el código. Intenta de nuevo.')
+    } else {
+      setCode(newCode)
+      setExpiresAt(exp)
+    }
+    setGenerating(false)
+  }
+
+  async function copyCode() {
+    if (!code) return
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setStepError('No se pudo copiar automáticamente. Escríbelo manualmente.')
+    }
+  }
+
+  function openBot() {
+    if (!code) return
+    window.open(`https://t.me/risky_finance_bot?start=${code}`, '_blank', 'noopener,noreferrer')
+  }
+
+  if (linked) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            Telegram conectado ✓
+          </h2>
+          <p className="text-purple-300/80 text-sm">
+            Ya puedes registrar gastos escribiéndole al bot.
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-500/15 to-violet-500/5 border border-green-500/30 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-400 flex items-center justify-center flex-shrink-0">
+              <Check className="h-7 w-7 text-green-300" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-white font-bold text-lg mb-1">Bot vinculado</h3>
+              <p className="text-sm text-green-100/80 mb-3">
+                Ahora prueba enviarle un mensaje:
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="px-3 py-2 bg-black/30 rounded-lg font-mono text-violet-200">
+                  &ldquo;Gasté 8500 en almuerzo&rdquo;
+                </div>
+                <div className="px-3 py-2 bg-black/30 rounded-lg font-mono text-violet-200">
+                  &ldquo;500 pesos café&rdquo;
+                </div>
+                <div className="px-3 py-2 bg-black/30 rounded-lg font-mono text-violet-200">
+                  📸 Una foto de tu recibo
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-purple-300">
+          Dale <strong className="text-white">Siguiente</strong> para continuar.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Conecta Telegram 🤖
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          El bot es la manera más rápida de registrar gastos. Este paso es <strong className="text-white">obligatorio</strong> — solo toma 30 segundos.
+        </p>
+      </div>
+
+      {/* Instrucciones numeradas */}
+      <div className="space-y-2">
+        <InstructionStep number={1} text="Abre @risky_finance_bot en Telegram (botón de abajo)" />
+        <InstructionStep number={2} text="Envíale el código que ves aquí" />
+        <InstructionStep number={3} text="Esta página detecta la conexión automáticamente" />
+      </div>
+
+      {/* Código grande */}
+      <div className="bg-gradient-to-br from-violet-600/15 to-violet-800/10 border border-violet-400/30 rounded-2xl p-5 text-center">
+        <p className="text-xs text-purple-300 uppercase tracking-wider mb-3">
+          Tu código de vinculación
+        </p>
+        {code ? (
+          <>
+            <div className="flex items-center justify-center gap-2">
+              <div className="font-mono text-4xl sm:text-5xl font-bold tracking-widest bg-black/40 px-6 py-4 rounded-xl text-violet-200 shadow-inner">
+                {code}
+              </div>
+              <button
+                type="button"
+                onClick={copyCode}
+                className="p-4 rounded-xl bg-violet-500/20 border border-violet-500/30 text-violet-200 hover:bg-violet-500/30 transition-colors min-h-[60px]"
+                aria-label="Copiar código"
+              >
+                {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
+              </button>
+            </div>
+            {expiresAt && (
+              <p className="text-[11px] text-purple-400/60 mt-3">
+                Expira: {expiresAt.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' })}
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="flex items-center justify-center gap-2 py-8 text-purple-300">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Generando código...
+          </div>
+        )}
+      </div>
+
+      {/* Botones */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={openBot}
+          disabled={!code}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-xl text-sm font-bold min-h-[52px] transition-all',
+            'bg-gradient-to-r from-[#229ED9] to-[#1E88BF] text-white shadow-lg shadow-[#229ED9]/20',
+            'hover:shadow-[#229ED9]/40 active:scale-[0.98] disabled:opacity-40'
+          )}
+        >
+          <Bot className="h-5 w-5" />
+          Abrir @risky_finance_bot
+          <ExternalLink className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={generateCode}
+          disabled={generating}
+          className="flex items-center justify-center gap-2 px-4 py-4 rounded-xl text-sm font-medium text-purple-300 border border-violet-500/20 bg-violet-950/30 hover:border-violet-500/40 disabled:opacity-40 min-h-[52px]"
+        >
+          <RotateCcw className={cn('h-4 w-4', generating && 'animate-spin')} />
+          <span className="sm:hidden md:inline">Regenerar</span>
+        </button>
+      </div>
+
+      {/* Estado polling */}
+      <div className="flex items-center justify-center gap-2 text-xs text-purple-400/70 bg-violet-950/30 rounded-xl py-3 border border-violet-500/10">
+        <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+        Esperando conexión del bot...
+      </div>
+
+      {stepError && (
+        <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-300">
+          {stepError}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function InstructionStep({ number, text }: { number: number; text: string }) {
+  return (
+    <div className="flex items-start gap-3 px-3 py-2 bg-violet-950/40 border border-violet-500/10 rounded-xl">
+      <div className="w-6 h-6 rounded-full bg-violet-500/25 border border-violet-400/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="text-xs font-bold text-violet-200">{number}</span>
+      </div>
+      <p className="text-sm text-purple-100/90 leading-snug">{text}</p>
+    </div>
+  )
+}
+
+function Step7Extras() {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Tres extras opcionales
+          Dos extras opcionales
         </h2>
         <p className="text-purple-300/80 text-sm">
-          Todos se configuran en 1 minuto. Puedes activarlos después en Configuración.
+          Se configuran en 1 minuto. Puedes activarlos después en Configuración.
         </p>
       </div>
 
       <div className="space-y-3">
         <ExtraCard
-          icon={<Bot className="h-6 w-6" />}
-          title="Bot de Telegram"
-          description="Registra gastos escribiendo un mensaje. Sin abrir la app."
-          cta="Conectar"
-          href="/settings?tab=telegram"
-          color="violet"
-        />
-        <ExtraCard
           icon={<Target className="h-6 w-6" />}
           title="Primer presupuesto"
-          description="Pon un límite mensual a una categoría y recibe alertas."
-          cta="Crear"
-          href="/budgets"
+          description="Pon un límite mensual a una categoría y recibe alertas al 80% y 100%."
+          hint="Menú → Presupuestos"
           color="green"
         />
         <ExtraCard
           icon={<Palette className="h-6 w-6" />}
           title="Tema visual"
           description="Claro, oscuro o automático según hora del día."
-          cta="Elegir"
-          href="/settings"
+          hint="Configuración → Apariencia"
           color="yellow"
         />
       </div>
 
       <p className="text-center text-xs text-purple-400/60">
-        Puedes saltar todo esto y configurarlo después desde el menú.
+        Todo esto se activa en cualquier momento desde el menú.
       </p>
     </div>
   )
@@ -786,15 +1055,13 @@ function ExtraCard({
   icon,
   title,
   description,
-  cta,
-  href,
+  hint,
   color,
 }: {
   icon: React.ReactNode
   title: string
   description: string
-  cta: string
-  href: string
+  hint: string
   color: 'violet' | 'green' | 'yellow'
 }) {
   const palette = {
@@ -806,34 +1073,35 @@ function ExtraCard({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 bg-gradient-to-br to-black/30 border rounded-2xl p-4',
+        'flex items-center gap-3 sm:gap-4 bg-gradient-to-br to-black/30 border rounded-2xl p-3 sm:p-4',
         palette
       )}
     >
-      <div className="w-12 h-12 rounded-xl bg-black/30 flex items-center justify-center flex-shrink-0">
+      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-black/30 flex items-center justify-center flex-shrink-0">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-white font-semibold mb-0.5">{title}</h3>
-        <p className="text-xs text-purple-300/70">{description}</p>
+        <h3 className="text-white font-semibold mb-0.5 text-sm sm:text-base">{title}</h3>
+        <p className="text-xs text-purple-300/70 leading-snug">{description}</p>
+        <p className="text-[10px] text-purple-400/50 mt-1 font-mono">{hint}</p>
       </div>
-      <a
-        href={href}
-        target="_blank"
-        className="px-3 py-2 rounded-lg bg-black/30 text-xs font-semibold hover:bg-black/50 transition-colors flex-shrink-0"
-      >
-        {cta}
-      </a>
     </div>
   )
 }
 
-function Step7Farewell({ data }: { data: WizardState }) {
+function Step8Farewell({
+  data,
+  telegramLinked,
+}: {
+  data: WizardState
+  telegramLinked: boolean
+}) {
   const achievements = [
     `Perfil: ${data.name || 'configurado'} · ${data.currency}`,
     `${data.selectedCategories.length} categorías elegidas`,
     data.firstTxAmount ? 'Primera transacción registrada' : null,
     !data.incomeSkipped && data.monthlyIncome ? 'Ingreso mensual configurado' : null,
+    telegramLinked ? 'Bot de Telegram vinculado' : null,
   ].filter(Boolean) as string[]
 
   return (
