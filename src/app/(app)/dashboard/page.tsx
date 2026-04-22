@@ -15,6 +15,8 @@ import {
 } from '@/types/database'
 import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
 import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap'
+import { WeeklyComparisonCard } from '@/components/dashboard/WeeklyComparisonCard'
+import { calculateWeeklyComparison } from '@/lib/utils/weeklyComparison'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -127,6 +129,27 @@ export default async function DashboardPage() {
     date, amount: v.amount, count: v.count,
   }))
 
+  // Weekly comparison: last 14 days
+  const fourteenDaysAgo = new Date()
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
+  const { data: weeklyTx } = await supabase
+    .from('transactions')
+    .select('transaction_date, amount, category_id, categories(name, icon, color)')
+    .eq('user_id', user.id)
+    .eq('type', 'expense')
+    .gte('transaction_date', fourteenDaysAgo.toISOString().split('T')[0])
+    .order('transaction_date', { ascending: false })
+
+  const weeklyData = calculateWeeklyComparison(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (weeklyTx ?? []).map((t: any) => ({
+      transaction_date: t.transaction_date,
+      amount: t.amount,
+      category_id: t.category_id,
+      categories: Array.isArray(t.categories) ? t.categories[0] : t.categories,
+    }))
+  )
+
   // Extract user's first name for greeting and capitalize it
   const rawName = profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
   const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
@@ -152,6 +175,9 @@ export default async function DashboardPage() {
           count={tripCount}
         />
       )}
+
+      {/* Weekly comparison - full featured */}
+      <WeeklyComparisonCard data={weeklyData} />
 
       {/* Activity heatmap */}
       <ActivityHeatmap data={heatmapData} />

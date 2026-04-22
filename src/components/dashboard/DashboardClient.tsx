@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { SummaryCards } from './SummaryCards'
 import { SpendingByCategoryChart } from './SpendingByCategoryChart'
 import { MonthlyTrendChart } from './MonthlyTrendChart'
-import { WeeklyComparisonChart } from './WeeklyComparisonChart'
 import { RecentTransactions } from './RecentTransactions'
 import { BudgetAlertBanner } from './BudgetAlertBanner'
 import { SavingsGoal } from './SavingsGoal'
@@ -299,10 +298,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
           isHidden={isHidden && focusMounted}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SpendingByCategoryChart data={categorySpending} />
-          <WeeklyComparisonChart data={weeklyComparison} />
-        </div>
+        <SpendingByCategoryChart data={categorySpending} />
 
         <MonthlyTrendChart data={monthlyTrends} />
 
