@@ -1,16 +1,78 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-// Cherry blossoms removidos por request del usuario
+import type { KatanaState } from '@/app/(app)/layout'
 
 interface SamuraiWidgetProps {
   transitioning?: boolean
+  katanaState?: KatanaState
 }
 
-export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
+// Katana color schemes based on financial state
+const KATANA_THEMES: Record<KatanaState, {
+  blade: string
+  bladeEdge: string
+  glow: string
+  auraColor: string
+  tsuba: string
+  statusLabel: string
+  statusColor: string
+}> = {
+  violet: {
+    blade: '#C084FC',
+    bladeEdge: '#EDE9FE',
+    glow: '#A855F7',
+    auraColor: 'rgba(124,58,237,0.25)',
+    tsuba: '#7C3AED',
+    statusLabel: 'En equilibrio',
+    statusColor: '#C084FC',
+  },
+  green: {
+    blade: '#86EFAC',
+    bladeEdge: '#DCFCE7',
+    glow: '#22C55E',
+    auraColor: 'rgba(34,197,94,0.3)',
+    tsuba: '#16A34A',
+    statusLabel: 'Próspero',
+    statusColor: '#86EFAC',
+  },
+  yellow: {
+    blade: '#FDE68A',
+    bladeEdge: '#FEF9C3',
+    glow: '#F59E0B',
+    auraColor: 'rgba(245,158,11,0.3)',
+    tsuba: '#D97706',
+    statusLabel: 'Atento',
+    statusColor: '#FDE68A',
+  },
+  red: {
+    blade: '#FCA5A5',
+    bladeEdge: '#FEE2E2',
+    glow: '#EF4444',
+    auraColor: 'rgba(239,68,68,0.35)',
+    tsuba: '#DC2626',
+    statusLabel: 'Alerta',
+    statusColor: '#FCA5A5',
+  },
+  gold: {
+    blade: '#FCD34D',
+    bladeEdge: '#FEF3C7',
+    glow: '#F59E0B',
+    auraColor: 'rgba(251,191,36,0.5)',
+    tsuba: '#B45309',
+    statusLabel: 'Victoria ✨',
+    statusColor: '#FCD34D',
+  },
+}
+
+export function SamuraiWidget({ transitioning = false, katanaState = 'violet' }: SamuraiWidgetProps) {
   const [current, setCurrent] = useState(0)
   const [visible, setVisible] = useState(true)
   const katanaContainerRef = useRef<HTMLDivElement>(null)
+
+  const theme = KATANA_THEMES[katanaState]
+  const isAlert = katanaState === 'red'
+  const isGold = katanaState === 'gold'
 
   // FRASES BUSHIDO SIMPLIFICADAS
   const quotes = [
@@ -87,39 +149,51 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           background: 'radial-gradient(circle, rgba(124,58,237,0.02) 0%, transparent 70%)',
         }}/>
 
-        {/* Aura dinámica original */}
+        {/* Aura dinámica reactiva */}
         <div className="k-aura" style={{
           position: 'absolute',
           top: '15%', left: '15%', right: '15%', bottom: '15%',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0.15) 30%, rgba(76,29,149,0.08) 60%, transparent 80%)',
-          border: '1px solid rgba(124,58,237,0.1)',
+          background: `radial-gradient(circle, ${theme.auraColor} 0%, ${theme.auraColor.replace(/[\d.]+\)$/, '0.15)')} 30%, transparent 70%)`,
+          border: `1px solid ${theme.auraColor.replace(/[\d.]+\)$/, '0.2)')}`,
+          transition: 'background 0.8s ease, border 0.8s ease',
         }}/>
 
-        {/* KATANA ELEGANTE - animación original diagonal */}
-        <div className="k-float k-glow" style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%) rotate(-45deg)',
-          transformOrigin: 'center',
-          zIndex: 10,
-        }}>
+        {/* KATANA REACTIVA - color cambia según estado financiero */}
+        <div
+          className={`k-float k-glow ${isAlert ? 'katana-alert' : ''} ${isGold ? 'katana-gold' : ''}`}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-45deg)',
+            transformOrigin: 'center',
+            zIndex: 10,
+            filter: `drop-shadow(0 0 6px ${theme.glow}) drop-shadow(0 0 2px ${theme.glow})`,
+            transition: 'filter 0.8s ease',
+          }}
+        >
           <svg width="90" height="90" viewBox="0 0 100 100">
             {/* Hoja larga y delgada — diagonal */}
             <rect x="48.5" y="2" width="3" height="65" rx="1.5"
-              fill="#C084FC" transform="rotate(0 50 50)"/>
+              fill={theme.blade} transform="rotate(0 50 50)"
+              style={{ transition: 'fill 0.8s ease' }}/>
             <rect x="49" y="2" width="1" height="63" rx="1"
-              fill="#EDE9FE" opacity="0.8"
-              transform="rotate(0 50 50)"/>
+              fill={theme.bladeEdge} opacity="0.8"
+              transform="rotate(0 50 50)"
+              style={{ transition: 'fill 0.8s ease' }}/>
             {/* Punta afilada */}
-            <polygon points="47.5,2 51.5,2 50,0" fill="#EDE9FE"/>
+            <polygon points="47.5,2 51.5,2 50,0" fill={theme.bladeEdge}
+              style={{ transition: 'fill 0.8s ease' }}/>
             {/* Hamon (línea de temple) sutil */}
             <path d="M 49 10 Q 50 20 49 30 Q 50 40 49 50 Q 50 60 49 65"
-              fill="none" stroke="#9F7AEA" strokeWidth="0.5" opacity="0.5"/>
+              fill="none" stroke={theme.glow} strokeWidth="0.5" opacity="0.5"
+              style={{ transition: 'stroke 0.8s ease' }}/>
             {/* Tsuba más detallada */}
-            <ellipse cx="50" cy="68" rx="10" ry="4" fill="#7C3AED"/>
-            <ellipse cx="50" cy="68" rx="8" ry="3" fill="#6D28D9"/>
+            <ellipse cx="50" cy="68" rx="10" ry="4" fill={theme.tsuba}
+              style={{ transition: 'fill 0.8s ease' }}/>
+            <ellipse cx="50" cy="68" rx="8" ry="3" fill={theme.tsuba} opacity="0.8"
+              style={{ transition: 'fill 0.8s ease' }}/>
             {/* Mango con grip */}
             <rect x="47" y="71" width="6" height="22" rx="2" fill="#1A0A2E"/>
             {/* Ito (vendaje) diagonal */}
@@ -132,9 +206,11 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
             <rect x="47" y="85" width="6" height="2" rx="0"
               fill="#4C1D95" opacity="0.8"/>
             {/* Kashira (pommel) */}
-            <ellipse cx="50" cy="94" rx="5" ry="3" fill="#6D28D9"/>
-            {/* Punto verde acento */}
-            <circle cx="50" cy="96" r="2.5" fill="#84CC16"/>
+            <ellipse cx="50" cy="94" rx="5" ry="3" fill={theme.tsuba}
+              style={{ transition: 'fill 0.8s ease' }}/>
+            {/* Punto acento */}
+            <circle cx="50" cy="96" r="2.5" fill={theme.glow}
+              style={{ transition: 'fill 0.8s ease' }}/>
           </svg>
         </div>
 
@@ -156,7 +232,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           <div>道</div>
         </div>
 
-        {/* Sombra bajo la katana */}
+        {/* Sombra bajo la katana - reactiva */}
         <div style={{
           position: 'absolute',
           bottom: '5%',
@@ -164,10 +240,26 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
           transform: 'translateX(-50%)',
           width: '60px',
           height: '3px',
-          background: 'radial-gradient(ellipse, #7C3AED, rgba(124,58,237,0.3), transparent)',
+          background: `radial-gradient(ellipse, ${theme.glow}, ${theme.auraColor}, transparent)`,
           borderRadius: '50%',
-          opacity: 0.4
+          opacity: 0.4,
+          transition: 'background 0.8s ease',
         }}/>
+      </div>
+
+      {/* Status indicator - label del estado actual */}
+      <div style={{
+        textAlign: 'center',
+        fontSize: '9px',
+        fontWeight: 600,
+        letterSpacing: '0.15em',
+        textTransform: 'uppercase',
+        color: theme.statusColor,
+        marginTop: '-4px',
+        opacity: 0.8,
+        transition: 'color 0.8s ease',
+      }}>
+        {theme.statusLabel}
       </div>
 
       {/* SEPARADOR DECORATIVO */}

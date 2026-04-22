@@ -32,11 +32,14 @@ const navItems = [
   { href: '/achievements', label: 'Logros', icon: Trophy },
 ]
 
+import type { KatanaState } from '@/app/(app)/layout'
+
 interface SidebarProps {
   totalPoints?: number
+  katanaState?: KatanaState
 }
 
-export function Sidebar({ totalPoints = 0 }: SidebarProps) {
+export function Sidebar({ totalPoints = 0, katanaState = 'violet' }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -97,7 +100,7 @@ export function Sidebar({ totalPoints = 0 }: SidebarProps) {
       </nav>
 
       {/* Samurai Widget - right after menu, no stretching */}
-      <SamuraiContainer />
+      <SamuraiContainer katanaState={katanaState} />
 
       {/* Spacer to push telegram + footer to bottom */}
       <div className="flex-1 min-h-0" />

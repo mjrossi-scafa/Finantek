@@ -1,12 +1,15 @@
 'use client'
 import { SamuraiWidget } from './SamuraiWidget'
+import type { KatanaState } from '@/app/(app)/layout'
 
-export function SamuraiContainer() {
+interface Props {
+  katanaState?: KatanaState
+}
+
+export function SamuraiContainer({ katanaState = 'violet' }: Props) {
   return (
     <div className="hidden lg:block">
-      <SamuraiWidget />
-
-      {/* Footer duplicado eliminado - solo aparece en SamuraiWidget */}
+      <SamuraiWidget katanaState={katanaState} />
     </div>
   )
 }
