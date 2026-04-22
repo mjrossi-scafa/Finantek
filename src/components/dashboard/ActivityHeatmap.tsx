@@ -3,7 +3,9 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { formatCLP } from '@/lib/utils/currency'
-import { Flame, Plus } from 'lucide-react'
+import { Flame, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+
+const COLLAPSE_KEY = 'katana:heatmap-collapsed'
 
 interface ActivityHeatmapProps {
   data: Array<{ date: string; amount: number; count: number }>
@@ -12,14 +14,30 @@ interface ActivityHeatmapProps {
 
 export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<{ date: string; amount: number; count: number } | null>(null)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setIsCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === '1')
+  }, [])
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
+      }
+      return next
+    })
+  }
 
   // Auto-scroll to the end (most recent weeks) on mount for mobile
   useEffect(() => {
-    if (scrollRef.current) {
+    if (!isCollapsed && scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
     }
-  }, [])
+  }, [isCollapsed])
 
   const { days, weekLabels, monthLabels, maxAmount, streakInfo } = useMemo(() => {
     const dataMap = new Map(data.map((d) => [d.date, d]))
@@ -142,8 +160,8 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
   }
 
   return (
-    <div className="glass-card rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+    <div className={`glass-card rounded-2xl ${isCollapsed ? 'p-4' : 'p-5'}`}>
+      <div className={`flex items-center justify-between flex-wrap gap-2 ${isCollapsed ? '' : 'mb-4'}`}>
         <div className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-yellow-400" />
           <h3 className="text-base font-bold text-text-primary">Actividad del año</h3>
@@ -158,9 +176,19 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
             <span className="text-text-muted">Total: </span>
             <span className="font-bold font-mono text-text-primary">{streakInfo.activeDays} días</span>
           </div>
+          <button
+            onClick={toggleCollapsed}
+            aria-label={isCollapsed ? 'Expandir heatmap' : 'Ocultar heatmap'}
+            aria-expanded={!isCollapsed}
+            className="ml-1 p-1 rounded-md hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
+          >
+            {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
+      {isCollapsed ? null : (
+      <>
       {/* Heatmap */}
       <div ref={scrollRef} className="overflow-x-auto">
         <div className="inline-flex gap-0.5 min-w-max">
@@ -237,6 +265,8 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
           <span className="text-text-muted">Más</span>
         </div>
       </div>
+      </>
+      )}
     </div>
   )
 }
