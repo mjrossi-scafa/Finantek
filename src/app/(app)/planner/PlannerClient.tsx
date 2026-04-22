@@ -23,6 +23,7 @@ import { PlannedExpenseModal } from '@/components/planner/PlannedExpenseModal'
 import { RecurringSuggestionsModal } from '@/components/planner/RecurringSuggestionsModal'
 import { GradientButton } from '@/components/shared/GradientButton'
 import { detectRecurringExpenses } from '@/lib/planner/detectRecurring'
+import { getChileToday } from '@/lib/utils/timezone'
 
 interface PlannerClientProps {
   initialPlanned: PlannedExpense[]
@@ -267,7 +268,7 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
 
   // Upcoming expenses (next 30 days)
   const upcomingExpenses = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getChileToday()
     const in30Days = new Date()
     in30Days.setDate(in30Days.getDate() + 30)
     const in30DaysStr = in30Days.toISOString().split('T')[0]
@@ -281,7 +282,7 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
   const goToNextMonth = () => setViewDate(new Date(currentYear, currentMonth + 1, 1))
   const goToToday = () => {
     setViewDate(new Date())
-    setSelectedDate(new Date().toISOString().split('T')[0])
+    setSelectedDate(getChileToday())
   }
 
   const handleAddForDate = (date: string) => {
@@ -319,7 +320,7 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
           type: 'expense',
           amount: exp.amount,
           description: exp.description,
-          transaction_date: new Date().toISOString().split('T')[0],
+          transaction_date: getChileToday(),
           source: 'manual',
         })
         .select('id')
@@ -392,7 +393,7 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
     setEditingExpense(undefined)
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = getChileToday()
   const selectedDayExpenses = selectedDate ? plannedByDate[selectedDate] || [] : []
   const selectedDayReal = selectedDate ? transactionsByDate[selectedDate] || [] : []
   const selectedIsPast = selectedDate ? selectedDate < today : false

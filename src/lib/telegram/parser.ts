@@ -1,5 +1,6 @@
 // Using Google Gemini API instead of Anthropic
 import { detectCurrency } from '@/lib/utils/exchangeRates'
+import { getChileToday } from '@/lib/utils/timezone'
 
 export interface ParsedTransaction {
   type: 'income' | 'expense'
@@ -46,7 +47,7 @@ CATEGORÍAS INGRESOS: Sueldo, Freelance, Inversiones, Otros Ingresos
 Responde SOLO JSON válido:`
 
 export async function parseMessage(text: string): Promise<ParseResult> {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getChileToday()
   const cleanText = text.trim().toLowerCase()
 
   // Quick pattern matching for simple cases

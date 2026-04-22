@@ -1,14 +1,16 @@
 'use client'
 
 import { useMemo, useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { formatCLP } from '@/lib/utils/currency'
-import { Flame } from 'lucide-react'
+import { Flame, Plus } from 'lucide-react'
 
 interface ActivityHeatmapProps {
   data: Array<{ date: string; amount: number; count: number }>
+  todayStr: string // YYYY-MM-DD in user's timezone (passed from server to avoid UTC drift)
 }
 
-export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
+export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<{ date: string; amount: number; count: number } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -20,27 +22,27 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   }, [])
 
   const { days, weekLabels, monthLabels, maxAmount, streakInfo } = useMemo(() => {
-    // Build a map from date to data
     const dataMap = new Map(data.map((d) => [d.date, d]))
 
-    // Generate last 365 days
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    // Parse todayStr as UTC date to iterate day-by-day without DST surprises
+    const [ty, tm, td] = todayStr.split('-').map(Number)
+    const today = new Date(Date.UTC(ty, tm - 1, td))
     const oneYearAgo = new Date(today)
-    oneYearAgo.setDate(oneYearAgo.getDate() - 364)
+    oneYearAgo.setUTCDate(oneYearAgo.getUTCDate() - 364)
 
-    // Align to Monday (start week)
-    const startDayOfWeek = (oneYearAgo.getDay() + 6) % 7
+    const fmt = (d: Date) =>
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+
+    // Align start to Monday
+    const startDayOfWeek = (oneYearAgo.getUTCDay() + 6) % 7
     const startDate = new Date(oneYearAgo)
-    startDate.setDate(startDate.getDate() - startDayOfWeek)
+    startDate.setUTCDate(startDate.getUTCDate() - startDayOfWeek)
 
-    const days: Array<{ date: string; amount: number; count: number; dayOfWeek: number; isCurrentYear: boolean }> = []
+    const days: Array<{ date: string; amount: number; count: number; dayOfWeek: number; isCurrentYear: boolean; isToday: boolean }> = []
     const cursor = new Date(startDate)
-    let maxAmount = 0
 
-    // Build 53 weeks * 7 days grid
     while (cursor <= today || days.length % 7 !== 0) {
-      const dateStr = cursor.toISOString().split('T')[0]
+      const dateStr = fmt(cursor)
       const entry = dataMap.get(dateStr)
       const amount = entry?.amount ?? 0
       const count = entry?.count ?? 0
@@ -48,77 +50,55 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
       days.push({
         date: dateStr,
-        amount: isInRange ? amount : -1, // -1 means "out of range"
+        amount: isInRange ? amount : -1,
         count: isInRange ? count : 0,
-        dayOfWeek: (cursor.getDay() + 6) % 7,
+        dayOfWeek: (cursor.getUTCDay() + 6) % 7,
         isCurrentYear: isInRange,
+        isToday: dateStr === todayStr,
       })
 
-      if (amount > maxAmount) maxAmount = amount
-      cursor.setDate(cursor.getDate() + 1)
+      cursor.setUTCDate(cursor.getUTCDate() + 1)
     }
 
-    // Calculate streak (consecutive days with activity ending today)
+    // Max amount from data (reflects all transactions, even if dates fall outside the grid)
+    const maxAmount = data.reduce((max, d) => (d.amount > max ? d.amount : max), 0)
+
+    // Current streak: consecutive days with activity, counting back from today
     let streak = 0
-    let longestStreak = 0
-    let currentStreak = 0
-    const reversed = [...days].reverse()
-    for (let i = 0; i < reversed.length; i++) {
-      const d = reversed[i]
+    for (let i = days.length - 1; i >= 0; i--) {
+      const d = days[i]
       if (!d.isCurrentYear) continue
-      if (d.count > 0) {
-        currentStreak++
-        if (i === 0 || (i > 0 && reversed[i - 1].count > 0)) {
-          if (i < 90) streak = currentStreak // current streak
-        }
-        if (currentStreak > longestStreak) longestStreak = currentStreak
-      } else {
-        if (streak === 0 || i === 0) currentStreak = 0
-        currentStreak = 0
-      }
-    }
-
-    // Simpler streak calculation: consecutive days from today backwards
-    streak = 0
-    for (let i = reversed.length - 1; i >= 0; i--) {
-      // iterating reverse-of-reverse = forward again, so pick from end
-    }
-    // Actually use the simple reverse approach
-    streak = 0
-    const daysToday = [...days].reverse().filter((d) => d.isCurrentYear)
-    for (const d of daysToday) {
       if (d.count > 0) streak++
       else break
     }
 
-    // Week labels (Mon, Wed, Fri)
-    const weekLabels = ['L', '', 'M', '', 'V', '', '']
+    const weekLabels = ['L', '', 'Mi', '', 'V', '', '']
 
-    // Month labels: at start of each month
     const monthLabels: Array<{ label: string; weekIndex: number }> = []
     const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
     let lastMonth = -1
     for (let i = 0; i < days.length; i += 7) {
-      const d = new Date(days[i].date + 'T12:00:00')
-      if (d.getMonth() !== lastMonth && d.getDate() <= 7) {
-        monthLabels.push({ label: monthNames[d.getMonth()], weekIndex: i / 7 })
-        lastMonth = d.getMonth()
+      const [, mm, dd] = days[i].date.split('-').map(Number)
+      if (mm - 1 !== lastMonth && dd <= 7) {
+        monthLabels.push({ label: monthNames[mm - 1], weekIndex: i / 7 })
+        lastMonth = mm - 1
       }
     }
 
-    // Total transactions last year
-    const totalCount = days.filter((d) => d.isCurrentYear).reduce((sum, d) => sum + d.count, 0)
-    const totalAmount = days.filter((d) => d.isCurrentYear).reduce((sum, d) => sum + d.amount, 0)
-    const activeDays = days.filter((d) => d.isCurrentYear && d.count > 0).length
+    // Totals from raw data — resilient to date-formatting drift (a transaction
+    // stored with a UTC date instead of local would otherwise disappear from counts).
+    const totalCount = data.reduce((sum, d) => sum + d.count, 0)
+    const totalAmount = data.reduce((sum, d) => sum + d.amount, 0)
+    const activeDays = data.filter((d) => d.count > 0).length
 
     return {
       days,
       weekLabels,
       monthLabels,
       maxAmount,
-      streakInfo: { current: streak, longest: longestStreak, totalCount, totalAmount, activeDays },
+      streakInfo: { current: streak, totalCount, totalAmount, activeDays },
     }
-  }, [data])
+  }, [data, todayStr])
 
   function getColor(amount: number): string {
     if (amount === -1) return 'transparent'
@@ -134,6 +114,31 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const weeks: Array<typeof days> = []
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7))
+  }
+
+  const isEmpty = streakInfo.totalCount === 0
+
+  if (isEmpty) {
+    return (
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Flame className="h-5 w-5 text-yellow-400" />
+          <h3 className="text-base font-bold text-text-primary">Actividad del año</h3>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+          <p className="text-sm text-text-secondary max-w-sm">
+            Todavía no hay gastos registrados en los últimos 365 días. Registra tu primera transacción y tu actividad aparecerá aquí.
+          </p>
+          <Link
+            href="/transactions"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva transacción
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -193,7 +198,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                       key={dayIdx}
                       onMouseEnter={() => day.isCurrentYear && setHoveredDay({ date: day.date, amount: day.amount, count: day.count })}
                       onMouseLeave={() => setHoveredDay(null)}
-                      className="w-2.5 h-2.5 rounded-sm transition-all hover:ring-2 hover:ring-violet-500 cursor-pointer"
+                      className={`w-2.5 h-2.5 rounded-sm transition-all hover:ring-2 hover:ring-violet-500 cursor-pointer ${day.isToday ? 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-transparent' : ''}`}
                       style={{ backgroundColor: getColor(day.amount) }}
                     />
                   ))}

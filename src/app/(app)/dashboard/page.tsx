@@ -17,6 +17,7 @@ import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
 import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap'
 import { WeeklyComparisonCard } from '@/components/dashboard/WeeklyComparisonCard'
 import { calculateWeeklyComparison } from '@/lib/utils/weeklyComparison'
+import { getChileToday } from '@/lib/utils/timezone'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -109,20 +110,27 @@ export default async function DashboardPage() {
     tripCount = (tripTx ?? []).length
   }
 
-  // Activity heatmap: last 365 days of transactions
-  const oneYearAgo = new Date()
-  oneYearAgo.setDate(oneYearAgo.getDate() - 365)
-  const { data: heatmapTx } = await supabase
+  // Activity heatmap: last 365 days of expense transactions (Chile timezone)
+  const todayChile = getChileToday() // YYYY-MM-DD in America/Santiago
+  const [y, m, d] = todayChile.split('-').map(Number)
+  const oneYearAgoChile = new Date(Date.UTC(y, m - 1, d))
+  oneYearAgoChile.setUTCDate(oneYearAgoChile.getUTCDate() - 365)
+  const oneYearAgoStr = `${oneYearAgoChile.getUTCFullYear()}-${String(oneYearAgoChile.getUTCMonth() + 1).padStart(2, '0')}-${String(oneYearAgoChile.getUTCDate()).padStart(2, '0')}`
+
+  const { data: heatmapTx, error: heatmapErr } = await supabase
     .from('transactions')
-    .select('transaction_date, amount, type')
+    .select('transaction_date, amount')
     .eq('user_id', user.id)
-    .gte('transaction_date', oneYearAgo.toISOString().split('T')[0])
+    .eq('type', 'expense')
+    .gte('transaction_date', oneYearAgoStr)
+
+  if (heatmapErr) console.error('[dashboard] heatmap query error:', heatmapErr)
 
   const heatmapMap: Record<string, { amount: number; count: number }> = {}
-  for (const tx of (heatmapTx ?? []) as { transaction_date: string; amount: number; type: string }[]) {
-    if (tx.type !== 'expense') continue
+  for (const tx of (heatmapTx ?? []) as { transaction_date: string; amount: number | string }[]) {
+    const amt = typeof tx.amount === 'string' ? Number(tx.amount) : tx.amount
     if (!heatmapMap[tx.transaction_date]) heatmapMap[tx.transaction_date] = { amount: 0, count: 0 }
-    heatmapMap[tx.transaction_date].amount += tx.amount
+    heatmapMap[tx.transaction_date].amount += amt
     heatmapMap[tx.transaction_date].count++
   }
   const heatmapData = Object.entries(heatmapMap).map(([date, v]) => ({
@@ -180,7 +188,7 @@ export default async function DashboardPage() {
       <WeeklyComparisonCard data={weeklyData} />
 
       {/* Activity heatmap */}
-      <ActivityHeatmap data={heatmapData} />
+      <ActivityHeatmap data={heatmapData} todayStr={todayChile} />
 
       {/* Client-side dashboard with functional filters */}
       <DashboardClient
