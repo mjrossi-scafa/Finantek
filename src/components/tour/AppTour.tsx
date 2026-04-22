@@ -69,6 +69,15 @@ const TOUR_STEPS: TourStep[] = [
     placement: 'right',
   },
   {
+    id: 'planner',
+    targets: ['[data-tour="nav-planner"]', '[data-tour="mnav-planner"]'],
+    title: 'Planificador',
+    description:
+      'Agenda gastos futuros: arriendo, suscripciones, cuentas. Te aviso antes de cada vencimiento y puedes marcarlos como pagados.',
+    pose: 'explicando',
+    placement: 'right',
+  },
+  {
     id: 'trips',
     targets: ['[data-tour="nav-trips"]', '[data-tour="mnav-trips"]'],
     title: 'Viajes',
@@ -84,6 +93,15 @@ const TOUR_STEPS: TourStep[] = [
     description:
       'Cada semana analizo tus patrones y te doy un resumen: dónde gastaste más, tendencias, recomendaciones. Se genera solo.',
     pose: 'explicando',
+    placement: 'right',
+  },
+  {
+    id: 'achievements',
+    targets: ['[data-tour="nav-achievements"]', '[data-tour="mnav-achievements"]'],
+    title: 'Logros',
+    description:
+      'Cada acción te da puntos y desbloqueas logros: registrar 7 días seguidos, ahorrar 20%, subir tu primer recibo. Revisa aquí tu progreso.',
+    pose: 'celebrando',
     placement: 'right',
   },
   {

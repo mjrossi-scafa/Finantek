@@ -93,14 +93,15 @@ export function OnboardingWizard({
 
   const [telegramLinked, setTelegramLinked] = useState(false)
 
-  const totalSteps = 7
+  const totalSteps = 9
   const progress = (step / totalSteps) * 100
 
   const pose: KenjiPose = useMemo(() => {
     if (step === 1) return 'saludo'
-    if (step === 7) return 'meditando'
+    if (step === 9) return 'meditando'
     if (step === 4 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
-    if (step === 6 && telegramLinked) return 'celebrando'
+    if (step === 5) return 'celebrando'
+    if (step === 7 && telegramLinked) return 'celebrando'
     return 'explicando'
   }, [step, data.firstTxAmount, data.firstTxCategory, telegramLinked])
 
@@ -115,12 +116,16 @@ export function OnboardingWizard({
       case 4:
         return `Registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
       case 5:
-        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
+        return `Bien hecho. Mira cómo te recompensa el dojo: puntos, logros, y el color del samurái cambia según tu salud financiera.`
       case 6:
+        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
+      case 7:
         return telegramLinked
           ? `¡Conectado! Ahora puedes registrar gastos desde Telegram.`
           : `Conecta el bot de Telegram ahora. Te va a ahorrar mucho tiempo después. Este paso no se salta.`
-      case 7:
+      case 8:
+        return `Instala Katana en tu celular. Funciona offline, entra rápido, y es gratis.`
+      case 9:
         return `Ya eres samurái. El dojo es tuyo. Domo arigatou.`
       default:
         return ''
@@ -194,7 +199,7 @@ export function OnboardingWizard({
         return true
       case 5:
         return true
-      case 6:
+      case 7:
         return telegramLinked
       default:
         return true
@@ -202,7 +207,7 @@ export function OnboardingWizard({
   }
 
   function handleNext() {
-    if (step === 7) {
+    if (step === 9) {
       finalizeOnboarding()
       return
     }
@@ -275,15 +280,17 @@ export function OnboardingWizard({
             {step === 2 && <Step2Income data={data} update={update} />}
             {step === 3 && <Step3Categories existingCategories={existingCategories} />}
             {step === 4 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
-            {step === 5 && <Step5Receipt />}
-            {step === 6 && (
-              <Step6Telegram
+            {step === 5 && <Step5Gamification />}
+            {step === 6 && <Step6Receipt />}
+            {step === 7 && (
+              <Step7Telegram
                 userId={userId}
                 linked={telegramLinked}
                 onLinked={() => setTelegramLinked(true)}
               />
             )}
-            {step === 7 && <Step7Farewell data={data} telegramLinked={telegramLinked} />}
+            {step === 8 && <Step8PWA />}
+            {step === 9 && <Step9Farewell data={data} telegramLinked={telegramLinked} />}
           </div>
 
           {error && (
@@ -320,7 +327,7 @@ export function OnboardingWizard({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Guardando...
                 </>
-              ) : step === 7 ? (
+              ) : step === 9 ? (
                 <>
                   Entrar al dojo
                   <ArrowRight className="h-4 w-4" />
@@ -664,7 +671,82 @@ function Step4FirstTransaction({
   )
 }
 
-function Step5Receipt() {
+function Step5Gamification() {
+  const colors = [
+    { state: 'violet', label: 'Normal', color: '#C084FC', meaning: 'Todo tranquilo, dojo en equilibrio' },
+    { state: 'green', label: 'Ahorrador', color: '#84CC16', meaning: 'Ahorras 20%+ de tus ingresos' },
+    { state: 'yellow', label: 'Alerta', color: '#FCD34D', meaning: 'Llegaste al 80% de un presupuesto' },
+    { state: 'red', label: 'Rojo', color: '#EF4444', meaning: 'Gastaste más de lo que entra' },
+    { state: 'gold', label: 'Dorado', color: '#F59E0B', meaning: 'Desbloqueaste un logro reciente' },
+  ]
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Así funciona el dojo 🥷
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          Katana no es solo una app de gastos: es tu progreso como samurái financiero.
+        </p>
+      </div>
+
+      {/* Puntos y logros */}
+      <div className="bg-gradient-to-br from-violet-500/10 to-green-500/5 border border-violet-500/20 rounded-2xl p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center flex-shrink-0 text-xl">
+            ⭐
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-sm">Puntos y logros</h3>
+            <p className="text-xs text-purple-300/80 leading-snug">
+              Cada acción te da puntos. Ahorrar, registrar días seguidos, subir recibos, cumplir presupuestos… todo suma. Desbloqueas logros y los ves en el menú <strong className="text-white">Logros</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Samurai colors */}
+      <div className="bg-violet-950/30 border border-violet-500/20 rounded-2xl p-4">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0 text-xl">
+            🎨
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-sm mb-1">Tu samurái cambia de color</h3>
+            <p className="text-xs text-purple-300/80 leading-snug">
+              El widget del sidebar refleja tu salud financiera en tiempo real:
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+          {colors.map((c) => (
+            <div
+              key={c.state}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/30 border border-white/5"
+            >
+              <div
+                className="w-4 h-4 rounded-full flex-shrink-0"
+                style={{ backgroundColor: c.color, boxShadow: `0 0 8px ${c.color}80` }}
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white">{c.label}</p>
+                <p className="text-[10px] text-purple-300/70 leading-tight truncate">{c.meaning}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-xs text-center text-purple-400/60">
+        Mientras más usas Katana, más progresa tu samurái.
+      </p>
+    </div>
+  )
+}
+
+function Step6Receipt() {
   return (
     <div className="space-y-6">
       <div>
@@ -721,7 +803,7 @@ function Step5Receipt() {
   )
 }
 
-function Step6Telegram({
+function Step7Telegram({
   userId,
   linked,
   onLinked,
@@ -991,7 +1073,109 @@ function InstructionStep({ number, text }: { number: number; text: string }) {
   )
 }
 
-function Step7Farewell({
+function Step8PWA() {
+  const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop')
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined') return
+    const ua = navigator.userAgent
+    if (/iPhone|iPad|iPod/i.test(ua)) setPlatform('ios')
+    else if (/Android/i.test(ua)) setPlatform('android')
+    else setPlatform('desktop')
+  }, [])
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Instala Katana en tu celular 📱
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          Katana es una app progresiva (PWA): funciona offline, se instala en 1 segundo y no ocupa espacio del App Store.
+        </p>
+      </div>
+
+      {/* Benefits */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-violet-950/40 border border-violet-500/15 rounded-xl p-3 text-center">
+          <div className="text-2xl mb-1">⚡</div>
+          <p className="text-[11px] text-purple-200 font-medium">Carga al instante</p>
+        </div>
+        <div className="bg-violet-950/40 border border-violet-500/15 rounded-xl p-3 text-center">
+          <div className="text-2xl mb-1">📴</div>
+          <p className="text-[11px] text-purple-200 font-medium">Funciona offline</p>
+        </div>
+        <div className="bg-violet-950/40 border border-violet-500/15 rounded-xl p-3 text-center">
+          <div className="text-2xl mb-1">🔔</div>
+          <p className="text-[11px] text-purple-200 font-medium">Notificaciones</p>
+        </div>
+      </div>
+
+      {/* Platform tabs */}
+      <div className="flex gap-1 p-1 bg-violet-950/40 border border-violet-500/15 rounded-xl">
+        {(['ios', 'android', 'desktop'] as const).map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => setPlatform(p)}
+            className={cn(
+              'flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all',
+              platform === p
+                ? 'bg-violet-500/25 text-white border border-violet-400'
+                : 'text-purple-400 hover:text-purple-200'
+            )}
+          >
+            {p === 'ios' ? '🍎 iPhone' : p === 'android' ? '🤖 Android' : '💻 Desktop'}
+          </button>
+        ))}
+      </div>
+
+      {/* Instructions */}
+      <div className="bg-gradient-to-br from-violet-500/10 to-black/30 border border-violet-500/25 rounded-2xl p-4 space-y-3">
+        {platform === 'ios' && (
+          <>
+            <PWAStep n={1} text="Abre esta página en Safari (no funciona en Chrome iOS)" />
+            <PWAStep n={2} text="Toca el botón Compartir (cuadrado con flecha arriba) en la barra inferior" />
+            <PWAStep n={3} text={"Desliza y toca \"Agregar a pantalla de inicio\""} />
+            <PWAStep n={4} text="Confirma y verás el ícono en tu home" />
+          </>
+        )}
+        {platform === 'android' && (
+          <>
+            <PWAStep n={1} text="Abre esta página en Chrome" />
+            <PWAStep n={2} text="Toca el menú de 3 puntos arriba a la derecha" />
+            <PWAStep n={3} text={"Toca \"Instalar app\" o \"Agregar a pantalla de inicio\""} />
+            <PWAStep n={4} text="Confirma y se instala como app normal" />
+          </>
+        )}
+        {platform === 'desktop' && (
+          <>
+            <PWAStep n={1} text="En Chrome/Edge/Brave, busca el ícono de instalación a la derecha del URL" />
+            <PWAStep n={2} text="En Safari: Archivo → Agregar al Dock" />
+            <PWAStep n={3} text="Abre como app independiente desde tu escritorio" />
+          </>
+        )}
+      </div>
+
+      <p className="text-center text-xs text-purple-400/60">
+        Puedes saltar este paso e instalar cuando quieras. 100% gratis, sin App Store.
+      </p>
+    </div>
+  )
+}
+
+function PWAStep({ n, text }: { n: number; text: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="w-6 h-6 rounded-full bg-violet-500/25 border border-violet-400/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="text-xs font-bold text-violet-200">{n}</span>
+      </div>
+      <p className="text-sm text-purple-100/90 leading-snug">{text}</p>
+    </div>
+  )
+}
+
+function Step9Farewell({
   data,
   telegramLinked,
 }: {
