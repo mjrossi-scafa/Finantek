@@ -93,12 +93,12 @@ export function OnboardingWizard({
 
   const [telegramLinked, setTelegramLinked] = useState(false)
 
-  const totalSteps = 8
+  const totalSteps = 7
   const progress = (step / totalSteps) * 100
 
   const pose: KenjiPose = useMemo(() => {
     if (step === 1) return 'saludo'
-    if (step === 8) return 'meditando'
+    if (step === 7) return 'meditando'
     if (step === 4 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
     if (step === 6 && telegramLinked) return 'celebrando'
     return 'explicando'
@@ -111,7 +111,7 @@ export function OnboardingWizard({
       case 2:
         return `¿Cuánto entra a tu dojo cada mes? Sirve para sugerirte límites justos. Puedes saltar si prefieres.`
       case 3:
-        return `Elige las categorías que más usas. Así arrancas con tus propias armas, no las del dojo.`
+        return `Estas son tus categorías para clasificar gastos. Puedes crear, editar o eliminar cuantas quieras en Configuración.`
       case 4:
         return `Registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
       case 5:
@@ -121,8 +121,6 @@ export function OnboardingWizard({
           ? `¡Conectado! Ahora puedes registrar gastos desde Telegram.`
           : `Conecta el bot de Telegram ahora. Te va a ahorrar mucho tiempo después. Este paso no se salta.`
       case 7:
-        return `Dos extras opcionales para dejar Katana perfecto.`
-      case 8:
         return `Ya eres samurái. El dojo es tuyo. Domo arigatou.`
       default:
         return ''
@@ -155,37 +153,11 @@ export function OnboardingWizard({
         .eq('id', userId)
       if (profileError) throw profileError
 
-      // 2. Create selected categories that don't exist yet
-      const existingNames = new Set(existingCategories.map((c) => c.name.toLowerCase()))
-      const newCategories = data.selectedCategories
-        .filter((name) => !existingNames.has(name.toLowerCase()))
-        .map((name, idx) => {
-          const preset = PRESET_CATEGORIES.find((p) => p.name === name)
-          return {
-            user_id: userId,
-            name,
-            icon: preset?.icon ?? '📌',
-            type: 'expense' as const,
-            is_default: false,
-            sort_order: existingCategories.length + idx,
-          }
-        })
-
-      let allCategories = existingCategories
-      if (newCategories.length > 0) {
-        const { data: inserted, error: catError } = await supabase
-          .from('categories')
-          .insert(newCategories)
-          .select('id, name, icon, type')
-        if (catError) throw catError
-        allCategories = [...existingCategories, ...(inserted ?? [])]
-      }
-
-      // 3. Create first transaction (if user entered one)
+      // 2. Create first transaction (if user entered one)
       if (data.firstTxAmount && data.firstTxCategory) {
         const amountNumber = parseInt(data.firstTxAmount.replace(/\D/g, ''), 10)
         if (amountNumber > 0) {
-          const category = allCategories.find((c) => c.name === data.firstTxCategory)
+          const category = existingCategories.find((c) => c.name === data.firstTxCategory)
           if (category) {
             const { error: txError } = await supabase.from('transactions').insert({
               user_id: userId,
@@ -217,24 +189,20 @@ export function OnboardingWizard({
       case 2:
         return true
       case 3:
-        // Si ya tiene 3+ categorías existentes, no necesita seleccionar nada más
-        if (existingCategories.length >= 3) return true
-        return data.selectedCategories.length >= 3
+        return true
       case 4:
         return true
       case 5:
         return true
       case 6:
         return telegramLinked
-      case 7:
-        return true
       default:
         return true
     }
   }
 
   function handleNext() {
-    if (step === 8) {
+    if (step === 7) {
       finalizeOnboarding()
       return
     }
@@ -305,8 +273,8 @@ export function OnboardingWizard({
           <div className="flex-1">
             {step === 1 && <Step1Welcome data={data} update={update} />}
             {step === 2 && <Step2Income data={data} update={update} />}
-            {step === 3 && <Step3Categories data={data} update={update} existingCategories={existingCategories} />}
-            {step === 4 && <Step4FirstTransaction data={data} update={update} />}
+            {step === 3 && <Step3Categories existingCategories={existingCategories} />}
+            {step === 4 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
             {step === 5 && <Step5Receipt />}
             {step === 6 && (
               <Step6Telegram
@@ -315,8 +283,7 @@ export function OnboardingWizard({
                 onLinked={() => setTelegramLinked(true)}
               />
             )}
-            {step === 7 && <Step7Extras />}
-            {step === 8 && <Step8Farewell data={data} telegramLinked={telegramLinked} />}
+            {step === 7 && <Step7Farewell data={data} telegramLinked={telegramLinked} />}
           </div>
 
           {error && (
@@ -353,7 +320,7 @@ export function OnboardingWizard({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Guardando...
                 </>
-              ) : step === 8 ? (
+              ) : step === 7 ? (
                 <>
                   Entrar al dojo
                   <ArrowRight className="h-4 w-4" />
@@ -525,6 +492,87 @@ function Step2Income({
 }
 
 function Step3Categories({
+  existingCategories,
+}: {
+  existingCategories: { id: string; name: string; icon: string | null; type: string }[]
+}) {
+  const hasCategories = existingCategories.length > 0
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Tus categorías
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          Las categorías te ayudan a clasificar cada gasto o ingreso para ver en qué se te va el dinero.
+        </p>
+      </div>
+
+      {hasCategories ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/25">
+            <Check className="h-5 w-5 text-green-400 flex-shrink-0" />
+            <p className="text-sm text-green-100 leading-snug">
+              Ya tienes {existingCategories.length} categorías listas para usar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {existingCategories.slice(0, 12).map((cat) => (
+              <div
+                key={cat.id}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-950/40 border border-violet-500/15 text-sm"
+              >
+                <span className="text-lg">{cat.icon ?? '📌'}</span>
+                <span className="text-purple-200 truncate">{cat.name}</span>
+              </div>
+            ))}
+          </div>
+          {existingCategories.length > 12 && (
+            <p className="text-xs text-purple-400/60 text-center">
+              +{existingCategories.length - 12} más
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="bg-violet-950/30 border border-violet-500/20 rounded-xl p-4">
+          <p className="text-sm text-purple-200 mb-3">
+            Al crear tu cuenta te armamos estas categorías por default:
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { icon: '🍔', name: 'Alimentación' },
+              { icon: '🚌', name: 'Transporte' },
+              { icon: '🎬', name: 'Entretenimiento' },
+              { icon: '💊', name: 'Salud' },
+              { icon: '📚', name: 'Educación' },
+              { icon: '🏠', name: 'Hogar' },
+            ].map((cat) => (
+              <div
+                key={cat.name}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-950/40 border border-violet-500/15 text-xs"
+              >
+                <span>{cat.icon}</span>
+                <span className="text-purple-200 truncate">{cat.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-violet-500/5 border border-violet-500/15">
+        <div className="text-violet-300 flex-shrink-0 pt-0.5">💡</div>
+        <div className="text-xs text-purple-200/80 leading-snug space-y-1">
+          <p><strong className="text-white">¿Necesitas otras?</strong></p>
+          <p>Puedes crear, editar o eliminar categorías en <strong className="text-white">Configuración → Categorías</strong> en cualquier momento.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Step4FirstTransaction({
   data,
   update,
   existingCategories,
@@ -533,101 +581,9 @@ function Step3Categories({
   update: <K extends keyof WizardState>(k: K, v: WizardState[K]) => void
   existingCategories: { id: string; name: string; icon: string | null; type: string }[]
 }) {
-  function toggle(name: string) {
-    const current = data.selectedCategories
-    if (current.includes(name)) {
-      update('selectedCategories', current.filter((n) => n !== name))
-    } else {
-      update('selectedCategories', [...current, name])
-    }
-  }
-
-  const existingNames = new Set(existingCategories.map((c) => c.name.toLowerCase()))
-  const count = data.selectedCategories.length
-  const alreadyHasEnough = existingCategories.length >= 3
-
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          {alreadyHasEnough ? 'Tus categorías' : '¿En qué gastas habitualmente?'}
-        </h2>
-        <p className="text-purple-300/80 text-sm">
-          {alreadyHasEnough
-            ? `Ya tienes ${existingCategories.length} categorías listas. Puedes marcar favoritas aquí (opcional) o pasar al siguiente.`
-            : 'Elige al menos 3. Luego puedes agregar más en Transacciones.'}
-        </p>
-      </div>
-
-      {alreadyHasEnough && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/25">
-          <Check className="h-5 w-5 text-green-400 flex-shrink-0" />
-          <p className="text-sm text-green-100 leading-snug">
-            Tu cuenta ya tiene categorías creadas. Puedes seguir sin seleccionar nada o marcar las que más uses para priorizarlas.
-          </p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {PRESET_CATEGORIES.map((cat) => {
-          const selected = data.selectedCategories.includes(cat.name)
-          const existed = existingNames.has(cat.name.toLowerCase())
-          return (
-            <button
-              key={cat.name}
-              type="button"
-              onClick={() => toggle(cat.name)}
-              className={cn(
-                'flex items-center gap-2 px-3 py-3 rounded-xl border text-sm font-medium transition-all text-left',
-                selected
-                  ? 'bg-violet-500/20 border-violet-400 text-white shadow-lg shadow-violet-500/20'
-                  : 'bg-violet-950/30 border-violet-500/10 text-purple-300 hover:border-violet-500/40'
-              )}
-            >
-              <span className="text-xl">{cat.icon}</span>
-              <span className="flex-1">{cat.name}</span>
-              {selected && <Check className="h-4 w-4 text-violet-300" />}
-              {existed && !selected && (
-                <span
-                  className="text-[10px] text-green-400/70 font-medium"
-                  title="Ya existe en tu cuenta"
-                >
-                  ✓
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {!alreadyHasEnough && (
-        <div
-          className={cn(
-            'px-4 py-3 rounded-xl text-sm border text-center',
-            count >= 3
-              ? 'bg-green-500/10 border-green-500/30 text-green-300'
-              : 'bg-violet-950/30 border-violet-500/20 text-purple-300/70'
-          )}
-        >
-          {count >= 3
-            ? `Perfecto, ${count} categorías seleccionadas`
-            : `Selecciona al menos ${3 - count} más (${count}/3)`}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Step4FirstTransaction({
-  data,
-  update,
-}: {
-  data: WizardState
-  update: <K extends keyof WizardState>(k: K, v: WizardState[K]) => void
-}) {
-  const available = data.selectedCategories.length > 0
-    ? data.selectedCategories
-    : PRESET_CATEGORIES.map((c) => c.name)
+  const available = existingCategories.length > 0
+    ? existingCategories.map((c) => ({ name: c.name, icon: c.icon ?? '📌' }))
+    : PRESET_CATEGORIES
 
   const currencySymbol = CURRENCIES.find((c) => c.code === data.currency)?.symbol ?? '$'
 
@@ -670,14 +626,13 @@ function Step4FirstTransaction({
           Categoría
         </label>
         <div className="flex flex-wrap gap-2">
-          {available.map((name) => {
-            const preset = PRESET_CATEGORIES.find((p) => p.name === name)
-            const selected = data.firstTxCategory === name
+          {available.map((cat) => {
+            const selected = data.firstTxCategory === cat.name
             return (
               <button
-                key={name}
+                key={cat.name}
                 type="button"
-                onClick={() => update('firstTxCategory', name)}
+                onClick={() => update('firstTxCategory', cat.name)}
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-full border text-sm transition-all',
                   selected
@@ -685,8 +640,8 @@ function Step4FirstTransaction({
                     : 'bg-violet-950/30 border-violet-500/10 text-purple-300 hover:border-violet-500/40'
                 )}
               >
-                <span>{preset?.icon ?? '📌'}</span>
-                <span>{name}</span>
+                <span>{cat.icon ?? '📌'}</span>
+                <span>{cat.name}</span>
               </button>
             )
           })}
@@ -1036,81 +991,7 @@ function InstructionStep({ number, text }: { number: number; text: string }) {
   )
 }
 
-function Step7Extras() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Dos extras opcionales
-        </h2>
-        <p className="text-purple-300/80 text-sm">
-          Se configuran en 1 minuto. Puedes activarlos después en Configuración.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <ExtraCard
-          icon={<Target className="h-6 w-6" />}
-          title="Primer presupuesto"
-          description="Pon un límite mensual a una categoría y recibe alertas al 80% y 100%."
-          hint="Menú → Presupuestos"
-          color="green"
-        />
-        <ExtraCard
-          icon={<Palette className="h-6 w-6" />}
-          title="Tema visual"
-          description="Claro, oscuro o automático según hora del día."
-          hint="Configuración → Apariencia"
-          color="yellow"
-        />
-      </div>
-
-      <p className="text-center text-xs text-purple-400/60">
-        Todo esto se activa en cualquier momento desde el menú.
-      </p>
-    </div>
-  )
-}
-
-function ExtraCard({
-  icon,
-  title,
-  description,
-  hint,
-  color,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  hint: string
-  color: 'violet' | 'green' | 'yellow'
-}) {
-  const palette = {
-    violet: 'from-violet-500/15 border-violet-500/30 text-violet-300',
-    green: 'from-green-500/15 border-green-500/30 text-green-300',
-    yellow: 'from-yellow-500/15 border-yellow-500/30 text-yellow-300',
-  }[color]
-
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-3 sm:gap-4 bg-gradient-to-br to-black/30 border rounded-2xl p-3 sm:p-4',
-        palette
-      )}
-    >
-      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-black/30 flex items-center justify-center flex-shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="text-white font-semibold mb-0.5 text-sm sm:text-base">{title}</h3>
-        <p className="text-xs text-purple-300/70 leading-snug">{description}</p>
-        <p className="text-[10px] text-purple-400/50 mt-1 font-mono">{hint}</p>
-      </div>
-    </div>
-  )
-}
-
-function Step8Farewell({
+function Step7Farewell({
   data,
   telegramLinked,
 }: {
@@ -1119,7 +1000,6 @@ function Step8Farewell({
 }) {
   const achievements = [
     `Perfil: ${data.name || 'configurado'} · ${data.currency}`,
-    `${data.selectedCategories.length} categorías elegidas`,
     data.firstTxAmount ? 'Primera transacción registrada' : null,
     !data.incomeSkipped && data.monthlyIncome ? 'Ingreso mensual configurado' : null,
     telegramLinked ? 'Bot de Telegram vinculado' : null,
