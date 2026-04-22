@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       >
         {/* Japan map as background decoration */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <JapanMapDots className="w-[85%] h-[85%]" dotSize={4} opacity={0.45} />
+          <JapanMapDots className="w-[65%] h-[65%]" />
         </div>
 
         {/* Contenido centrado verticalmente */}

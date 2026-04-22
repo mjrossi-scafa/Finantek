@@ -1,4 +1,4 @@
-// Pixel-art map of Japan rendered as SVG dots.
+// Pixel-art map of Japan rendered as SVG squares aligned to the background dot grid.
 // Coordinates approximate main islands: Hokkaido, Honshu, Shikoku, Kyushu.
 const JAPAN_DOTS: [number, number][] = [
   // Hokkaido (north)
@@ -35,66 +35,45 @@ const JAPAN_DOTS: [number, number][] = [
   [8, 27], [10, 27], [12, 27],
   [10, 28], [12, 28],
 
-  // Okinawa chain hint (bottom-left small dots)
+  // Okinawa chain hint
   [6, 30],
   [4, 32],
 ]
 
 interface JapanMapDotsProps {
   className?: string
-  /** Size multiplier for dots */
-  dotSize?: number
-  /** Opacity of dots */
-  opacity?: number
 }
 
-export function JapanMapDots({
-  className,
-  dotSize = 3,
-  opacity = 0.55,
-}: JapanMapDotsProps) {
+export function JapanMapDots({ className }: JapanMapDotsProps) {
   return (
     <svg
       viewBox="0 0 50 40"
       preserveAspectRatio="xMidYMid meet"
       className={className}
+      shapeRendering="crispEdges"
       aria-hidden="true"
     >
-      <defs>
-        <radialGradient id="japanDotGradient" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stopColor="#84CC16" stopOpacity="0.9" />
-          <stop offset="60%" stopColor="#C084FC" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
-        </radialGradient>
-        <filter id="japanDotGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="0.3" />
-        </filter>
-      </defs>
+      {JAPAN_DOTS.map(([x, y], i) => (
+        <rect
+          key={`${x}-${y}-${i}`}
+          x={x - 0.35}
+          y={y - 0.35}
+          width={0.7}
+          height={0.7}
+          fill="#C084FC"
+          opacity={0.5}
+        />
+      ))}
 
-      <g opacity={opacity} filter="url(#japanDotGlow)">
-        {JAPAN_DOTS.map(([x, y], i) => (
-          <circle
-            key={`${x}-${y}-${i}`}
-            cx={x}
-            cy={y}
-            r={dotSize * 0.25}
-            fill="url(#japanDotGradient)"
-          />
-        ))}
-      </g>
-
-      {/* Brighter core dots for depth */}
-      <g opacity={opacity * 0.8}>
-        {JAPAN_DOTS.map(([x, y], i) => (
-          <circle
-            key={`core-${x}-${y}-${i}`}
-            cx={x}
-            cy={y}
-            r={dotSize * 0.15}
-            fill="#C084FC"
-          />
-        ))}
-      </g>
+      {/* Tokyo highlight dot (green = Katana color accent) */}
+      <rect
+        x={27.65}
+        y={18.65}
+        width={0.7}
+        height={0.7}
+        fill="#84CC16"
+        opacity={0.9}
+      />
     </svg>
   )
 }
