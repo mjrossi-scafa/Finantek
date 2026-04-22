@@ -217,6 +217,8 @@ export function OnboardingWizard({
       case 2:
         return true
       case 3:
+        // Si ya tiene 3+ categorías existentes, no necesita seleccionar nada más
+        if (existingCategories.length >= 3) return true
         return data.selectedCategories.length >= 3
       case 4:
         return true
@@ -542,17 +544,29 @@ function Step3Categories({
 
   const existingNames = new Set(existingCategories.map((c) => c.name.toLowerCase()))
   const count = data.selectedCategories.length
+  const alreadyHasEnough = existingCategories.length >= 3
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          ¿En qué gastas habitualmente?
+          {alreadyHasEnough ? 'Tus categorías' : '¿En qué gastas habitualmente?'}
         </h2>
         <p className="text-purple-300/80 text-sm">
-          Elige al menos 3. Luego puedes agregar más en Transacciones.
+          {alreadyHasEnough
+            ? `Ya tienes ${existingCategories.length} categorías listas. Puedes marcar favoritas aquí (opcional) o pasar al siguiente.`
+            : 'Elige al menos 3. Luego puedes agregar más en Transacciones.'}
         </p>
       </div>
+
+      {alreadyHasEnough && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/25">
+          <Check className="h-5 w-5 text-green-400 flex-shrink-0" />
+          <p className="text-sm text-green-100 leading-snug">
+            Tu cuenta ya tiene categorías creadas. Puedes seguir sin seleccionar nada o marcar las que más uses para priorizarlas.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {PRESET_CATEGORIES.map((cat) => {
@@ -574,25 +588,32 @@ function Step3Categories({
               <span className="flex-1">{cat.name}</span>
               {selected && <Check className="h-4 w-4 text-violet-300" />}
               {existed && !selected && (
-                <span className="text-[10px] text-green-400 opacity-70">ya</span>
+                <span
+                  className="text-[10px] text-green-400/70 font-medium"
+                  title="Ya existe en tu cuenta"
+                >
+                  ✓
+                </span>
               )}
             </button>
           )
         })}
       </div>
 
-      <div
-        className={cn(
-          'px-4 py-3 rounded-xl text-sm border text-center',
-          count >= 3
-            ? 'bg-green-500/10 border-green-500/30 text-green-300'
-            : 'bg-violet-950/30 border-violet-500/20 text-purple-300/70'
-        )}
-      >
-        {count >= 3
-          ? `Perfecto, ${count} categorías seleccionadas`
-          : `Selecciona al menos ${3 - count} más (${count}/3)`}
-      </div>
+      {!alreadyHasEnough && (
+        <div
+          className={cn(
+            'px-4 py-3 rounded-xl text-sm border text-center',
+            count >= 3
+              ? 'bg-green-500/10 border-green-500/30 text-green-300'
+              : 'bg-violet-950/30 border-violet-500/20 text-purple-300/70'
+          )}
+        >
+          {count >= 3
+            ? `Perfecto, ${count} categorías seleccionadas`
+            : `Selecciona al menos ${3 - count} más (${count}/3)`}
+        </div>
+      )}
     </div>
   )
 }
