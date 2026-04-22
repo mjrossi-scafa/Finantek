@@ -19,6 +19,8 @@ export interface Profile {
   onboarding_completed?: boolean
   onboarding_completed_at?: string | null
   monthly_income_estimate?: number | null
+  app_tour_completed?: boolean
+  app_tour_completed_at?: string | null
   created_at: string
   updated_at: string
 }

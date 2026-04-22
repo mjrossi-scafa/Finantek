@@ -364,6 +364,17 @@
 }
 .animate-kenji-breathe { animation: kenjiBreathe 2.8s ease-in-out infinite; }
 
+/* Tour spotlight pulse */
+@keyframes tourPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(132,204,22,0.6), 0 0 40px 8px rgba(132,204,22,0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(132,204,22,0.9), 0 0 60px 12px rgba(132,204,22,0.4);
+  }
+}
+.animate-tour-pulse { animation: tourPulse 2s ease-in-out infinite; }
+
 /* Kenji entrance */
 @keyframes kenjiEnter {
   0% { opacity: 0; transform: translateY(20px) scale(0.9); }

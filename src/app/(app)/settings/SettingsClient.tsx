@@ -205,6 +205,19 @@ export function SettingsClient({
     router.push('/onboarding')
   }
 
+  async function handleRetakeTour() {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ app_tour_completed: false })
+      .eq('id', userId)
+    if (error) {
+      toast.error('No se pudo reiniciar el tour', { description: error.message })
+      return
+    }
+    router.push('/dashboard')
+    router.refresh()
+  }
+
   async function exportData() {
     toast.loading('Preparando exportación...', { id: 'export' })
     try {
@@ -527,18 +540,29 @@ export function SettingsClient({
       </div>
 
       {/* Retake tutorial */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="glass-card rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
           <RefreshCw className="h-4 w-4 text-violet-light" />
-          <h2 className="text-sm font-bold text-text-primary">Rehacer tutorial</h2>
+          <h2 className="text-sm font-bold text-text-primary">Tutoriales con Kenji</h2>
         </div>
-        <p className="text-sm text-text-muted mb-3">
-          Vuelve al wizard de bienvenida con Kenji para repasar cómo funciona Katana.
-        </p>
-        <GradientButton onClick={handleRetakeTutorial} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4" />
-          Volver al dojo inicial
-        </GradientButton>
+        <div>
+          <p className="text-sm text-text-muted mb-3">
+            Vuelve al wizard de bienvenida para configurar moneda, categorías, transacción y Telegram desde cero.
+          </p>
+          <GradientButton onClick={handleRetakeTutorial} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4" />
+            Rehacer onboarding inicial
+          </GradientButton>
+        </div>
+        <div className="border-t border-surface-border/30 pt-4">
+          <p className="text-sm text-text-muted mb-3">
+            Repasa el tour guiado de la app (dashboard, transacciones, recibos, presupuestos, viajes, insights).
+          </p>
+          <GradientButton onClick={handleRetakeTour} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4" />
+            Ver tour de la app
+          </GradientButton>
+        </div>
       </div>
 
       {/* Data export */}

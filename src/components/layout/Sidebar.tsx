@@ -22,14 +22,14 @@ import { KatanaLogo } from '@/components/logo/katana-logo'
 import { SamuraiContainer } from '@/components/sidebar/SamuraiContainer'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
-  { href: '/trips', label: 'Viajes', icon: Plane },
-  { href: '/planner', label: 'Planificador', icon: CalendarClock },
-  { href: '/receipts', label: 'Recibos', icon: Receipt },
-  { href: '/budgets', label: 'Presupuestos', icon: Target },
-  { href: '/insights', label: 'Insights', icon: Lightbulb },
-  { href: '/achievements', label: 'Logros', icon: Trophy },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tour: 'nav-dashboard' },
+  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight, tour: 'nav-transactions' },
+  { href: '/trips', label: 'Viajes', icon: Plane, tour: 'nav-trips' },
+  { href: '/planner', label: 'Planificador', icon: CalendarClock, tour: 'nav-planner' },
+  { href: '/receipts', label: 'Recibos', icon: Receipt, tour: 'nav-receipts' },
+  { href: '/budgets', label: 'Presupuestos', icon: Target, tour: 'nav-budgets' },
+  { href: '/insights', label: 'Insights', icon: Lightbulb, tour: 'nav-insights' },
+  { href: '/achievements', label: 'Logros', icon: Trophy, tour: 'nav-achievements' },
 ]
 
 import type { KatanaState } from '@/app/(app)/layout'
@@ -85,6 +85,7 @@ export function Sidebar({ totalPoints = 0, katanaState = 'violet' }: SidebarProp
             <Link
               key={item.href}
               href={item.href}
+              data-tour={item.tour}
               className={cn(
                 'flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-weight-medium transition-wa',
                 isActive

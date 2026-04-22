@@ -6,11 +6,11 @@ import { LayoutDashboard, ArrowLeftRight, CalendarClock, Plane, Trophy } from 'l
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
-  { href: '/transactions', label: 'Movimientos', icon: ArrowLeftRight },
-  { href: '/trips', label: 'Viajes', icon: Plane },
-  { href: '/planner', label: 'Planificar', icon: CalendarClock },
-  { href: '/achievements', label: 'Logros', icon: Trophy },
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, tour: 'mnav-dashboard' },
+  { href: '/transactions', label: 'Movimientos', icon: ArrowLeftRight, tour: 'mnav-transactions' },
+  { href: '/trips', label: 'Viajes', icon: Plane, tour: 'mnav-trips' },
+  { href: '/planner', label: 'Planificar', icon: CalendarClock, tour: 'mnav-planner' },
+  { href: '/achievements', label: 'Logros', icon: Trophy, tour: 'mnav-achievements' },
 ]
 
 export function MobileNav() {
@@ -31,6 +31,7 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
+              data-tour={item.tour}
               className={cn(
                 'flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-all',
                 isActive ? 'text-violet-light' : 'text-text-muted active:text-text-secondary'

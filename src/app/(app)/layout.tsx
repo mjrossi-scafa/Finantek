@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { MobileDrawer } from '@/components/layout/MobileDrawer'
+import { AppTourMount } from '@/components/tour/AppTourMount'
 
 export type KatanaState = 'violet' | 'green' | 'yellow' | 'red' | 'gold'
 
@@ -16,13 +17,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: onboardingProfile } = await supabase
     .from('profiles')
-    .select('onboarding_completed')
+    .select('onboarding_completed, app_tour_completed')
     .eq('id', user.id)
     .single()
 
   if (onboardingProfile && !onboardingProfile.onboarding_completed) {
     redirect('/onboarding')
   }
+
+  const shouldRunTour = Boolean(
+    onboardingProfile?.onboarding_completed && !onboardingProfile?.app_tour_completed
+  )
 
   const now = new Date()
   const year = now.getFullYear()
@@ -90,6 +95,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
       </main>
       <MobileNav />
+      <AppTourMount userId={user.id} shouldRun={shouldRunTour} />
     </div>
   )
 }
