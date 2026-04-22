@@ -1,9 +1,21 @@
+export interface UserPreferences {
+  notifications: {
+    budget_alerts: boolean
+    weekly_insights: boolean
+    daily_reminders: boolean
+  }
+  reminder_hour: number
+}
+
 export interface Profile {
   id: string
   email: string
   display_name: string | null
   currency: string
   theme: string
+  timezone?: string | null
+  avatar_url?: string | null
+  preferences?: UserPreferences | null
   created_at: string
   updated_at: string
 }
