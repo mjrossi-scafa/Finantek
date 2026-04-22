@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Transaction, Category } from '@/types/database'
+import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import * as DateUtils from '@/lib/utils/dates'
 import { createClient } from '@/lib/supabase/client'
@@ -42,6 +42,7 @@ interface TransactionsClientProps {
   initialTransactions: Transaction[]
   categories: Category[]
   userId: string
+  activeTrip: Trip | null
 }
 
 function groupByDate(transactions: Transaction[]) {
@@ -93,7 +94,8 @@ function isRecentTransaction(createdAt: string): boolean {
 export function TransactionsClient({
   initialTransactions,
   categories,
-  userId
+  userId,
+  activeTrip
 }: TransactionsClientProps) {
   const supabase = createClient()
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions)
@@ -874,6 +876,7 @@ export function TransactionsClient({
         userId={userId}
         onSuccess={refreshTransactions}
         mode={modalMode}
+        activeTrip={activeTrip}
       />
 
       {/* Fixed floating button for mobile */}
