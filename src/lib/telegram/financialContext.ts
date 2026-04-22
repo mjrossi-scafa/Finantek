@@ -183,7 +183,7 @@ export async function checkSmartAlerts(
   chatId: number,
   newTransaction: { category?: string; type: string; amount: number },
   ctx: FinancialContext,
-  sendMessageFn: (chatId: number, text: string) => Promise<void>
+  sendMessageFn: (chatId: number, text: string) => Promise<number | null | void>
 ): Promise<void> {
   if (newTransaction.type !== 'expense') return
 

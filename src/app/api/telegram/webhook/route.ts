@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendMessage, getFile, TelegramUpdate } from '@/lib/telegram/bot'
+import { sendMessage, sendTypingAction, editMessage, deleteMessage, getFile, TelegramUpdate } from '@/lib/telegram/bot'
 import { parseMessage, ParsedTransaction } from '@/lib/telegram/parser'
 import { parseReceipt } from '@/lib/anthropic/receiptParser'
 import { generateWeeklyInsight } from '@/lib/anthropic/insightGenerator'
@@ -109,6 +109,9 @@ export async function POST(request: NextRequest) {
   if (!message) return NextResponse.json({ ok: true })
 
   const chatId = message.chat.id
+
+  // Show typing indicator immediately so the user knows we received the message
+  sendTypingAction(chatId).catch(() => {})
 
   // Get user
   let userId = await getUserByChat(chatId)
@@ -297,9 +300,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  // Parse regular message
+  // Parse regular message - show a "processing" placeholder while Gemini thinks
+  let processingMsgId: number | null = null
   try {
+    // Send processing placeholder (will be deleted or replaced after response)
+    processingMsgId = await sendMessage(chatId, '🔄 <i>Analizando tu mensaje...</i>')
+
+    // Keep typing indicator alive for longer operations
+    sendTypingAction(chatId).catch(() => {})
+
     const parsed = await parseMessage(text)
+
+    // Delete processing placeholder before sending the real response
+    if (processingMsgId) {
+      deleteMessage(chatId, processingMsgId).catch(() => {})
+      processingMsgId = null
+    }
 
     // Handle different message types
     switch (parsed.action) {
@@ -329,6 +345,9 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error('Telegram webhook error:', err)
+    if (processingMsgId) {
+      deleteMessage(chatId, processingMsgId).catch(() => {})
+    }
     await sendMessage(chatId, 'No pude procesar eso. Intenta de nuevo.')
   }
 
