@@ -1,5 +1,6 @@
 import { KatanaLogo } from '@/components/logo/katana-logo'
 import { BarChart3, Bot, Camera, Sparkles } from 'lucide-react'
+import { JapanMapDots } from '@/components/decorations/JapanMapDots'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,10 +10,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="hidden lg:flex lg:w-1/2 text-white p-12 flex-col justify-center relative overflow-hidden"
         style={{
           backgroundColor: '#0F0A1E',
-          backgroundImage: 'radial-gradient(circle, rgba(139,92,246,0.15) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(139,92,246,0.08) 1px, transparent 1px)',
           backgroundSize: '24px 24px'
         }}
       >
+        {/* Japan map as background decoration */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <JapanMapDots className="w-[85%] h-[85%]" dotSize={4} opacity={0.45} />
+        </div>
+
         {/* Contenido centrado verticalmente */}
         <div className="relative space-y-8 max-w-md mx-auto">
           {/* Logo */}
