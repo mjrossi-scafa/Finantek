@@ -100,9 +100,9 @@ export function OnboardingWizard({
     if (step === 1) return 'meditando' // privacy = serio/confiable
     if (step === 2) return 'saludo'
     if (step === 11) return 'meditando'
-    if (step === 5 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
+    if (step === 5 && telegramLinked) return 'celebrando'
     if (step === 6) return 'celebrando'
-    if (step === 8 && telegramLinked) return 'celebrando'
+    if (step === 8 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
     return 'explicando'
   }, [step, data.firstTxAmount, data.firstTxCategory, telegramLinked])
 
@@ -117,15 +117,15 @@ export function OnboardingWizard({
       case 4:
         return `Estas son tus categorías para clasificar gastos. Puedes crear, editar o eliminar cuantas quieras en Configuración.`
       case 5:
-        return `Registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
-      case 6:
-        return `Bien hecho. Mira cómo te recompensa el dojo: puntos, logros, y el color del samurái cambia según tu salud financiera.`
-      case 7:
-        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
-      case 8:
         return telegramLinked
           ? `¡Conectado! Ahora puedes registrar gastos desde Telegram.`
           : `Conecta el bot de Telegram ahora. Te va a ahorrar mucho tiempo después. Este paso no se salta.`
+      case 6:
+        return `Así funciona el dojo: puntos, logros, y el color del samurái cambia según tu salud financiera.`
+      case 7:
+        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
+      case 8:
+        return `Ahora sí, registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
       case 9:
         return `Elige cómo quieres que te avise de cosas importantes. Todo es configurable después.`
       case 10:
@@ -196,7 +196,7 @@ export function OnboardingWizard({
     switch (step) {
       case 2:
         return data.name.trim().length > 0 && data.currency.length > 0
-      case 8:
+      case 5:
         return telegramLinked
       default:
         return true
@@ -277,16 +277,16 @@ export function OnboardingWizard({
             {step === 2 && <Step1Welcome data={data} update={update} />}
             {step === 3 && <Step2Income data={data} update={update} />}
             {step === 4 && <Step3Categories existingCategories={existingCategories} />}
-            {step === 5 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
-            {step === 6 && <Step5Gamification />}
-            {step === 7 && <Step6Receipt />}
-            {step === 8 && (
+            {step === 5 && (
               <Step7Telegram
                 userId={userId}
                 linked={telegramLinked}
                 onLinked={() => setTelegramLinked(true)}
               />
             )}
+            {step === 6 && <Step5Gamification />}
+            {step === 7 && <Step6Receipt />}
+            {step === 8 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
             {step === 9 && <StepNotifications />}
             {step === 10 && <Step8PWA />}
             {step === 11 && <Step9Farewell data={data} telegramLinked={telegramLinked} />}
