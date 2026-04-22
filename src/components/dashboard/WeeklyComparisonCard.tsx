@@ -91,7 +91,7 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
       {/* Daily line chart */}
       <div>
         <p className="text-xs text-text-muted uppercase tracking-wide mb-3">Gasto diario</p>
-        <div className="flex items-end gap-2 h-24">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {DAY_NAMES.map((dayName, i) => {
             const thisAmt = thisWeek.byDay[i]
             const lastAmt = lastWeek.byDay[i]
@@ -103,11 +103,14 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
             const isFuture = i > todayIdx
 
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                {/* Bars container */}
-                <div className="w-full flex items-end gap-0.5 h-full">
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                {/* Bars container - explicit height */}
+                <div className="w-full h-24 flex items-end gap-0.5">
                   {/* Last week (gray) */}
-                  <div className="flex-1 bg-surface-border rounded-t transition-all group relative" style={{ height: `${Math.max(lastPct, 2)}%` }}>
+                  <div
+                    className="flex-1 bg-surface-border rounded-t transition-all group relative min-h-[2px]"
+                    style={{ height: `${Math.max(lastPct, 2)}%` }}
+                  >
                     {lastAmt > 0 && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap bg-surface-primary border border-surface-border rounded-lg px-2 py-1 text-[10px] text-text-muted z-10">
                         {fmt(lastAmt)}
@@ -116,10 +119,10 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
                   </div>
                   {/* This week (violet or muted if future) */}
                   <div
-                    className={`flex-1 rounded-t transition-all group relative ${
+                    className={`flex-1 rounded-t transition-all group relative min-h-[2px] ${
                       isFuture ? 'bg-violet-500/10' : 'bg-gradient-to-t from-violet-600 to-violet-400'
                     }`}
-                    style={{ height: `${Math.max(thisPct, isFuture ? 2 : 2)}%` }}
+                    style={{ height: `${Math.max(thisPct, 2)}%` }}
                   >
                     {thisAmt > 0 && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap bg-surface-primary border border-violet-500/40 rounded-lg px-2 py-1 text-[10px] text-violet-light z-10">
