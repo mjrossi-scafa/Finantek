@@ -14,19 +14,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           backgroundSize: '24px 24px'
         }}
       >
-        {/* Japan map as background decoration - offset to the right edge */}
+        {/* Japan map as subtle watermark in top-left corner */}
         <div
           className="absolute pointer-events-none"
           style={{
-            right: '-8%',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: '70%',
-            height: '85%',
+            top: '2%',
+            left: '-4%',
+            width: '32%',
+            height: '32%',
+            opacity: 0.35,
             WebkitMaskImage:
-              'radial-gradient(ellipse at 70% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0.4) 65%, transparent 90%)',
+              'radial-gradient(ellipse at 40% 40%, rgba(0,0,0,1) 45%, transparent 95%)',
             maskImage:
-              'radial-gradient(ellipse at 70% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0.4) 65%, transparent 90%)',
+              'radial-gradient(ellipse at 40% 40%, rgba(0,0,0,1) 45%, transparent 95%)',
           }}
         >
           <JapanMapDots className="w-full h-full" />
