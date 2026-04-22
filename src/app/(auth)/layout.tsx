@@ -14,9 +14,22 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           backgroundSize: '24px 24px'
         }}
       >
-        {/* Japan map as background decoration */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <JapanMapDots className="w-[65%] h-[65%]" />
+        {/* Japan map as background decoration - offset to the right edge */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            right: '-8%',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '70%',
+            height: '85%',
+            WebkitMaskImage:
+              'radial-gradient(ellipse at 70% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0.4) 65%, transparent 90%)',
+            maskImage:
+              'radial-gradient(ellipse at 70% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0.4) 65%, transparent 90%)',
+          }}
+        >
+          <JapanMapDots className="w-full h-full" />
         </div>
 
         {/* Contenido centrado verticalmente */}

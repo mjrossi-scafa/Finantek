@@ -364,6 +364,19 @@
 }
 .animate-kenji-breathe { animation: kenjiBreathe 2.8s ease-in-out infinite; }
 
+/* Japan map pulse - very subtle breathing */
+@keyframes japanPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.82; }
+}
+.animate-japan-pulse { animation: japanPulse 4s ease-in-out infinite; }
+
+@keyframes japanPulseSlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
+}
+.animate-japan-pulse-slow { animation: japanPulseSlow 6s ease-in-out infinite; }
+
 /* Tour spotlight pulse */
 @keyframes tourPulse {
   0%, 100% {
