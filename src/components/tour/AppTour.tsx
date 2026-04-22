@@ -198,16 +198,15 @@ export function AppTour({ userId, open, onClose }: AppTourProps) {
     await completeTour()
   }
 
-  if (!mounted || !open) return null
-
-  const hasTarget = Boolean(targetRect)
   const placement = step.placement ?? 'bottom'
+  const hasTarget = Boolean(targetRect)
 
-  // Compute tooltip position
+  // Compute tooltip position (hook must be called before any early return)
   const tooltipStyle = useMemo<React.CSSProperties>(() => {
     if (!targetRect || placement === 'center' || isMobile) {
       return {}
     }
+    if (typeof window === 'undefined') return {}
 
     const padding = 16
     switch (placement) {
@@ -234,6 +233,9 @@ export function AppTour({ userId, open, onClose }: AppTourProps) {
         }
     }
   }, [targetRect, placement, isMobile])
+
+  if (!mounted || !open) return null
+  if (typeof document === 'undefined') return null
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] pointer-events-none">
