@@ -15,11 +15,27 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/login')
   }
 
-  const { data: onboardingProfile } = await supabase
+  const onboardingQuery = await supabase
     .from('profiles')
     .select('onboarding_completed, app_tour_completed')
     .eq('id', user.id)
     .single()
+
+  let onboardingProfile = onboardingQuery.data as
+    | { onboarding_completed?: boolean; app_tour_completed?: boolean }
+    | null
+
+  // Fallback if app_tour_completed column doesn't exist yet (migration pending)
+  if (!onboardingProfile && onboardingQuery.error) {
+    const fallback = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single()
+    if (fallback.data) {
+      onboardingProfile = { ...fallback.data, app_tour_completed: true }
+    }
+  }
 
   if (onboardingProfile && !onboardingProfile.onboarding_completed) {
     redirect('/onboarding')
