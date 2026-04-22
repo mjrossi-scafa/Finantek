@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Katana · Fix la N</title>
+  <style>
+    body {
+      background: #0A0613;
+      color: #F8FAFC;
+      font-family: -apple-system, sans-serif;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 20px; text-align: center; }
+    p.subtitle { color: #94A3B8; text-align: center; margin-bottom: 40px; }
+    .option {
+      background: #13091F;
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .option.best { border-color: rgba(132,204,22,0.4); }
+    .option-label {
+      display: inline-block;
+      background: rgba(139,92,246,0.1);
+      color: #A855F7;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .option-label.best {
+      background: rgba(132,204,22,0.15);
+      color: #84CC16;
+    }
+    h2 { font-size: 18px; margin-bottom: 6px; }
+    .desc { color: #94A3B8; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+    .stage {
+      background: #0A0613;
+      border: 1px solid rgba(139,92,246,0.08);
+      border-radius: 10px;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .mini { display: flex; gap: 20px; align-items: center; justify-content: center; margin-top: 12px; font-size: 11px; color: #64748B; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗡️ La letra N</h1>
+    <p class="subtitle">Comparación visual. Todas las N en el mismo contexto del logo KATA<span style="color: #C084FC;">N</span>A.</p>
+
+    <!-- ACTUAL -->
+    <div class="option">
+      <span class="option-label">ACTUAL</span>
+      <h2>N actual (con problema)</h2>
+      <p class="desc">Las "diagonales" no conectan con las verticales. Se lee raro.</p>
+      <div class="stage">
+        <svg width="140" height="110" viewBox="300 0 80 110">
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="324" y="22" width="10" height="76" rx="3" fill="#C084FC"/>
+          <rect x="338" y="36" width="10" height="62" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 1 - Diagonal clara escalonada -->
+    <div class="option best">
+      <span class="option-label best">OPCIÓN 1 · RECOMENDADA</span>
+      <h2>Diagonal clara escalonada</h2>
+      <p class="desc">La diagonal baja de arriba-izquierda a abajo-derecha, como una N clásica pero en pixel. <strong>Conecta con las dos verticales.</strong></p>
+      <div class="stage">
+        <svg width="140" height="110" viewBox="300 0 80 110">
+          <!-- Izq vertical -->
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <!-- Diagonal escalonada: 3 bloques que bajan -->
+          <rect x="324" y="14" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="338" y="34" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="338" y="58" width="10" height="34" rx="3" fill="#C084FC"/>
+          <!-- Der vertical -->
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+        </svg>
+      </div>
+      <div class="mini">
+        <span>En el logo completo:</span>
+      </div>
+      <div class="stage" style="margin-top: 8px;">
+        <svg width="400" height="90" viewBox="0 0 485 110">
+          <!-- K -->
+          <rect x="30" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="44" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+          <rect x="58" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="72" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+          <rect x="58" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+          <rect x="72" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="100" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="114" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="128" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="142" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="114" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="128" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- T -->
+          <rect x="156" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="170" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="184" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="198" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="212" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="240" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="254" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="268" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="282" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="254" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="268" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- N NUEVA -->
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="324" y="14" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="338" y="34" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="338" y="58" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="380" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="394" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="408" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="422" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="394" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="408" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 2 - Diagonal perfecta 4 pasos -->
+    <div class="option">
+      <span class="option-label">OPCIÓN 2</span>
+      <h2>Diagonal continua 4 pasos</h2>
+      <p class="desc">Diagonal muy clara con 4 bloques bajando. Más fluida.</p>
+      <div class="stage">
+        <svg width="140" height="110" viewBox="300 0 80 110">
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="324" y="22" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="334" y="36" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="344" y="50" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 3 - N inversa -->
+    <div class="option">
+      <span class="option-label">OPCIÓN 3</span>
+      <h2>Diagonal arriba-conectada</h2>
+      <p class="desc">La diagonal parte pegada arriba a la izq y conecta abajo con la der. Más "tradicional".</p>
+      <div class="stage">
+        <svg width="140" height="110" viewBox="300 0 80 110">
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="324" y="8" width="10" height="30" rx="3" fill="#C084FC"/>
+          <rect x="338" y="36" width="10" height="30" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="338" y="68" width="10" height="30" rx="3" fill="#C084FC"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 4 - Minimal -->
+    <div class="option">
+      <span class="option-label">OPCIÓN 4</span>
+      <h2>Minimalista (sin diagonales)</h2>
+      <p class="desc">Sólo 2 verticales + 1 bloque superior. Más rústica pero menos "N" clara.</p>
+      <div class="stage">
+        <svg width="140" height="110" viewBox="300 0 80 110">
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="320" y="8" width="32" height="10" rx="3" fill="#C084FC"/>
+          <rect x="320" y="22" width="20" height="10" rx="3" fill="#C084FC" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, rgba(132,204,22,0.08), transparent); border-radius: 14px; border: 1px solid rgba(132,204,22,0.2); margin-top: 20px;">
+      <p style="color: #94A3B8; font-size: 14px;">
+        <strong style="color: #84CC16;">Opción 1</strong> es la más legible como N y mantiene el estilo pixel.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Katana · Retro Pulido al Máximo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0A0613;
+      color: #F8FAFC;
+      font-family: -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+      background-image: radial-gradient(circle at 20% 30%, rgba(139,92,246,0.08) 0%, transparent 50%);
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff, #A855F7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+    }
+    .subtitle {
+      color: #94A3B8;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 15px;
+    }
+    .card {
+      background: #13091F;
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .card-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: #94A3B8;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card p {
+      color: #94A3B8;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .stage {
+      background: #0A0613;
+      border: 1px solid rgba(139,92,246,0.08);
+      border-radius: 14px;
+      padding: 40px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+    }
+    .variants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .variant {
+      background: #0A0613;
+      border: 1px solid rgba(139,92,246,0.08);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .variant-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: #64748B;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .note {
+      background: linear-gradient(135deg, rgba(132,204,22,0.08), transparent);
+      border-left: 3px solid #84CC16;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #94A3B8;
+      line-height: 1.6;
+    }
+    .note strong { color: #84CC16; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗡️ Logo Retro · Pulido al máximo</h1>
+    <p class="subtitle">Pixel-art refinado: sombras sutiles, profundidad, proporciones perfectas, micro-detalles que suman.</p>
+
+    <!-- VERSION FINAL -->
+    <div class="card">
+      <span class="card-label">FINAL · VERSION PULIDA</span>
+      <h2>Logo horizontal completo</h2>
+      <p>Pixel-art con <strong>sombras 1-pixel</strong> para dar profundidad, <strong>hamon diagonal</strong> atravesando (como un corte de katana sutil), <strong>dot verde con glow</strong>, baseline con gradiente.</p>
+
+      <div class="stage" style="padding: 60px 40px; min-height: 200px;">
+        <svg width="100%" height="auto" viewBox="0 0 520 130" style="max-width: 480px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Glow filter for green dot -->
+            <filter id="greenGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <!-- Baseline gradient -->
+            <linearGradient id="baselineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#7C3AED" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#7C3AED" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+            </linearGradient>
+            <!-- Hamon gradient (subtle cut line) -->
+            <linearGradient id="hamonGrad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="#C084FC" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#EDE9FE" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#C084FC" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- KATANA - main violet blocks -->
+          <!-- K -->
+          <rect x="30" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="44" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+          <rect x="58" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+          <rect x="72" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+          <rect x="58" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+          <rect x="72" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="100" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="114" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="128" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="142" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="114" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="128" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- T -->
+          <rect x="156" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="170" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="184" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="198" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="212" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="240" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="254" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="268" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="282" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="254" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="268" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <!-- N -->
+          <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <rect x="324" y="22" width="10" height="76" rx="3" fill="#C084FC"/>
+          <rect x="338" y="36" width="10" height="62" rx="3" fill="#C084FC"/>
+          <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+          <!-- A -->
+          <rect x="380" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="394" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="408" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+          <rect x="422" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+          <rect x="394" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+          <rect x="408" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+
+          <!-- SHADOWS - subtle 1-pixel shadows on bottom-right of each block -->
+          <!-- K shadows -->
+          <rect x="40" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="72" y="30" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="72" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <!-- A shadows -->
+          <rect x="110" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="142" y="32" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="152" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <!-- T shadow -->
+          <rect x="194" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <!-- A2 shadows -->
+          <rect x="250" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="292" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <!-- N shadows -->
+          <rect x="320" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="362" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <!-- A3 shadows -->
+          <rect x="390" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+          <rect x="432" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+
+          <!-- HAMON DIAGONAL (subtle katana cut) -->
+          <line x1="20" y1="110" x2="440" y2="-5" stroke="url(#hamonGrad)" stroke-width="1" opacity="0.35"/>
+
+          <!-- BASELINE gradient -->
+          <rect x="30" y="108" width="400" height="1.5" fill="url(#baselineGrad)" rx="0.75"/>
+
+          <!-- GREEN ACCENT DOT with glow -->
+          <circle cx="448" cy="94" r="5" fill="#84CC16" filter="url(#greenGlow)"/>
+          <circle cx="448" cy="94" r="3" fill="#A3E635"/>
+
+          <!-- Small cross mark (optional - like a finishing stroke) -->
+          <circle cx="448" cy="94" r="1" fill="#FFFFFF" opacity="0.8"/>
+        </svg>
+      </div>
+
+      <div class="note">
+        <strong>Mejoras aplicadas:</strong><br>
+        ✓ Sombras sutiles abajo-derecha en cada bloque (profundidad sin romper pixel)<br>
+        ✓ Hamon diagonal sutil atravesando (sugerencia de corte de katana)<br>
+        ✓ Dot verde con glow suave + highlight blanco central<br>
+        ✓ Baseline con gradiente (aparece/desaparece suave)<br>
+        ✓ Un solo color principal = más limpio
+      </div>
+    </div>
+
+    <!-- VARIANT SIZES -->
+    <div class="card">
+      <span class="card-label">VARIANTES</span>
+      <h2>Cómo se ve en diferentes tamaños</h2>
+      <p>El logo pulido mantiene identidad en todos los tamaños, desde favicon hasta billboard.</p>
+
+      <div class="variants-grid">
+        <!-- Icon 32 (favicon) -->
+        <div class="variant">
+          <div class="variant-label">Favicon 32×32</div>
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 80px;">
+            <div style="width: 32px; height: 32px; background: #1A0A2E; border-radius: 7px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <svg width="28" height="28" viewBox="0 0 90 110">
+                <rect x="4" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+                <rect x="18" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+                <rect x="32" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+                <rect x="46" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+                <rect x="32" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+                <rect x="46" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+                <circle cx="68" cy="92" r="6" fill="#84CC16"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Icon 64 (app icon) -->
+        <div class="variant">
+          <div class="variant-label">App Icon 64×64</div>
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 80px;">
+            <div style="width: 64px; height: 64px; background: #1A0A2E; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <svg width="54" height="54" viewBox="0 0 90 110">
+                <rect x="4" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+                <rect x="18" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+                <rect x="32" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+                <rect x="46" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+                <rect x="32" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+                <rect x="46" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+                <!-- Shadow -->
+                <rect x="14" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+                <rect x="46" y="30" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+                <rect x="46" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.5"/>
+                <!-- Green dot with glow -->
+                <circle cx="68" cy="92" r="6" fill="#84CC16"/>
+                <circle cx="68" cy="92" r="1.5" fill="#FFFFFF" opacity="0.7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- App Icon 120 -->
+        <div class="variant">
+          <div class="variant-label">iOS Icon 120×120</div>
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 140px;">
+            <div style="width: 120px; height: 120px; background: #1A0A2E; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 28px rgba(0,0,0,0.4);">
+              <svg width="96" height="96" viewBox="0 0 90 110">
+                <rect x="4" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+                <rect x="18" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+                <rect x="32" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+                <rect x="46" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+                <rect x="32" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+                <rect x="46" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+                <!-- Shadows -->
+                <rect x="14" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.6"/>
+                <rect x="46" y="30" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.6"/>
+                <rect x="46" y="98" width="10" height="2" rx="1" fill="#7C3AED" opacity="0.6"/>
+                <!-- Green with glow -->
+                <circle cx="68" cy="92" r="8" fill="#84CC16" opacity="0.5"/>
+                <circle cx="68" cy="92" r="6" fill="#84CC16"/>
+                <circle cx="68" cy="92" r="2" fill="#FFFFFF" opacity="0.8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR SIMULATION -->
+    <div class="card">
+      <span class="card-label">EN CONTEXTO</span>
+      <h2>Sidebar + Auth screen</h2>
+      <p>Cómo se ve integrado en la app real.</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+        <!-- Sidebar -->
+        <div style="background: #13091F; border: 1px solid rgba(139,92,246,0.15); border-radius: 14px; padding: 20px;">
+          <div class="variant-label" style="margin-bottom: 20px;">SIDEBAR</div>
+          <!-- Logo compact -->
+          <div style="margin-bottom: 20px;">
+            <svg width="180" height="40" viewBox="0 0 485 110" preserveAspectRatio="xMinYMid meet">
+              <!-- Main blocks -->
+              <rect x="30" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="44" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+              <rect x="58" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+              <rect x="72" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+              <rect x="58" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+              <rect x="72" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+              <rect x="100" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="114" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="128" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="142" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="114" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="128" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="156" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="170" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="184" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="198" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="212" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="240" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="254" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="268" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="282" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="254" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="268" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="324" y="22" width="10" height="76" rx="3" fill="#C084FC"/>
+              <rect x="338" y="36" width="10" height="62" rx="3" fill="#C084FC"/>
+              <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="380" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="394" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="408" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="422" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="394" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="408" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <circle cx="448" cy="94" r="6" fill="#84CC16"/>
+              <circle cx="448" cy="94" r="1.5" fill="#FFFFFF" opacity="0.7"/>
+            </svg>
+          </div>
+          <div style="font-size: 9px; color: #64748B; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; opacity: 0.6;">MENÚ</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="padding: 8px 12px; border-radius: 8px; background: linear-gradient(135deg, #7C3AED, #8B5CF6); color: white; font-size: 13px; font-weight: 500;">Dashboard</div>
+            <div style="padding: 8px 12px; border-radius: 8px; color: #94A3B8; font-size: 13px;">Transacciones</div>
+            <div style="padding: 8px 12px; border-radius: 8px; color: #94A3B8; font-size: 13px;">Viajes</div>
+          </div>
+        </div>
+
+        <!-- Auth -->
+        <div style="background: #0F0A1E; background-image: radial-gradient(circle, rgba(139,92,246,0.15) 1px, transparent 1px); background-size: 24px 24px; border-radius: 14px; padding: 32px 20px; text-align: center;">
+          <div class="variant-label" style="margin-bottom: 24px;">AUTH</div>
+          <div style="margin-bottom: 16px; display: flex; justify-content: center;">
+            <svg width="200" height="45" viewBox="0 0 485 110" preserveAspectRatio="xMinYMid meet">
+              <rect x="30" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="44" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+              <rect x="58" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+              <rect x="72" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+              <rect x="58" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+              <rect x="72" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+              <rect x="100" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="114" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="128" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="142" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="114" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="128" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="156" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="170" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="184" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="198" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="212" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="240" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="254" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="268" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="282" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="254" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="268" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="324" y="22" width="10" height="76" rx="3" fill="#C084FC"/>
+              <rect x="338" y="36" width="10" height="62" rx="3" fill="#C084FC"/>
+              <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+              <rect x="380" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="394" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="408" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+              <rect x="422" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+              <rect x="394" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <rect x="408" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+              <circle cx="448" cy="94" r="6" fill="#84CC16"/>
+              <circle cx="448" cy="94" r="1.5" fill="#FFFFFF" opacity="0.7"/>
+            </svg>
+          </div>
+          <div style="font-size: 22px; font-weight: 800; margin-bottom: 4px;">Toma el control</div>
+          <div style="font-size: 13px; color: #A855F7; opacity: 0.7;">La disciplina del samurai</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 32px; background: linear-gradient(135deg, rgba(132,204,22,0.06), transparent); border-radius: 16px; border: 1px solid rgba(132,204,22,0.2); margin-top: 20px;">
+      <p style="font-size: 14px; color: #94A3B8;">
+        Si te gusta, dale <strong style="color: #84CC16;">"lo aplicamos"</strong> y lo pongo en el código.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

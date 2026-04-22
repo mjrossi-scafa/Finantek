@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Katana · Samurai Retro</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0A0613;
+      --surface: #13091F;
+      --surface-2: #1A0F2E;
+      --border: rgba(139, 92, 246, 0.15);
+      --text: #F8FAFC;
+      --text-dim: #94A3B8;
+      --text-muted: #64748B;
+      --violet: #8B5CF6;
+      --violet-dark: #7C3AED;
+      --violet-light: #A855F7;
+      --violet-deep: #5B21B6;
+      --green: #84CC16;
+      --red: #EF4444;
+      --gold: #F59E0B;
+      --skin: #FDBCAB;
+      --skin-shadow: #E8998A;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 60px 24px;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(139,92,246,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(124,58,237,0.05) 0%, transparent 50%);
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 0%, var(--violet-light) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: var(--text-dim);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .section {
+      margin-bottom: 80px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .section-badge {
+      background: rgba(139,92,246,0.12);
+      border: 1px solid var(--border);
+      color: var(--violet-light);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .section h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .section-desc {
+      color: var(--text-dim);
+      margin-bottom: 24px;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 720px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .demo-stage {
+      position: relative;
+      background: #0A0613;
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(139,92,246,0.08);
+    }
+    .demo-usage {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(139,92,246,0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .demo-usage strong {
+      color: var(--violet-light);
+    }
+
+    /* ===================== */
+    /* SAMURAI STATIC        */
+    /* ===================== */
+    .samurai {
+      position: relative;
+      width: 140px;
+      height: 180px;
+      image-rendering: pixelated;
+    }
+
+    /* Pixel samurai using SVG */
+    .samurai svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ===================== */
+    /* SLASH ANIMATION       */
+    /* ===================== */
+
+    @keyframes slashHorizontal {
+      0% { transform: translate(-30px, 0) rotate(-10deg); opacity: 0; }
+      30% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+      60% { transform: translate(80px, 0) rotate(15deg); opacity: 1; }
+      100% { transform: translate(120px, 0) rotate(20deg); opacity: 0; }
+    }
+
+    @keyframes moneyFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(180px) rotate(720deg); opacity: 0; }
+    }
+
+    @keyframes moneyCut {
+      0%, 40% { transform: scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.1) rotate(-5deg); opacity: 0.8; }
+      60% { transform: scale(0.95) rotate(5deg); opacity: 0.4; }
+      100% { transform: scale(0.5) rotate(90deg); opacity: 0; }
+    }
+
+    @keyframes slashFlash {
+      0%, 100% { opacity: 0; transform: translateX(0) scaleX(0); }
+      30% { opacity: 1; transform: translateX(0) scaleX(1); }
+      60% { opacity: 1; transform: translateX(60px) scaleX(1); }
+      100% { opacity: 0; transform: translateX(100px) scaleX(0); }
+    }
+
+    @keyframes samuraiSlash {
+      0%, 100% { transform: translateX(0) scale(1); }
+      40% { transform: translateX(-10px) scale(1); }
+      50% { transform: translateX(-5px) scale(1.05); }
+      60% { transform: translateX(15px) scale(1); }
+    }
+
+    @keyframes particleFly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx, 40px), var(--ty, -30px)) scale(0.3);
+      }
+    }
+
+    @keyframes floatIdle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Animated scene */
+    .scene-animated {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+    }
+    .scene-samurai {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      animation: samuraiSlash 2s ease-in-out infinite;
+    }
+    .scene-money {
+      position: absolute;
+      right: 60px;
+      top: 30px;
+      font-size: 42px;
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--red);
+      text-shadow: 0 0 20px rgba(239,68,68,0.4);
+      animation: moneyCut 2s ease-in-out infinite;
+    }
+    .scene-slash {
+      position: absolute;
+      left: 150px;
+      top: 80px;
+      width: 160px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--violet-light), #fff, var(--violet-light), transparent);
+      box-shadow: 0 0 20px var(--violet-light);
+      transform-origin: left center;
+      animation: slashFlash 2s ease-in-out infinite;
+    }
+
+    /* Savings counter up */
+    .scene-savings {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      font-size: 13px;
+      color: var(--green);
+      font-family: monospace;
+      font-weight: 600;
+      background: rgba(132,204,22,0.1);
+      border: 1px solid rgba(132,204,22,0.3);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    /* Bushido text */
+    .bushido {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 10px;
+      color: var(--violet-light);
+      opacity: 0.5;
+      letter-spacing: 2px;
+      font-family: monospace;
+    }
+
+    /* ===================== */
+    /* EMPTY STATE EXAMPLE   */
+    /* ===================== */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .empty-state h3 {
+      font-size: 18px;
+      margin: 16px 0 8px;
+    }
+    .empty-state p {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ===================== */
+    /* LOADING / CELEBRATION */
+    /* ===================== */
+    .loading-scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .loading-scene .text {
+      font-size: 13px;
+      color: var(--text-dim);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Usage examples */
+    .usage-examples {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .usage-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .usage-card h4 {
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--violet-light);
+    }
+    .usage-card p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Final CTA */
+    .final-cta {
+      text-align: center;
+      margin-top: 60px;
+      padding: 40px 24px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(124,58,237,0.04));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+    }
+    .final-cta h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🗡️ Samurai Retro · Concept</h1>
+      <p>Mascota pixel-art que corta los gastos innecesarios. Propuestas de uso en la app.</p>
+    </div>
+
+    <!-- ======================= -->
+    <!-- SECCION 1: EL SAMURAI    -->
+    <!-- ======================= -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-badge">1. EL SAMURAI</span>
+        <h2>Mascota estática</h2>
+      </div>
+      <p class="section-desc">Un samurai en estilo pixel-art, con la paleta violeta de Katana. Silueta reconocible, expresión seria y disciplinada.</p>
+
+      <div class="demo-grid">
+        <!-- Front view -->
+        <div class="demo-card">
+          <div class="demo-label">Vista frontal · 140×180</div>
+          <div class="demo-stage">
+            <div class="samurai">
+              <svg viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                <!-- Shadow on ground -->
+                <ellipse cx="70" cy="170" rx="35" ry="4" fill="#000" opacity="0.3"/>
+
+                <!-- BODY parts from bottom to top -->
+
+                <!-- Legs (hakama - pants) -->
+                <rect x="52" y="120" width="14" height="36" fill="#1A0A2E"/>
+                <rect x="74" y="120" width="14" height="36" fill="#1A0A2E"/>
+                <rect x="50" y="154" width="18" height="6" fill="#13091F"/>
+                <rect x="72" y="154" width="18" height="6" fill="#13091F"/>
+                <!-- Shoes (geta/tabi) -->
+                <rect x="48" y="160" width="22" height="6" fill="#0A0613"/>
+                <rect x="70" y="160" width="22" height="6" fill="#0A0613"/>
+
+                <!-- Sash (obi) -->
+                <rect x="42" y="112" width="56" height="10" fill="#7C3AED"/>
+                <rect x="42" y="112" width="56" height="2" fill="#A855F7"/>
+                <rect x="42" y="120" width="56" height="2" fill="#5B21B6"/>
+
+                <!-- Kimono torso -->
+                <polygon points="42,70 98,70 104,118 36,118" fill="#8B5CF6"/>
+                <!-- Kimono lapel/collar overlap -->
+                <polygon points="70,70 70,112 60,118 58,72" fill="#5B21B6"/>
+                <polygon points="70,70 70,112 80,118 82,72" fill="#A855F7"/>
+                <!-- Shoulder detail -->
+                <rect x="36" y="70" width="10" height="6" fill="#5B21B6"/>
+                <rect x="94" y="70" width="10" height="6" fill="#5B21B6"/>
+
+                <!-- Arms (kimono sleeves) -->
+                <rect x="26" y="74" width="16" height="38" fill="#8B5CF6"/>
+                <rect x="26" y="108" width="16" height="6" fill="#5B21B6"/>
+                <rect x="98" y="74" width="16" height="38" fill="#8B5CF6"/>
+                <rect x="98" y="108" width="16" height="6" fill="#5B21B6"/>
+
+                <!-- Hands -->
+                <rect x="28" y="110" width="12" height="8" fill="#FDBCAB"/>
+                <rect x="100" y="110" width="12" height="8" fill="#FDBCAB"/>
+
+                <!-- Katana in right hand -->
+                <g transform="translate(106 115)">
+                  <!-- Blade -->
+                  <rect x="-1" y="-55" width="2" height="55" fill="#EDE9FE"/>
+                  <rect x="-0.5" y="-55" width="1" height="55" fill="#C084FC"/>
+                  <!-- Punta -->
+                  <polygon points="-1,-55 1,-55 0,-58" fill="#EDE9FE"/>
+                  <!-- Tsuba -->
+                  <rect x="-4" y="0" width="8" height="2" fill="#5B21B6"/>
+                  <!-- Handle -->
+                  <rect x="-2" y="2" width="4" height="12" fill="#1A0A2E"/>
+                  <rect x="-2" y="4" width="4" height="1" fill="#4C1D95"/>
+                  <rect x="-2" y="7" width="4" height="1" fill="#4C1D95"/>
+                  <rect x="-2" y="10" width="4" height="1" fill="#4C1D95"/>
+                </g>
+
+                <!-- Neck -->
+                <rect x="62" y="62" width="16" height="10" fill="#FDBCAB"/>
+                <rect x="62" y="70" width="16" height="2" fill="#E8998A"/>
+
+                <!-- Head -->
+                <rect x="52" y="32" width="36" height="32" fill="#FDBCAB"/>
+                <!-- Face shadow -->
+                <rect x="52" y="58" width="36" height="4" fill="#E8998A"/>
+
+                <!-- Eyes (determined) -->
+                <rect x="58" y="46" width="6" height="3" fill="#0A0613"/>
+                <rect x="58" y="46" width="6" height="1" fill="#1A0A2E"/>
+                <rect x="76" y="46" width="6" height="3" fill="#0A0613"/>
+                <rect x="76" y="46" width="6" height="1" fill="#1A0A2E"/>
+
+                <!-- Eyebrows (serious) -->
+                <rect x="56" y="42" width="8" height="2" fill="#1A0A2E"/>
+                <rect x="76" y="42" width="8" height="2" fill="#1A0A2E"/>
+
+                <!-- Nose hint -->
+                <rect x="68" y="50" width="4" height="4" fill="#E8998A" opacity="0.5"/>
+
+                <!-- Mouth (neutral/serious) -->
+                <rect x="64" y="56" width="12" height="2" fill="#5B21B6" opacity="0.4"/>
+
+                <!-- Helmet (kabuto) base -->
+                <polygon points="48,32 92,32 94,24 46,24" fill="#5B21B6"/>
+                <rect x="46" y="20" width="48" height="4" fill="#4C1D95"/>
+                <!-- Kabuto top crest -->
+                <polygon points="56,20 84,20 80,8 60,8" fill="#4C1D95"/>
+                <rect x="64" y="0" width="12" height="10" fill="#84CC16"/>
+                <rect x="66" y="0" width="8" height="6" fill="#A3E635"/>
+                <!-- Side flaps -->
+                <rect x="42" y="24" width="6" height="14" fill="#5B21B6"/>
+                <rect x="92" y="24" width="6" height="14" fill="#5B21B6"/>
+                <rect x="42" y="38" width="6" height="4" fill="#4C1D95"/>
+                <rect x="92" y="38" width="6" height="4" fill="#4C1D95"/>
+
+                <!-- Violet glow aura -->
+                <circle cx="70" cy="90" r="70" fill="#8B5CF6" opacity="0.04"/>
+              </svg>
+            </div>
+          </div>
+          <div class="demo-usage">
+            <strong>Uso posible:</strong> Empty states, onboarding, celebraciones, pantalla de bienvenida, login page.
+          </div>
+        </div>
+
+        <!-- Chibi / compact version -->
+        <div class="demo-card">
+          <div class="demo-label">Compacto · 80×100 (chibi)</div>
+          <div class="demo-stage">
+            <div style="transform: scale(1.2); animation: floatIdle 3s ease-in-out infinite;">
+              <svg width="80" height="100" viewBox="0 0 80 100" shape-rendering="crispEdges">
+                <ellipse cx="40" cy="96" rx="18" ry="3" fill="#000" opacity="0.3"/>
+                <!-- Body -->
+                <rect x="24" y="50" width="32" height="32" fill="#8B5CF6"/>
+                <rect x="24" y="74" width="32" height="8" fill="#7C3AED"/>
+                <!-- Legs -->
+                <rect x="26" y="82" width="10" height="12" fill="#1A0A2E"/>
+                <rect x="44" y="82" width="10" height="12" fill="#1A0A2E"/>
+                <!-- Arms -->
+                <rect x="16" y="54" width="10" height="24" fill="#8B5CF6"/>
+                <rect x="54" y="54" width="10" height="24" fill="#8B5CF6"/>
+                <rect x="18" y="76" width="6" height="4" fill="#FDBCAB"/>
+                <rect x="56" y="76" width="6" height="4" fill="#FDBCAB"/>
+                <!-- Katana -->
+                <g transform="translate(62 76)">
+                  <rect x="-0.5" y="-24" width="1" height="24" fill="#EDE9FE"/>
+                  <rect x="-2" y="0" width="4" height="2" fill="#5B21B6"/>
+                  <rect x="-1" y="2" width="2" height="6" fill="#1A0A2E"/>
+                </g>
+                <!-- Head -->
+                <rect x="24" y="22" width="32" height="28" fill="#FDBCAB"/>
+                <!-- Eyes big (chibi) -->
+                <rect x="28" y="34" width="8" height="6" fill="#0A0613"/>
+                <rect x="30" y="35" width="2" height="2" fill="#fff"/>
+                <rect x="44" y="34" width="8" height="6" fill="#0A0613"/>
+                <rect x="46" y="35" width="2" height="2" fill="#fff"/>
+                <!-- Cheeks -->
+                <rect x="26" y="42" width="4" height="2" fill="#FDA4B4" opacity="0.6"/>
+                <rect x="50" y="42" width="4" height="2" fill="#FDA4B4" opacity="0.6"/>
+                <!-- Mouth tiny -->
+                <rect x="38" y="44" width="4" height="1" fill="#5B21B6"/>
+                <!-- Helmet -->
+                <polygon points="20,22 60,22 62,14 18,14" fill="#5B21B6"/>
+                <rect x="18" y="10" width="44" height="4" fill="#4C1D95"/>
+                <rect x="36" y="2" width="8" height="8" fill="#84CC16"/>
+              </svg>
+            </div>
+          </div>
+          <div class="demo-usage">
+            <strong>Uso posible:</strong> Avatar de perfil, notificaciones, badges, micro-interacciones, loading states.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- SECCION 2: ANIMACIÓN     -->
+    <!-- ======================= -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-badge">2. ACCIÓN</span>
+        <h2>Cortando gastos innecesarios</h2>
+      </div>
+      <p class="section-desc">El samurai corta de un tajo los gastos marcados como "innecesarios" o cuando el usuario elimina un gasto. Con flash de katana y partículas.</p>
+
+      <div class="demo-grid">
+        <!-- Animated expense cut -->
+        <div class="demo-card">
+          <div class="demo-label">Cortando gasto · Loop</div>
+          <div class="demo-stage">
+            <div class="scene-animated">
+              <span class="bushido">武士道</span>
+
+              <!-- Samurai -->
+              <div class="scene-samurai">
+                <svg width="70" height="110" viewBox="0 0 70 110" shape-rendering="crispEdges">
+                  <ellipse cx="35" cy="104" rx="20" ry="3" fill="#000" opacity="0.3"/>
+                  <!-- Legs -->
+                  <rect x="22" y="76" width="10" height="24" fill="#1A0A2E"/>
+                  <rect x="38" y="76" width="10" height="24" fill="#1A0A2E"/>
+                  <rect x="20" y="98" width="14" height="4" fill="#0A0613"/>
+                  <rect x="36" y="98" width="14" height="4" fill="#0A0613"/>
+                  <!-- Body -->
+                  <rect x="20" y="44" width="30" height="36" fill="#8B5CF6"/>
+                  <rect x="20" y="70" width="30" height="8" fill="#7C3AED"/>
+                  <!-- Arm extended (slashing) -->
+                  <rect x="48" y="48" width="22" height="8" fill="#8B5CF6"/>
+                  <rect x="66" y="50" width="4" height="6" fill="#FDBCAB"/>
+                  <!-- Katana extended forward -->
+                  <rect x="70" y="50" width="40" height="2" fill="#EDE9FE"/>
+                  <rect x="70" y="51" width="40" height="1" fill="#C084FC"/>
+                  <!-- Back arm -->
+                  <rect x="12" y="48" width="10" height="24" fill="#8B5CF6"/>
+                  <!-- Head -->
+                  <rect x="20" y="20" width="28" height="24" fill="#FDBCAB"/>
+                  <!-- Eyes (focused, narrow) -->
+                  <rect x="23" y="30" width="6" height="2" fill="#0A0613"/>
+                  <rect x="39" y="30" width="6" height="2" fill="#0A0613"/>
+                  <!-- Mouth determined -->
+                  <rect x="30" y="36" width="8" height="1" fill="#5B21B6"/>
+                  <!-- Helmet -->
+                  <polygon points="16,20 52,20 54,12 14,12" fill="#5B21B6"/>
+                  <rect x="14" y="8" width="40" height="4" fill="#4C1D95"/>
+                  <rect x="30" y="0" width="8" height="8" fill="#84CC16"/>
+                </svg>
+              </div>
+
+              <!-- Slash flash -->
+              <div class="scene-slash"></div>
+
+              <!-- Expense being cut -->
+              <div class="scene-money">$50k</div>
+
+              <!-- Savings counter -->
+              <div class="scene-savings">+ $50,000 ahorrado</div>
+            </div>
+          </div>
+          <div class="demo-usage">
+            <strong>Uso posible:</strong> Al eliminar un gasto, detectar un "gasto innecesario" sugerido por IA, o en el empty state de gastos.
+          </div>
+        </div>
+
+        <!-- Static slash pose -->
+        <div class="demo-card">
+          <div class="demo-label">Pose de corte · Stático</div>
+          <div class="demo-stage">
+            <svg width="200" height="180" viewBox="0 0 200 180" shape-rendering="crispEdges">
+              <ellipse cx="100" cy="170" rx="35" ry="4" fill="#000" opacity="0.3"/>
+
+              <!-- Speed lines behind -->
+              <rect x="10" y="80" width="30" height="2" fill="#C084FC" opacity="0.5"/>
+              <rect x="20" y="90" width="20" height="2" fill="#C084FC" opacity="0.3"/>
+              <rect x="15" y="100" width="25" height="2" fill="#C084FC" opacity="0.4"/>
+
+              <!-- Samurai mid-slash -->
+              <!-- Legs (wide stance) -->
+              <rect x="70" y="120" width="14" height="30" fill="#1A0A2E"/>
+              <rect x="118" y="100" width="14" height="50" fill="#1A0A2E"/>
+              <rect x="68" y="150" width="18" height="4" fill="#0A0613"/>
+              <rect x="116" y="150" width="18" height="4" fill="#0A0613"/>
+
+              <!-- Body rotated -->
+              <polygon points="72,70 120,70 130,120 64,120" fill="#8B5CF6"/>
+              <rect x="64" y="112" width="66" height="10" fill="#7C3AED"/>
+
+              <!-- Back arm -->
+              <rect x="58" y="74" width="14" height="28" fill="#8B5CF6"/>
+
+              <!-- Front arm (slashing extended) -->
+              <rect x="120" y="60" width="14" height="30" fill="#8B5CF6"/>
+              <rect x="128" y="50" width="30" height="14" fill="#8B5CF6" transform="rotate(45 143 57)"/>
+              <!-- Hand -->
+              <rect x="158" y="60" width="10" height="8" fill="#FDBCAB" transform="rotate(45 163 64)"/>
+
+              <!-- Katana slashing diagonally -->
+              <g transform="translate(160 60) rotate(45)">
+                <rect x="-1" y="-60" width="2" height="60" fill="#EDE9FE"/>
+                <rect x="-0.5" y="-60" width="1" height="60" fill="#fff"/>
+                <polygon points="-1,-60 1,-60 0,-64" fill="#fff"/>
+                <rect x="-4" y="0" width="8" height="2" fill="#5B21B6"/>
+                <rect x="-2" y="2" width="4" height="10" fill="#1A0A2E"/>
+              </g>
+
+              <!-- Slash line (visible swoosh) -->
+              <line x1="40" y1="140" x2="180" y2="20" stroke="url(#slashGrad)" stroke-width="3" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="slashGrad" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#fff" stop-opacity="1"/>
+                  <stop offset="100%" stop-color="#C084FC" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Head focused -->
+              <rect x="80" y="38" width="28" height="28" fill="#FDBCAB"/>
+              <!-- Eyes narrow -->
+              <rect x="84" y="50" width="6" height="2" fill="#0A0613"/>
+              <rect x="98" y="50" width="6" height="2" fill="#0A0613"/>
+              <rect x="82" y="46" width="8" height="2" fill="#1A0A2E"/>
+              <rect x="98" y="46" width="8" height="2" fill="#1A0A2E"/>
+              <!-- Mouth yelling -->
+              <rect x="90" y="58" width="8" height="4" fill="#5B21B6"/>
+              <!-- Helmet -->
+              <polygon points="76,38 112,38 114,30 74,30" fill="#5B21B6"/>
+              <rect x="74" y="26" width="40" height="4" fill="#4C1D95"/>
+              <rect x="90" y="14" width="8" height="14" fill="#84CC16"/>
+            </svg>
+          </div>
+          <div class="demo-usage">
+            <strong>Uso posible:</strong> Hero de sección "Logros", botón destructivo "Eliminar todo", celebración al cerrar mes bien.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- SECCION 3: USO REAL      -->
+    <!-- ======================= -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-badge">3. DONDE USARLO</span>
+        <h2>Propuestas concretas</h2>
+      </div>
+
+      <div class="usage-examples">
+        <div class="usage-card">
+          <h4>🎯 Empty state de /transactions</h4>
+          <p>Cuando no hay transacciones, el samurai con katana desenvainada + "Aún no hay gastos que cortar"</p>
+        </div>
+        <div class="usage-card">
+          <h4>✂️ Al eliminar un gasto</h4>
+          <p>Animación breve del corte (1 seg) antes de que la transacción desaparezca de la lista</p>
+        </div>
+        <div class="usage-card">
+          <h4>🏆 Mes con balance positivo</h4>
+          <p>Al cerrar el mes con ahorro, el samurai aparece con la katana envainada + mensaje "Bien hecho"</p>
+        </div>
+        <div class="usage-card">
+          <h4>⚠️ Alerta de presupuesto</h4>
+          <p>Cuando un presupuesto está al 80%+, el samurai aparece con postura de advertencia</p>
+        </div>
+        <div class="usage-card">
+          <h4>🎮 Desbloqueo de logro</h4>
+          <p>Alternativa al confetti: el samurai celebra con la katana al cielo, más épico</p>
+        </div>
+        <div class="usage-card">
+          <h4>👤 Avatar del perfil</h4>
+          <p>Versión chibi pequeña como avatar por defecto en Configuración</p>
+        </div>
+        <div class="usage-card">
+          <h4>🔄 Loading states</h4>
+          <p>Mientras carga, el samurai en pose de meditación (más distintivo que un spinner)</p>
+        </div>
+        <div class="usage-card">
+          <h4>📱 Pantalla 404 / error</h4>
+          <p>Samurai confundido + "El dojo no encontró esta página"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- SECCION 4: EMPTY STATE   -->
+    <!-- ======================= -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-badge">4. EN CONTEXTO</span>
+        <h2>Simulación empty state</h2>
+      </div>
+      <p class="section-desc">Así se vería integrado en, por ejemplo, /transactions cuando está vacío.</p>
+
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 20px; text-align: center;">
+        <div style="display: inline-block; margin-bottom: 20px;">
+          <svg width="140" height="180" viewBox="0 0 140 180" shape-rendering="crispEdges">
+            <ellipse cx="70" cy="170" rx="35" ry="4" fill="#000" opacity="0.3"/>
+            <rect x="52" y="120" width="14" height="36" fill="#1A0A2E"/>
+            <rect x="74" y="120" width="14" height="36" fill="#1A0A2E"/>
+            <rect x="50" y="154" width="18" height="6" fill="#13091F"/>
+            <rect x="72" y="154" width="18" height="6" fill="#13091F"/>
+            <rect x="48" y="160" width="22" height="6" fill="#0A0613"/>
+            <rect x="70" y="160" width="22" height="6" fill="#0A0613"/>
+            <rect x="42" y="112" width="56" height="10" fill="#7C3AED"/>
+            <rect x="42" y="112" width="56" height="2" fill="#A855F7"/>
+            <polygon points="42,70 98,70 104,118 36,118" fill="#8B5CF6"/>
+            <polygon points="70,70 70,112 60,118 58,72" fill="#5B21B6"/>
+            <polygon points="70,70 70,112 80,118 82,72" fill="#A855F7"/>
+            <rect x="26" y="74" width="16" height="38" fill="#8B5CF6"/>
+            <rect x="98" y="74" width="16" height="38" fill="#8B5CF6"/>
+            <rect x="28" y="110" width="12" height="8" fill="#FDBCAB"/>
+            <rect x="100" y="110" width="12" height="8" fill="#FDBCAB"/>
+            <g transform="translate(106 115)">
+              <rect x="-1" y="-55" width="2" height="55" fill="#EDE9FE"/>
+              <rect x="-0.5" y="-55" width="1" height="55" fill="#C084FC"/>
+              <polygon points="-1,-55 1,-55 0,-58" fill="#EDE9FE"/>
+              <rect x="-4" y="0" width="8" height="2" fill="#5B21B6"/>
+              <rect x="-2" y="2" width="4" height="12" fill="#1A0A2E"/>
+            </g>
+            <rect x="62" y="62" width="16" height="10" fill="#FDBCAB"/>
+            <rect x="52" y="32" width="36" height="32" fill="#FDBCAB"/>
+            <rect x="58" y="46" width="6" height="3" fill="#0A0613"/>
+            <rect x="76" y="46" width="6" height="3" fill="#0A0613"/>
+            <rect x="56" y="42" width="8" height="2" fill="#1A0A2E"/>
+            <rect x="76" y="42" width="8" height="2" fill="#1A0A2E"/>
+            <rect x="64" y="56" width="12" height="2" fill="#5B21B6" opacity="0.4"/>
+            <polygon points="48,32 92,32 94,24 46,24" fill="#5B21B6"/>
+            <rect x="46" y="20" width="48" height="4" fill="#4C1D95"/>
+            <polygon points="56,20 84,20 80,8 60,8" fill="#4C1D95"/>
+            <rect x="64" y="0" width="12" height="10" fill="#84CC16"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">El dojo está en silencio</h3>
+        <p style="color: var(--text-dim); font-size: 14px; max-width: 340px; margin: 0 auto 24px;">No hay gastos para cortar aún. Registra tu primera transacción para comenzar el camino.</p>
+        <button style="padding: 10px 24px; border: none; border-radius: 999px; background: linear-gradient(135deg, #6D28D9, #A855F7); color: white; font-weight: 600; cursor: pointer; font-size: 14px;">
+          ⚔️ Registrar primera transacción
+        </button>
+      </div>
+    </div>
+
+    <!-- FINAL CTA -->
+    <div class="final-cta">
+      <h2>¿Te gusta el concepto?</h2>
+      <p style="color: var(--text-dim); margin-bottom: 16px;">Podemos integrarlo como mascota en los lugares que tengan más sentido.</p>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        <strong style="color: var(--violet-light);">Mi recomendación:</strong> Empezar con empty states + animación al eliminar gastos.
+        Son low-risk y dan mucho carácter sin saturar.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

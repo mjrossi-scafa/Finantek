@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Katana · Premium Max</title>
+  <style>
+    body {
+      background: #0A0613;
+      color: #F8FAFC;
+      font-family: -apple-system, sans-serif;
+      padding: 40px 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff, #A855F7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+    }
+    .sub { color: #94A3B8; text-align: center; margin-bottom: 48px; font-size: 15px; }
+    .section {
+      background: #13091F;
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .label {
+      display: inline-block;
+      background: rgba(139,92,246,0.12);
+      color: #A855F7;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .label.premium {
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(139,92,246,0.15));
+      color: #F59E0B;
+    }
+    h2 { font-size: 22px; margin-bottom: 8px; font-weight: 700; }
+    .desc { color: #94A3B8; font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+    .stage {
+      background: #0A0613;
+      border: 1px solid rgba(139,92,246,0.08);
+      border-radius: 14px;
+      padding: 60px 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stage-ambient::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(139,92,246,0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .feat {
+      background: rgba(139,92,246,0.05);
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .feat-title {
+      font-size: 12px;
+      color: #C084FC;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .feat-desc {
+      font-size: 11px;
+      color: #94A3B8;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗡️ Katana · Premium Max</h1>
+    <p class="sub">Pixel-art pulido al extremo. Sombras, highlights, gradientes sutiles, N fixeada.</p>
+
+    <div class="section">
+      <span class="label premium">✨ PREMIUM MAX</span>
+      <h2>Versión final premium</h2>
+      <p class="desc">Pixel-art con gradientes sutiles dentro de cada bloque, highlights arriba, sombras abajo, hamon diagonal, baseline con shimmer, dot con triple glow.</p>
+
+      <div class="stage stage-ambient">
+        <svg width="100%" height="auto" viewBox="0 0 520 150" style="max-width: 480px; position: relative; z-index: 2;">
+          <defs>
+            <!-- Gradiente principal de bloques: violeta claro arriba, más oscuro abajo -->
+            <linearGradient id="blockGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#D8B4FE"/>
+              <stop offset="50%" stop-color="#C084FC"/>
+              <stop offset="100%" stop-color="#A855F7"/>
+            </linearGradient>
+
+            <!-- Highlight top: línea más clara arriba de cada bloque -->
+            <linearGradient id="blockHighlight" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Shadow bottom -->
+            <linearGradient id="blockShadow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#5B21B6" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#5B21B6" stop-opacity="0.6"/>
+            </linearGradient>
+
+            <!-- Green glow filter -->
+            <filter id="greenGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+
+            <!-- Baseline gradient -->
+            <linearGradient id="baseline" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#7C3AED" stop-opacity="0"/>
+              <stop offset="20%" stop-color="#7C3AED" stop-opacity="0.3"/>
+              <stop offset="50%" stop-color="#C084FC" stop-opacity="0.7"/>
+              <stop offset="80%" stop-color="#7C3AED" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Hamon (katana cut line) -->
+            <linearGradient id="hamon" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0"/>
+              <stop offset="30%" stop-color="#EDE9FE" stop-opacity="0.3"/>
+              <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.5"/>
+              <stop offset="70%" stop-color="#EDE9FE" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Reusable block template using symbol -->
+            <symbol id="block" viewBox="0 0 10 10">
+              <rect width="10" height="10" rx="3" fill="url(#blockGrad)"/>
+              <rect width="10" height="2" rx="1" fill="url(#blockHighlight)"/>
+              <rect y="8" width="10" height="2" rx="1" fill="url(#blockShadow)"/>
+            </symbol>
+          </defs>
+
+          <!-- ==== K ==== -->
+          <g>
+            <rect x="30" y="8" width="10" height="90" rx="3" fill="url(#blockGrad)"/>
+            <rect x="30" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="30" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="44" y="40" width="10" height="30" rx="3" fill="url(#blockGrad)"/>
+            <rect x="44" y="40" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="44" y="65" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="58" y="22" width="10" height="34" rx="3" fill="url(#blockGrad)"/>
+            <rect x="58" y="22" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="58" y="51" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="72" y="8" width="10" height="22" rx="3" fill="url(#blockGrad)"/>
+            <rect x="72" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="72" y="25" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="58" y="62" width="10" height="36" rx="3" fill="url(#blockGrad)"/>
+            <rect x="58" y="62" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="58" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="72" y="76" width="10" height="22" rx="3" fill="url(#blockGrad)"/>
+            <rect x="72" y="76" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="72" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+          </g>
+
+          <!-- ==== A ==== -->
+          <g>
+            <rect x="100" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="100" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="100" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="114" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+            <rect x="114" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="114" y="27" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="128" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+            <rect x="128" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="128" y="27" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="142" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="142" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="142" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="114" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="128" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+          </g>
+
+          <!-- ==== T ==== -->
+          <g>
+            <rect x="156" y="8" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="170" y="8" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="184" y="8" width="10" height="90" rx="3" fill="url(#blockGrad)"/>
+            <rect x="184" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="184" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+            <rect x="198" y="8" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="212" y="8" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+          </g>
+
+          <!-- ==== A ==== -->
+          <g>
+            <rect x="240" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="240" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="240" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="254" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+            <rect x="268" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+
+            <rect x="282" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="282" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="282" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="254" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="268" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+          </g>
+
+          <!-- ==== N (NUEVA - Opción 1) ==== -->
+          <g>
+            <!-- Vertical izq -->
+            <rect x="310" y="8" width="10" height="90" rx="3" fill="url(#blockGrad)"/>
+            <rect x="310" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="310" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <!-- Diagonal escalonada -->
+            <rect x="324" y="14" width="10" height="34" rx="3" fill="url(#blockGrad)"/>
+            <rect x="324" y="14" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+
+            <rect x="338" y="34" width="10" height="34" rx="3" fill="url(#blockGrad)"/>
+
+            <rect x="338" y="58" width="10" height="34" rx="3" fill="url(#blockGrad)"/>
+            <rect x="338" y="87" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <!-- Vertical der -->
+            <rect x="352" y="8" width="10" height="90" rx="3" fill="url(#blockGrad)"/>
+            <rect x="352" y="8" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="352" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+          </g>
+
+          <!-- ==== A (última) ==== -->
+          <g>
+            <rect x="380" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="380" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="380" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="394" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+            <rect x="408" y="8" width="10" height="24" rx="3" fill="url(#blockGrad)"/>
+
+            <rect x="422" y="26" width="10" height="72" rx="3" fill="url(#blockGrad)"/>
+            <rect x="422" y="26" width="10" height="3" rx="1" fill="url(#blockHighlight)"/>
+            <rect x="422" y="93" width="10" height="5" rx="1" fill="url(#blockShadow)"/>
+
+            <rect x="394" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+            <rect x="408" y="50" width="10" height="12" rx="3" fill="url(#blockGrad)"/>
+          </g>
+
+          <!-- HAMON DIAGONAL sutil -->
+          <line x1="10" y1="118" x2="440" y2="-10" stroke="url(#hamon)" stroke-width="1" opacity="0.4"/>
+
+          <!-- BASELINE premium con gradiente -->
+          <rect x="20" y="108" width="420" height="1.5" fill="url(#baseline)" rx="0.75"/>
+
+          <!-- Tiny dots en baseline (shimmer) -->
+          <circle cx="80" cy="108.75" r="0.8" fill="#C084FC" opacity="0.5"/>
+          <circle cx="200" cy="108.75" r="0.8" fill="#C084FC" opacity="0.5"/>
+          <circle cx="320" cy="108.75" r="0.8" fill="#C084FC" opacity="0.5"/>
+
+          <!-- GREEN DOT PREMIUM (3 layers) -->
+          <circle cx="448" cy="94" r="8" fill="#84CC16" opacity="0.3" filter="url(#greenGlow)"/>
+          <circle cx="448" cy="94" r="5" fill="#84CC16"/>
+          <circle cx="448" cy="94" r="3" fill="#A3E635"/>
+          <circle cx="447" cy="93" r="1.2" fill="#FFFFFF" opacity="0.9"/>
+
+          <!-- Tiny samurai accent dot (optional ornament) -->
+          <text x="450" y="125" font-family="monospace" font-size="7" fill="#5B21B6" opacity="0.6">武</text>
+        </svg>
+      </div>
+
+      <div class="features">
+        <div class="feat">
+          <div class="feat-title">✨ Gradiente vertical</div>
+          <div class="feat-desc">Cada bloque tiene gradiente D8B4FE → C084FC → A855F7 (claro → medio → oscuro)</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">💡 Highlight top</div>
+          <div class="feat-desc">Línea 3px más clara arriba de cada bloque vertical</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">🌑 Shadow bottom</div>
+          <div class="feat-desc">Sombra sutil 5px abajo que da peso y profundidad</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">⚔️ Hamon diagonal</div>
+          <div class="feat-desc">Línea blanca translúcida atravesando - sugiere corte de katana</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">✦ Baseline shimmer</div>
+          <div class="feat-desc">Gradiente que aparece y desaparece + dots de brillo</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">🟢 Green dot triple</div>
+          <div class="feat-desc">3 capas: glow exterior + sólido + inner highlight</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">🈁 Ornamento sutil</div>
+          <div class="feat-desc">Kanji 武 (bu · disciplina) super tenue en la esquina</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">🎨 Ambient glow</div>
+          <div class="feat-desc">Radial gradient de fondo suave (no parte del SVG)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARACIÓN -->
+    <div class="section">
+      <span class="label">ANTES · DESPUÉS</span>
+      <h2>Comparación lado a lado</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+        <!-- ANTES -->
+        <div style="background: #0A0613; border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 24px; text-align: center;">
+          <div style="font-size: 10px; color: #EF4444; letter-spacing: 0.2em; margin-bottom: 16px;">ANTES · PLANO</div>
+          <svg width="100%" viewBox="0 0 485 110" style="max-width: 220px;">
+            <rect x="30" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+            <rect x="44" y="40" width="10" height="30" rx="3" fill="#C084FC"/>
+            <rect x="58" y="22" width="10" height="34" rx="3" fill="#C084FC"/>
+            <rect x="72" y="8" width="10" height="22" rx="3" fill="#C084FC"/>
+            <rect x="58" y="62" width="10" height="36" rx="3" fill="#C084FC"/>
+            <rect x="72" y="76" width="10" height="22" rx="3" fill="#C084FC"/>
+            <rect x="100" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="114" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="128" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="142" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="114" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="128" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="156" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="170" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="184" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+            <rect x="198" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="212" y="8" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="240" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="254" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="268" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="282" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="254" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="268" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="310" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+            <rect x="324" y="22" width="10" height="76" rx="3" fill="#C084FC"/>
+            <rect x="338" y="36" width="10" height="62" rx="3" fill="#C084FC"/>
+            <rect x="352" y="8" width="10" height="90" rx="3" fill="#C084FC"/>
+            <rect x="380" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="394" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="408" y="8" width="10" height="24" rx="3" fill="#C084FC"/>
+            <rect x="422" y="26" width="10" height="72" rx="3" fill="#C084FC"/>
+            <rect x="394" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <rect x="408" y="50" width="10" height="12" rx="3" fill="#C084FC"/>
+            <circle cx="445" cy="92" r="5" fill="#84CC16"/>
+          </svg>
+        </div>
+
+        <!-- DESPUÉS -->
+        <div style="background: #0A0613; border: 1px solid rgba(132,204,22,0.3); border-radius: 12px; padding: 24px; text-align: center; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 100px; background: radial-gradient(ellipse, rgba(139,92,246,0.2), transparent 70%);"></div>
+          <div style="position: relative; z-index: 2;">
+            <div style="font-size: 10px; color: #84CC16; letter-spacing: 0.2em; margin-bottom: 16px;">DESPUÉS · PREMIUM</div>
+            <svg width="100%" viewBox="0 0 485 130" style="max-width: 220px;">
+              <defs>
+                <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#D8B4FE"/>
+                  <stop offset="50%" stop-color="#C084FC"/>
+                  <stop offset="100%" stop-color="#A855F7"/>
+                </linearGradient>
+                <linearGradient id="hl2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="sh2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#5B21B6" stop-opacity="0"/>
+                  <stop offset="100%" stop-color="#5B21B6" stop-opacity="0.6"/>
+                </linearGradient>
+                <linearGradient id="bl2" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#7C3AED" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#C084FC" stop-opacity="0.7"/>
+                  <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="hm2" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="g2"><feGaussianBlur stdDeviation="3"/></filter>
+              </defs>
+              <!-- K -->
+              <rect x="30" y="8" width="10" height="90" rx="3" fill="url(#bg2)"/>
+              <rect x="30" y="8" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <rect x="30" y="93" width="10" height="5" rx="1" fill="url(#sh2)"/>
+              <rect x="44" y="40" width="10" height="30" rx="3" fill="url(#bg2)"/>
+              <rect x="58" y="22" width="10" height="34" rx="3" fill="url(#bg2)"/>
+              <rect x="72" y="8" width="10" height="22" rx="3" fill="url(#bg2)"/>
+              <rect x="58" y="62" width="10" height="36" rx="3" fill="url(#bg2)"/>
+              <rect x="72" y="76" width="10" height="22" rx="3" fill="url(#bg2)"/>
+              <!-- A -->
+              <rect x="100" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="100" y="26" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <rect x="100" y="93" width="10" height="5" rx="1" fill="url(#sh2)"/>
+              <rect x="114" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="128" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="142" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="142" y="26" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <rect x="114" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="128" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <!-- T -->
+              <rect x="156" y="8" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="170" y="8" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="184" y="8" width="10" height="90" rx="3" fill="url(#bg2)"/>
+              <rect x="184" y="8" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <rect x="198" y="8" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="212" y="8" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <!-- A -->
+              <rect x="240" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="254" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="268" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="282" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="254" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="268" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <!-- N FIXEADA -->
+              <rect x="310" y="8" width="10" height="90" rx="3" fill="url(#bg2)"/>
+              <rect x="310" y="8" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <rect x="324" y="14" width="10" height="34" rx="3" fill="url(#bg2)"/>
+              <rect x="338" y="34" width="10" height="34" rx="3" fill="url(#bg2)"/>
+              <rect x="338" y="58" width="10" height="34" rx="3" fill="url(#bg2)"/>
+              <rect x="352" y="8" width="10" height="90" rx="3" fill="url(#bg2)"/>
+              <rect x="352" y="8" width="10" height="3" rx="1" fill="url(#hl2)"/>
+              <!-- A -->
+              <rect x="380" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="394" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="408" y="8" width="10" height="24" rx="3" fill="url(#bg2)"/>
+              <rect x="422" y="26" width="10" height="72" rx="3" fill="url(#bg2)"/>
+              <rect x="394" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <rect x="408" y="50" width="10" height="12" rx="3" fill="url(#bg2)"/>
+              <!-- Hamon -->
+              <line x1="10" y1="118" x2="440" y2="-10" stroke="url(#hm2)" stroke-width="1" opacity="0.4"/>
+              <!-- Baseline -->
+              <rect x="20" y="108" width="420" height="1.5" fill="url(#bl2)"/>
+              <!-- Green dot premium -->
+              <circle cx="448" cy="94" r="8" fill="#84CC16" opacity="0.3" filter="url(#g2)"/>
+              <circle cx="448" cy="94" r="5" fill="#84CC16"/>
+              <circle cx="448" cy="94" r="3" fill="#A3E635"/>
+              <circle cx="447" cy="93" r="1.2" fill="#FFFFFF" opacity="0.9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 32px; background: linear-gradient(135deg, rgba(132,204,22,0.08), rgba(139,92,246,0.05)); border-radius: 16px; border: 1px solid rgba(132,204,22,0.2); margin-top: 20px;">
+      <p style="color: #94A3B8; font-size: 14px; margin-bottom: 8px;">
+        Si te convence, dale <strong style="color: #84CC16;">"aplícalo"</strong> y lo pongo en el código como versión final.
+      </p>
+      <p style="font-size: 12px; color: #64748B;">
+        Aplica a: sidebar, auth screen, favicon, PWA icon, iOS icon, Android icon.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
