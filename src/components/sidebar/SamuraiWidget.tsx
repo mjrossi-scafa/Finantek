@@ -174,43 +174,64 @@ export function SamuraiWidget({ transitioning = false, katanaState = 'violet' }:
           }}
         >
           <svg width="90" height="90" viewBox="0 0 100 100">
-            {/* Hoja larga y delgada — diagonal */}
+            <defs>
+              <linearGradient id={`kata-blade-${katanaState}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={theme.bladeEdge} />
+                <stop offset="50%" stopColor={theme.blade} />
+                <stop offset="100%" stopColor={theme.glow} />
+              </linearGradient>
+              <linearGradient id={`kata-tsuba-${katanaState}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={theme.tsuba} stopOpacity="1" />
+                <stop offset="100%" stopColor={theme.tsuba} stopOpacity="0.7" />
+              </linearGradient>
+              <linearGradient id={`kata-grip-${katanaState}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#2D1B4E" />
+                <stop offset="50%" stopColor="#1A0A2E" />
+                <stop offset="100%" stopColor="#0F0618" />
+              </linearGradient>
+            </defs>
+            {/* Hoja con gradiente premium */}
             <rect x="48.5" y="2" width="3" height="65" rx="1.5"
-              fill={theme.blade} transform="rotate(0 50 50)"
-              style={{ transition: 'fill 0.8s ease' }}/>
-            <rect x="49" y="2" width="1" height="63" rx="1"
-              fill={theme.bladeEdge} opacity="0.8"
-              transform="rotate(0 50 50)"
+              fill={`url(#kata-blade-${katanaState})`}
+              style={{ transition: 'all 0.8s ease' }}/>
+            {/* Filo reflejado (highlight) */}
+            <rect x="49" y="2" width="0.8" height="63"
+              fill={theme.bladeEdge} opacity="0.9"
               style={{ transition: 'fill 0.8s ease' }}/>
             {/* Punta afilada */}
-            <polygon points="47.5,2 51.5,2 50,0" fill={theme.bladeEdge}
+            <polygon points="47.5,2 51.5,2 50,-1" fill={theme.bladeEdge}
               style={{ transition: 'fill 0.8s ease' }}/>
-            {/* Hamon (línea de temple) sutil */}
+            {/* Hamon (línea de temple) premium */}
             <path d="M 49 10 Q 50 20 49 30 Q 50 40 49 50 Q 50 60 49 65"
-              fill="none" stroke={theme.glow} strokeWidth="0.5" opacity="0.5"
+              fill="none" stroke={theme.bladeEdge} strokeWidth="0.6" opacity="0.7"
               style={{ transition: 'stroke 0.8s ease' }}/>
-            {/* Tsuba más detallada */}
-            <ellipse cx="50" cy="68" rx="10" ry="4" fill={theme.tsuba}
+            {/* Tsuba con gradiente */}
+            <ellipse cx="50" cy="68" rx="10" ry="4" fill={`url(#kata-tsuba-${katanaState})`}
+              style={{ transition: 'all 0.8s ease' }}/>
+            {/* Tsuba highlight top */}
+            <ellipse cx="50" cy="66.5" rx="9" ry="1" fill={theme.bladeEdge} opacity="0.4"
               style={{ transition: 'fill 0.8s ease' }}/>
-            <ellipse cx="50" cy="68" rx="8" ry="3" fill={theme.tsuba} opacity="0.8"
+            {/* Tsuba shadow bottom */}
+            <ellipse cx="50" cy="71" rx="8" ry="1" fill="#1A0A2E" opacity="0.5"/>
+            {/* Mango con gradiente */}
+            <rect x="47" y="71" width="6" height="22" rx="2" fill={`url(#kata-grip-${katanaState})`}/>
+            {/* Mango highlight izquierdo */}
+            <rect x="47" y="71" width="1" height="22" rx="0.5" fill={theme.glow} opacity="0.2"/>
+            {/* Ito (vendaje) con detalle */}
+            <rect x="47" y="73" width="6" height="1.5" fill={theme.glow} opacity="0.7"/>
+            <rect x="47" y="77" width="6" height="1.5" fill={theme.glow} opacity="0.7"/>
+            <rect x="47" y="81" width="6" height="1.5" fill={theme.glow} opacity="0.7"/>
+            <rect x="47" y="85" width="6" height="1.5" fill={theme.glow} opacity="0.7"/>
+            {/* Kashira premium */}
+            <ellipse cx="50" cy="94" rx="5" ry="3" fill={`url(#kata-tsuba-${katanaState})`}
+              style={{ transition: 'all 0.8s ease' }}/>
+            {/* Kashira highlight */}
+            <ellipse cx="50" cy="93" rx="4" ry="0.8" fill={theme.bladeEdge} opacity="0.4"/>
+            {/* Punto acento premium con glow */}
+            <circle cx="50" cy="96" r="3.5" fill={theme.glow} opacity="0.4"/>
+            <circle cx="50" cy="96" r="2" fill={theme.glow}
               style={{ transition: 'fill 0.8s ease' }}/>
-            {/* Mango con grip */}
-            <rect x="47" y="71" width="6" height="22" rx="2" fill="#1A0A2E"/>
-            {/* Ito (vendaje) diagonal */}
-            <rect x="47" y="73" width="6" height="2" rx="0"
-              fill="#4C1D95" opacity="0.8"/>
-            <rect x="47" y="77" width="6" height="2" rx="0"
-              fill="#4C1D95" opacity="0.8"/>
-            <rect x="47" y="81" width="6" height="2" rx="0"
-              fill="#4C1D95" opacity="0.8"/>
-            <rect x="47" y="85" width="6" height="2" rx="0"
-              fill="#4C1D95" opacity="0.8"/>
-            {/* Kashira (pommel) */}
-            <ellipse cx="50" cy="94" rx="5" ry="3" fill={theme.tsuba}
-              style={{ transition: 'fill 0.8s ease' }}/>
-            {/* Punto acento */}
-            <circle cx="50" cy="96" r="2.5" fill={theme.glow}
-              style={{ transition: 'fill 0.8s ease' }}/>
+            <circle cx="49.5" cy="95.5" r="0.6" fill="#FFFFFF" opacity="0.8"/>
           </svg>
         </div>
 

@@ -56,9 +56,9 @@ export function Sidebar({ totalPoints = 0, katanaState = 'violet' }: SidebarProp
       <div className="absolute top-0 left-0 w-[1px] h-full gradient-indigo opacity-30" />
 
       {/* Logo KATANA con barras SVG */}
-      <div className="pt-6 pb-3 px-4">
+      <div className="pt-6 pb-3 px-5">
         <div>
-          <KatanaLogo variant="sidebar" className="!min-w-[200px] !max-w-[200px]" />
+          <KatanaLogo variant="sidebar" className="!min-w-[180px] !max-w-[180px]" />
         </div>
       </div>
 
