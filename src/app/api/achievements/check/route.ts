@@ -108,6 +108,84 @@ export async function POST(request: NextRequest) {
   const usedSet = new Set((usedCategories ?? []).map((t: { category_id: string }) => t.category_id))
   const allExpenseCategoriesUsed = (expenseCategories ?? []).every((c: { id: string }) => usedSet.has(c.id))
 
+  // ==========================
+  // NEW CONTEXTS
+  // ==========================
+
+  // Planner
+  const { count: plannedCount } = await supabase
+    .from('planned_expenses')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  const { count: recurringPlannedCount } = await supabase
+    .from('planned_expenses')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .neq('recurrence', 'none')
+
+  const { count: plannedPaidCount } = await supabase
+    .from('planned_expenses')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_paid', true)
+
+  const currentMonthStart = `${year}-${String(month).padStart(2, '0')}-01`
+  const nextMonthStart = month === 12
+    ? `${year + 1}-01-01`
+    : `${year}-${String(month + 1).padStart(2, '0')}-01`
+
+  const { data: plannedMonthly } = await supabase
+    .from('planned_expenses')
+    .select('amount')
+    .eq('user_id', user.id)
+    .gte('planned_date', currentMonthStart)
+    .lt('planned_date', nextMonthStart)
+  const plannedAmountMonthly = (plannedMonthly ?? []).reduce(
+    (sum: number, p: { amount: number }) => sum + p.amount,
+    0
+  )
+
+  // Insights
+  const { count: insightCount } = await supabase
+    .from('weekly_insights')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  // Telegram
+  const { count: telegramLinkedCount } = await supabase
+    .from('telegram_users')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+  const telegramLinked = (telegramLinkedCount ?? 0) > 0
+
+  // Active budgets (current month or annual)
+  const { count: activeBudgetsCount } = await supabase
+    .from('budgets')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .or(`and(period_type.eq.monthly,year.eq.${year},month.eq.${month}),period_type.eq.annual`)
+
+  // Previous month savings data for improvement tracking
+  const prevMonth = month === 1 ? 12 : month - 1
+  const prevYear = month === 1 ? year - 1 : year
+  const { data: prevSummary } = await supabase.rpc('get_monthly_summary', { p_year: prevYear, p_month: prevMonth })
+  const prevMonthExpense = (prevSummary ?? []).find(
+    (s: { type: string; total: number }) => s.type === 'expense'
+  )?.total ?? 0
+  const monthExpenseReduction =
+    prevMonthExpense > 0 ? (prevMonthExpense - monthExpense) / prevMonthExpense : 0
+
+  // Time-based (secret achievements)
+  const nowHour = now.getHours()
+  const lateNightTransaction = trigger === 'transaction_created' && nowHour >= 2 && nowHour < 5
+  const earlyMorningTransaction = trigger === 'transaction_created' && nowHour < 7
+  const isJan1 = now.getMonth() === 0 && now.getDate() === 1
+
+  // All achievements unlocked (except "total_master" itself)
+  const totalAchievements = (allAchievements ?? []).filter((a) => a.key !== 'total_master').length
+  const allAchievementsUnlocked = unlockedKeys.size >= totalAchievements && totalAchievements > 0
+
   const newlyUnlocked = evaluateAchievements(
     (allAchievements ?? []) as Achievement[],
     unlockedKeys,
@@ -121,6 +199,19 @@ export async function POST(request: NextRequest) {
       monthlySavingsRate,
       monthlyPositive,
       allExpenseCategoriesUsed,
+      // New
+      plannedCount: plannedCount ?? 0,
+      recurringPlannedCount: recurringPlannedCount ?? 0,
+      plannedPaidCount: plannedPaidCount ?? 0,
+      plannedAmountMonthly,
+      insightCount: insightCount ?? 0,
+      telegramLinked,
+      activeBudgetsCount: activeBudgetsCount ?? 0,
+      monthExpenseReduction,
+      lateNightTransaction,
+      earlyMorningTransaction,
+      isJan1,
+      allAchievementsUnlocked,
     }
   )
 
