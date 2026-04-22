@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { formatCLP, parseCLP } from '@/lib/utils/currency'
 import { cn } from '@/lib/utils'
@@ -15,35 +15,31 @@ interface CurrencyInputProps {
 }
 
 export function CurrencyInput({ value, onChange, placeholder = '$0', disabled, id, className }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = useState('')
+  // Derive display value from props instead of useEffect
+  const [focused, setFocused] = useState(false)
+  const [rawInput, setRawInput] = useState('')
 
-  useEffect(() => {
-    if (value > 0) {
-      setDisplayValue(formatCLP(value))
-    } else {
-      setDisplayValue('')
-    }
-  }, [value])
+  // Compute display based on focus state and value
+  const displayValue = focused
+    ? rawInput
+    : value > 0
+      ? formatCLP(value)
+      : ''
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value
+    setRawInput(raw)
     const numeric = parseCLP(raw)
-    setDisplayValue(raw)
     onChange(numeric)
   }
 
   function handleBlur() {
-    if (value > 0) {
-      setDisplayValue(formatCLP(value))
-    } else {
-      setDisplayValue('')
-    }
+    setFocused(false)
   }
 
   function handleFocus() {
-    if (value > 0) {
-      setDisplayValue(value.toString())
-    }
+    setFocused(true)
+    setRawInput(value > 0 ? value.toString() : '')
   }
 
   return (

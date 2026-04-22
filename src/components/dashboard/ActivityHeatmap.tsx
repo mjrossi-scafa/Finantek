@@ -77,7 +77,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
     }
     // Actually use the simple reverse approach
     streak = 0
-    let daysToday = [...days].reverse().filter((d) => d.isCurrentYear)
+    const daysToday = [...days].reverse().filter((d) => d.isCurrentYear)
     for (const d of daysToday) {
       if (d.count > 0) streak++
       else break

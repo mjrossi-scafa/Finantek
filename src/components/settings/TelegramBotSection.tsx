@@ -27,14 +27,9 @@ export function TelegramBotSection({ userId }: TelegramBotSectionProps) {
   const supabase = createClient()
   const router = useRouter()
 
-  useEffect(() => {
-    checkLinkStatus()
-  }, [])
-
-  async function checkLinkStatus() {
+  const checkLinkStatus = async () => {
     setLoading(true)
 
-    // Check if user is linked
     const { data: telegramLink } = await supabase
       .from('telegram_users')
       .select('telegram_username')
@@ -45,7 +40,6 @@ export function TelegramBotSection({ userId }: TelegramBotSectionProps) {
       setIsLinked(true)
       setTelegramUser(telegramLink)
     } else {
-      // Check for existing code
       const { data: profile } = await supabase
         .from('profiles')
         .select('telegram_link_code, telegram_link_expires_at')
@@ -63,6 +57,11 @@ export function TelegramBotSection({ userId }: TelegramBotSectionProps) {
 
     setLoading(false)
   }
+
+  useEffect(() => {
+    checkLinkStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function generateCode() {
     setGenerating(true)

@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       await sendMessage(chatId,
         "⚔️ Bienvenido al dojo.\n\n" +
         "Para comenzar necesitas vincular tu cuenta:\n" +
-        "1. Regístrate en " + (process.env.NEXT_PUBLIC_APP_URL || "katana-omega.vercel.app") + "\n" +
+        "1. Regístrate en " + (process.env.NEXT_PUBLIC_APP_URL || "katana-finance.vercel.app") + "\n" +
         "2. Ve a Configuración → Bot de Telegram\n" +
         "3. Copia tu código y envíalo aquí\n\n" +
         "Ya tienes cuenta? Envía tu código de 6 dígitos."
@@ -250,11 +250,11 @@ export async function POST(request: NextRequest) {
     await sendMessage(chatId,
       "⚔️ Bienvenido a Katana\n\n" +
       "La disciplina del samurai aplicada al dinero.\n\n" +
-      "Si ya tienes cuenta en katana-omega.vercel.app:\n" +
+      "Si ya tienes cuenta en katana-finance.vercel.app:\n" +
       "→ Ve a Configuración → Bot de Telegram\n" +
       "→ Copia tu código y envíalo aquí\n\n" +
       "Si no tienes cuenta:\n" +
-      "→ Regístrate en katana-omega.vercel.app\n\n" +
+      "→ Regístrate en katana-finance.vercel.app\n\n" +
       "💡 Una vez vinculado podrás:\n" +
       "- Registrar gastos con texto o foto\n" +
       "- Ver tu resumen mensual\n" +
@@ -844,7 +844,7 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
       break
 
     case 'dashboard':
-      const url = process.env.NEXT_PUBLIC_APP_URL || 'https://finantek-omega.vercel.app'
+      const url = process.env.NEXT_PUBLIC_APP_URL || 'https://katana-finance.vercel.app'
       await sendMessage(chatId, `🌐 Abre tu dashboard aquí:\n${url}/dashboard`)
       break
 
