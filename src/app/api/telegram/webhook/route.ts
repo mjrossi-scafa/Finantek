@@ -645,8 +645,12 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
       c => c.name.toLowerCase().includes(tx.suggested_category.toLowerCase()) && c.type === tx.type
     ) || categories.find(c => c.type === tx.type) || categories[0]
 
-    // Determine currency: explicit in message > trip currency > CLP
-    const currency = tx.currency || activeTrip?.currency || 'CLP'
+    // Trip link: only if transaction date falls within trip range
+    const isDuringTrip = !!activeTrip && tx.date >= activeTrip.start_date && tx.date <= activeTrip.end_date
+    const tripId: string | null = isDuringTrip ? activeTrip!.id : null
+
+    // Determine currency: explicit in message > trip currency (only if during trip) > CLP
+    const currency = tx.currency || (isDuringTrip ? activeTrip!.currency : 'CLP')
     const isForeign = currency !== 'CLP'
 
     let finalAmount = tx.amount
@@ -663,12 +667,6 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
         const { convertCurrency } = await import('@/lib/utils/exchangeRates')
         finalAmount = await convertCurrency(tx.amount, currency, 'CLP')
       }
-    }
-
-    // Trip link: only if transaction date falls within trip range
-    let tripId: string | null = null
-    if (activeTrip && tx.date >= activeTrip.start_date && tx.date <= activeTrip.end_date) {
-      tripId = activeTrip.id
     }
 
     await supabase.from('transactions').insert({
