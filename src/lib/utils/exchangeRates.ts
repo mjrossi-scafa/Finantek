@@ -153,15 +153,25 @@ export const CURRENCY_ALIASES: Record<string, string> = {
   clp: 'CLP', peso: 'CLP', pesos: 'CLP',
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 /**
  * Detect currency from a text message.
  * Returns ISO code or null.
+ *
+ * Aliases that are pure words (letters and spaces only) are matched with
+ * word boundaries so "aud" doesn't match "audio". Symbol aliases like "a$"
+ * or "¥" are escaped and matched literally — without escaping, "$" was
+ * interpreted as end-of-string, causing "agua y barra" to match "a$" → AUD.
  */
 export function detectCurrency(text: string): string | null {
   const lower = text.toLowerCase()
   for (const [alias, code] of Object.entries(CURRENCY_ALIASES)) {
-    // Match whole word or symbol
-    const pattern = alias.length <= 2 ? alias : `\\b${alias}\\b`
+    const isWord = /^[\p{L}\s]+$/u.test(alias)
+    const escaped = escapeRegExp(alias)
+    const pattern = isWord ? `\\b${escaped}\\b` : escaped
     const regex = new RegExp(pattern, 'i')
     if (regex.test(lower)) return code
   }
