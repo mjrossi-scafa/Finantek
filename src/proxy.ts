@@ -29,11 +29,21 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+  const code = searchParams.get('code')
+
+  // If Supabase redirected to any page with ?code=, forward to /auth/callback
+  // so the route handler can exchange it for a session with proper cookie setup.
+  if (code && pathname !== '/auth/callback') {
+    const callbackUrl = request.nextUrl.clone()
+    callbackUrl.pathname = '/auth/callback'
+    return NextResponse.redirect(callbackUrl)
+  }
 
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password')
   const isApiRoute = pathname.startsWith('/api')
-  const isPublic = isAuthRoute || isApiRoute
+  const isOAuthCallback = pathname.startsWith('/auth/')
+  const isPublic = isAuthRoute || isApiRoute || isOAuthCallback
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
