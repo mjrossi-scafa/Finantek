@@ -879,7 +879,8 @@ export function TransactionsClient({
       {/* Fixed floating button for mobile */}
       <button
         onClick={handleCreateNew}
-        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center md:hidden z-50"
+        className="fixed right-4 w-14 h-14 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center md:hidden z-50"
+        style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}
       >
         <Plus className="h-6 w-6" />
       </button>

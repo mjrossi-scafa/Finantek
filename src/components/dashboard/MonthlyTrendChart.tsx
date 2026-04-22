@@ -54,15 +54,15 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
   const promedio = (totalIngresos - totalGastos) / data.length
 
   return (
-    <div className="glass-card rounded-2xl p-6">
-      <div className="flex items-start justify-between mb-6">
+    <div className="glass-card rounded-2xl p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 mb-5 sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-light/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-xl bg-indigo-light/10 flex items-center justify-center shrink-0">
             <TrendingUp className="h-5 w-5 text-indigo-light" />
           </div>
           <div>
             <h3 className="text-base font-bold text-text-primary">Tendencia Mensual</h3>
-            <p className="text-sm text-text-tertiary">Ingresos vs gastos últimos 12 meses</p>
+            <p className="text-xs sm:text-sm text-text-tertiary">Ingresos vs gastos últimos 12 meses</p>
           </div>
         </div>
 

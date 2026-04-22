@@ -138,7 +138,7 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-[10px]">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded bg-gradient-to-t from-violet-600 to-violet-400" />
             <span className="text-text-secondary">Esta semana</span>
@@ -148,9 +148,9 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
             <span className="text-text-secondary">Anterior</span>
           </div>
           {bestDay && worstDay && (
-            <div className="ml-auto flex items-center gap-3 text-text-muted">
-              <span>🏆 Mejor día: <span className="text-bamboo-take font-mono">{bestDay.dayName}</span></span>
-              <span>💥 Mayor: <span className="text-vermillion-shu font-mono">{worstDay.dayName}</span></span>
+            <div className="w-full md:w-auto md:ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-text-muted">
+              <span className="whitespace-nowrap">🏆 <span className="text-bamboo-take font-mono">{bestDay.dayName}</span></span>
+              <span className="whitespace-nowrap">💥 <span className="text-vermillion-shu font-mono">{worstDay.dayName}</span></span>
             </div>
           )}
         </div>

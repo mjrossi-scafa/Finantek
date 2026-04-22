@@ -43,12 +43,12 @@ export function SummaryCards({
         <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
         <div className="absolute top-6 left-6 w-40 h-40 bg-white/3 rounded-full blur-2xl" />
 
-        <div className="relative flex flex-row items-stretch h-full min-h-[220px]">
+        <div className="relative flex flex-row items-stretch h-full min-h-[180px] md:min-h-[220px]">
           {/* Mitad izquierda - balance actual */}
-          <div className="flex-1 flex flex-col justify-between p-8">
+          <div className="flex-1 flex flex-col justify-between p-5 sm:p-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <Wallet className="h-6 w-6 text-white" />
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                <Wallet className="h-5 w-5 md:h-6 md:w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-white/70 tracking-wide">Balance del Mes</p>
@@ -57,8 +57,8 @@ export function SummaryCards({
             </div>
 
             {/* Número de balance más grande con código de color */}
-            <div className="mb-6">
-              <p className={`text-6xl font-black font-mono leading-none mb-2 ${
+            <div className="mb-4 md:mb-6">
+              <p className={`text-4xl sm:text-5xl md:text-6xl font-black font-mono leading-none mb-2 break-all ${
                 balance >= 0 ? 'text-white' : 'text-red-200'
               }`}>
                 {isHidden ? '•••••' : <CountUp value={balance} />}
@@ -140,8 +140,8 @@ export function SummaryCards({
             )}
           </div>
 
-          {/* Estado de hover mejorado */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {/* Estado siempre visible en mobile, solo hover en desktop */}
+          <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
             <p className="text-xs text-text-muted">
               {prevIncome > 0 ? `Antes: ${formatCLP(prevIncome)}` : 'Primer mes registrando'}
             </p>

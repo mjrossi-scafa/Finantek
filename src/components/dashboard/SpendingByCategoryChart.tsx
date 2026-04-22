@@ -63,9 +63,9 @@ export function SpendingByCategoryChart({ data }: SpendingByCategoryChartProps) 
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col md:flex-row items-center md:items-center gap-4 md:gap-6">
         {/* Donut chart con contenido central */}
-        <div className="relative w-44 h-44 shrink-0">
+        <div className="relative w-36 h-36 sm:w-44 sm:h-44 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -104,7 +104,7 @@ export function SpendingByCategoryChart({ data }: SpendingByCategoryChartProps) 
         </div>
 
         {/* Lista de categorías mejorada */}
-        <div className="flex-1 space-y-2 overflow-hidden">
+        <div className="flex-1 space-y-2 overflow-hidden w-full">
           {chartData.slice(0, 6).map((d, i) => (
             <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-elevated/50 transition-colors group">
               {/* Punto de color */}

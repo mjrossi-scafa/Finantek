@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { formatCLP } from '@/lib/utils/currency'
 import { Flame } from 'lucide-react'
 
@@ -10,6 +10,14 @@ interface ActivityHeatmapProps {
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<{ date: string; amount: number; count: number } | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to the end (most recent weeks) on mount for mobile
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
+    }
+  }, [])
 
   const { days, weekLabels, monthLabels, maxAmount, streakInfo } = useMemo(() => {
     // Build a map from date to data
@@ -149,7 +157,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       </div>
 
       {/* Heatmap */}
-      <div className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto">
         <div className="inline-flex gap-0.5 min-w-max">
           {/* Day labels column */}
           <div className="flex flex-col gap-0.5 pr-1 text-[9px] text-text-muted pt-4">

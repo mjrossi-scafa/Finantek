@@ -150,16 +150,16 @@ export function RecentTransactions({
                   </p>
                 </div>
 
-                {/* Quick actions on hover */}
+                {/* Quick actions - always visible on mobile, hover on desktop */}
                 {userId && (
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1">
                     <Link
                       href={`/transactions?edit=${t.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-lg text-text-tertiary hover:text-violet-light hover:bg-violet-light/10 transition-colors"
+                      className="p-2 md:p-1.5 rounded-lg text-text-tertiary hover:text-violet-light hover:bg-violet-light/10 transition-colors"
                       title="Editar"
                     >
-                      <Edit2 className="h-3.5 w-3.5" />
+                      <Edit2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
                     </Link>
                     <button
                       onClick={(e) => {
@@ -171,14 +171,14 @@ export function RecentTransactions({
                           setTimeout(() => setDeletingId(''), 3000)
                         }
                       }}
-                      className={`p-1.5 rounded-lg transition-colors ${
+                      className={`p-2 md:p-1.5 rounded-lg transition-colors ${
                         deletingId === t.id
                           ? 'text-vermillion-shu bg-vermillion-shu/20 animate-pulse'
                           : 'text-text-tertiary hover:text-vermillion-shu hover:bg-vermillion-shu/10'
                       }`}
                       title={deletingId === t.id ? 'Click de nuevo para confirmar' : 'Eliminar'}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
                     </button>
                   </div>
                 )}

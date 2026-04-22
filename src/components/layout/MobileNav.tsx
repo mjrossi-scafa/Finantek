@@ -33,7 +33,7 @@ export function MobileNav() {
               href={item.href}
               data-tour={item.tour}
               className={cn(
-                'flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-all',
+                'flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition-all min-h-[52px]',
                 isActive ? 'text-violet-light' : 'text-text-muted active:text-text-secondary'
               )}
             >
