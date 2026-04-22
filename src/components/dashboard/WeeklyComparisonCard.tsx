@@ -152,8 +152,12 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
           </div>
           {bestDay && worstDay && (
             <div className="w-full md:w-auto md:ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-text-muted">
-              <span className="whitespace-nowrap">🏆 <span className="text-bamboo-take font-mono">{bestDay.dayName}</span></span>
-              <span className="whitespace-nowrap">💥 <span className="text-vermillion-shu font-mono">{worstDay.dayName}</span></span>
+              <span className="whitespace-nowrap" title={`Menor gasto del ${bestDay.dayName}`}>
+                🏆 Menor: <span className="text-bamboo-take font-mono">{bestDay.dayName}</span>
+              </span>
+              <span className="whitespace-nowrap" title={`Mayor gasto del ${worstDay.dayName}`}>
+                💥 Mayor: <span className="text-vermillion-shu font-mono">{worstDay.dayName}</span>
+              </span>
             </div>
           )}
         </div>
