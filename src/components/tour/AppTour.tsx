@@ -121,7 +121,7 @@ const TOUR_STEPS: TourStep[] = [
     description:
       'Aquí cambias moneda, timezone, categorías, preferencias de notificaciones, exportas todo en CSV o eliminas tu cuenta. También puedes rehacer este tour cuando quieras.',
     pose: 'explicando',
-    placement: 'right',
+    placement: 'top',
   },
   {
     id: 'farewell',
@@ -246,27 +246,39 @@ export function AppTour({ userId, open, onClose }: AppTourProps) {
     if (typeof window === 'undefined') return {}
 
     const padding = 16
+    const tooltipHeight = 340
+    const tooltipWidth = 360
+    const maxTop = Math.max(16, window.innerHeight - tooltipHeight - 16)
+    const maxLeft = Math.max(16, window.innerWidth - tooltipWidth - 16)
+
+    function clampTop(desired: number) {
+      return Math.max(16, Math.min(maxTop, desired))
+    }
+    function clampLeft(desired: number) {
+      return Math.max(16, Math.min(maxLeft, desired))
+    }
+
     switch (placement) {
       case 'right':
         return {
-          top: Math.max(16, targetRect.top + targetRect.height / 2 - 150),
-          left: Math.min(window.innerWidth - 400, targetRect.right + padding),
+          top: clampTop(targetRect.top + targetRect.height / 2 - tooltipHeight / 2),
+          left: clampLeft(targetRect.right + padding),
         }
       case 'left':
         return {
-          top: Math.max(16, targetRect.top + targetRect.height / 2 - 150),
-          right: Math.min(window.innerWidth - 400, window.innerWidth - targetRect.left + padding),
+          top: clampTop(targetRect.top + targetRect.height / 2 - tooltipHeight / 2),
+          right: Math.max(16, Math.min(maxLeft, window.innerWidth - targetRect.left + padding)),
         }
       case 'top':
         return {
           bottom: window.innerHeight - targetRect.top + padding,
-          left: Math.max(16, Math.min(window.innerWidth - 400, targetRect.left)),
+          left: clampLeft(targetRect.left),
         }
       case 'bottom':
       default:
         return {
-          top: targetRect.bottom + padding,
-          left: Math.max(16, Math.min(window.innerWidth - 400, targetRect.left)),
+          top: clampTop(targetRect.bottom + padding),
+          left: clampLeft(targetRect.left),
         }
     }
   }, [targetRect, placement, isMobile])
