@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, memo } from 'react'
 import { Transaction, Category } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -21,7 +21,7 @@ interface TransactionItemProps {
   onLongPress: () => void
 }
 
-export function TransactionItem({
+export const TransactionItem = memo(function TransactionItem({
   transaction,
   isSelected,
   isDeleting,
@@ -257,4 +257,4 @@ export function TransactionItem({
       </div>
     </div>
   )
-}
+})

@@ -20,9 +20,10 @@ interface MonthlyTrendChartProps {
 
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) {
   if (!active || !payload?.length) return null
+  const currentYear = new Date().getFullYear()
   return (
     <div className="glass-card rounded-xl px-4 py-3 shadow-xl border border-surface-border backdrop-blur-md">
-      <p className="text-sm font-semibold text-text-primary mb-3">{label} 2024</p>
+      <p className="text-sm font-semibold text-text-primary mb-3">{label} {currentYear}</p>
       <div className="space-y-2">
         {payload.map((p, i) => (
           <div key={i} className="flex items-center justify-between gap-4">

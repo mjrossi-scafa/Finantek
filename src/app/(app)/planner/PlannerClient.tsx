@@ -55,27 +55,69 @@ export function PlannerClient({ initialPlanned, categories, transactions, userId
   const [editingExpense, setEditingExpense] = useState<PlannedExpense | undefined>()
   const [suggestionsOpen, setSuggestionsOpen] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
+  const [historicalTransactions, setHistoricalTransactions] = useState<Transaction[]>([])
+  const [loadingHistorical, setLoadingHistorical] = useState(false)
+  const [hasLoadedHistorical, setHasLoadedHistorical] = useState(false)
 
-  // Detect recurring expenses from transaction history
+  // Detect recurring expenses from historical data (only available after lazy load)
   const recurringSuggestions = useMemo(
-    () => detectRecurringExpenses(transactions, planned),
-    [transactions, planned]
+    () => hasLoadedHistorical ? detectRecurringExpenses(historicalTransactions, planned) : [],
+    [historicalTransactions, planned, hasLoadedHistorical]
   )
 
-  // Show banner on first visit if there are suggestions
+  // Lazy-load 3 months of history when user first interacts with suggestions
+  const loadHistoricalTransactions = async () => {
+    if (hasLoadedHistorical || loadingHistorical) return
+    setLoadingHistorical(true)
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+    const threeMonthsAgoStr = threeMonthsAgo.toISOString().split('T')[0]
+
+    const { data } = await supabase
+      .from('transactions')
+      .select('*, categories(*)')
+      .eq('user_id', userId)
+      .eq('type', 'expense')
+      .gte('transaction_date', threeMonthsAgoStr)
+      .order('transaction_date', { ascending: false })
+
+    setHistoricalTransactions((data ?? []) as Transaction[])
+    setHasLoadedHistorical(true)
+    setLoadingHistorical(false)
+  }
+
+  // Defer banner check: load historical data after first render (idle) to know if banner should show
   useEffect(() => {
     const seen = localStorage.getItem(SEEN_SUGGESTIONS_KEY)
-    if (!seen && recurringSuggestions.length > 0) {
+    if (seen) return
+
+    // Use requestIdleCallback (or setTimeout as fallback) to not block initial render
+    const timeoutId = window.setTimeout(async () => {
+      await loadHistoricalTransactions()
+    }, 1500)
+
+    return () => window.clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Show banner when historical data arrives and suggestions exist
+  useEffect(() => {
+    const seen = localStorage.getItem(SEEN_SUGGESTIONS_KEY)
+    if (!seen && hasLoadedHistorical && recurringSuggestions.length > 0) {
       setShowBanner(true)
     }
-  }, [recurringSuggestions.length])
+  }, [recurringSuggestions.length, hasLoadedHistorical])
 
   const dismissBanner = () => {
     setShowBanner(false)
     localStorage.setItem(SEEN_SUGGESTIONS_KEY, 'true')
   }
 
-  const openSuggestions = () => {
+  const openSuggestions = async () => {
+    // Make sure historical data is loaded before opening modal
+    if (!hasLoadedHistorical) {
+      await loadHistoricalTransactions()
+    }
     setSuggestionsOpen(true)
     dismissBanner()
   }

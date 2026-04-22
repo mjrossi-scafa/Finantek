@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { formatCLP } from '@/lib/utils/currency'
 
 interface CountUpProps {
@@ -10,7 +10,7 @@ interface CountUpProps {
   format?: (n: number) => string
 }
 
-export function CountUp({ value, duration = 800, className, format = formatCLP }: CountUpProps) {
+export const CountUp = memo(function CountUp({ value, duration = 800, className, format = formatCLP }: CountUpProps) {
   const [displayValue, setDisplayValue] = useState(0)
   const prevValueRef = useRef(0)
   const rafRef = useRef<number | null>(null)
@@ -45,4 +45,4 @@ export function CountUp({ value, duration = 800, className, format = formatCLP }
   }, [value, duration])
 
   return <span className={className}>{format(Math.round(displayValue))}</span>
-}
+})

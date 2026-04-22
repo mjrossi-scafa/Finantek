@@ -61,62 +61,7 @@ export function SamuraiWidget({ transitioning = false }: SamuraiWidgetProps) {
         transition: 'opacity 0.4s ease, all 0.8s ease',
       }}
     >
-      <style>{`
-        @keyframes katanaFloat {
-          0%,100% { transform: translateY(0) rotate(-45deg); }
-          50%      { transform: translateY(-8px) rotate(-45deg); }
-        }
-        @keyframes zenFloat {
-          0%,100% {
-            transform: translateY(0px) rotate(0deg);
-            filter: drop-shadow(0 0 6px #4C1D95)
-                    drop-shadow(0 0 2px #7C3AED);
-          }
-          50% {
-            transform: translateY(-8px) rotate(0deg);
-            filter: drop-shadow(0 0 14px #7C3AED)
-                    drop-shadow(0 0 6px #A855F7)
-                    drop-shadow(0 0 2px #84CC16);
-          }
-        }
-        @keyframes katanaGlow {
-          0%,100% {
-            filter: drop-shadow(0 0 6px #7C3AED)
-                    drop-shadow(0 0 2px #A855F7);
-          }
-          50% {
-            filter: drop-shadow(0 0 14px #A855F7)
-                    drop-shadow(0 0 6px #84CC16)
-                    drop-shadow(0 0 2px #C084FC);
-          }
-        }
-        @keyframes auraKatana {
-          0%,100% { opacity: 0.15; transform: scale(1); }
-          50%      { opacity: 0.35; transform: scale(1.12); }
-        }
-        @keyframes auraZen {
-          0%,100% { opacity: 0.08; transform: scale(1); }
-          50%      { opacity: 0.18; transform: scale(1.05); }
-        }
-        @keyframes particleFloat {
-          0%   { opacity: 0; transform: translateY(25px) scale(0); }
-          50%  { opacity: 1; transform: translateY(-12px) scale(1); }
-          100% { opacity: 0; transform: translateY(-35px) scale(0); }
-        }
-        @keyframes energyLine {
-          0%,100% { opacity: 0.2; transform: scaleY(1); }
-          50%      { opacity: 0.6; transform: scaleY(1.3); }
-        }
-        .k-float { animation: katanaFloat 3.5s ease-in-out infinite; }
-        .zen-float { animation: zenFloat 4s ease-in-out infinite; }
-        .k-glow  { animation: katanaGlow 2.5s ease-in-out infinite; }
-        .k-aura  { animation: auraKatana 3.5s ease-in-out infinite; }
-        .k-aura-zen { animation: auraZen 4s ease-in-out infinite; }
-        .k-particle { animation: particleFloat 4.5s ease-in-out infinite; }
-        .k-energy { animation: energyLine 2s ease-in-out infinite; }
-      `}</style>
-
-      {/* WIDGET SAMURAI ORIGINAL */}
+      {/* WIDGET SAMURAI ORIGINAL (animations in globals.css) */}
       <div
         ref={katanaContainerRef}
         style={{

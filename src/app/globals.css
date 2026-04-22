@@ -307,3 +307,29 @@
   .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 3px; }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.3); }
 }
+
+/* ========================================
+   SamuraiWidget animations (moved from inline)
+   ======================================== */
+@keyframes katanaFloat {
+  0%, 100% { transform: translateY(0) rotate(-45deg); }
+  50%      { transform: translateY(-8px) rotate(-45deg); }
+}
+@keyframes katanaGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px #7C3AED)
+            drop-shadow(0 0 2px #A855F7);
+  }
+  50% {
+    filter: drop-shadow(0 0 14px #A855F7)
+            drop-shadow(0 0 6px #84CC16)
+            drop-shadow(0 0 2px #C084FC);
+  }
+}
+@keyframes auraKatana {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(1.12); }
+}
+.k-float { animation: katanaFloat 3.5s ease-in-out infinite; }
+.k-glow  { animation: katanaGlow 2.5s ease-in-out infinite; }
+.k-aura  { animation: auraKatana 3.5s ease-in-out infinite; }

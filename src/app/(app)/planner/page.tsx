@@ -8,10 +8,10 @@ export default async function PlannerPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Get transactions from last 3 months for recurrence detection
-  const threeMonthsAgo = new Date()
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-  const threeMonthsAgoStr = threeMonthsAgo.toISOString().split('T')[0]
+  // Only load CURRENT month transactions for the unified calendar view
+  // (historical 3-month data is loaded on-demand when opening AI Suggestions)
+  const now = new Date()
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
   const [plannedRes, categoriesRes, transactionsRes] = await Promise.all([
     supabase
@@ -30,7 +30,7 @@ export default async function PlannerPage() {
       .select('*, categories(*)')
       .eq('user_id', user.id)
       .eq('type', 'expense')
-      .gte('transaction_date', threeMonthsAgoStr)
+      .gte('transaction_date', currentMonthStart)
       .order('transaction_date', { ascending: false }),
   ])
 

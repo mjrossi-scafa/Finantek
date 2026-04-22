@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Budget } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { getMonthName } from '@/lib/utils/dates'
@@ -12,7 +13,7 @@ interface BudgetCardProps {
   onEdit?: () => void
 }
 
-export function BudgetCard({ budget, spent, planned = 0, compliance, onDelete, onEdit }: BudgetCardProps) {
+export const BudgetCard = memo(function BudgetCard({ budget, spent, planned = 0, compliance, onDelete, onEdit }: BudgetCardProps) {
   const projected = spent + planned
   const pct = budget.amount > 0 ? Math.round((projected / budget.amount) * 100) : 0
   const realPct = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0
@@ -124,4 +125,4 @@ export function BudgetCard({ budget, spent, planned = 0, compliance, onDelete, o
       </div>
     </div>
   )
-}
+})
