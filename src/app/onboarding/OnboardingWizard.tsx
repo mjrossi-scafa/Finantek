@@ -93,39 +93,44 @@ export function OnboardingWizard({
 
   const [telegramLinked, setTelegramLinked] = useState(false)
 
-  const totalSteps = 9
+  const totalSteps = 11
   const progress = (step / totalSteps) * 100
 
   const pose: KenjiPose = useMemo(() => {
-    if (step === 1) return 'saludo'
-    if (step === 9) return 'meditando'
-    if (step === 4 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
-    if (step === 5) return 'celebrando'
-    if (step === 7 && telegramLinked) return 'celebrando'
+    if (step === 1) return 'meditando' // privacy = serio/confiable
+    if (step === 2) return 'saludo'
+    if (step === 11) return 'meditando'
+    if (step === 5 && data.firstTxAmount && data.firstTxCategory) return 'celebrando'
+    if (step === 6) return 'celebrando'
+    if (step === 8 && telegramLinked) return 'celebrando'
     return 'explicando'
   }, [step, data.firstTxAmount, data.firstTxCategory, telegramLinked])
 
   const dialogue = useMemo(() => {
     switch (step) {
       case 1:
-        return `Konnichiwa. Soy Kenji, tu guía en el dojo de Katana. ¿Cómo te llamas?`
+        return `Antes de empezar: tus datos son solo tuyos. Sin anuncios, sin venta de información.`
       case 2:
-        return `¿Cuánto entra a tu dojo cada mes? Sirve para sugerirte límites justos. Puedes saltar si prefieres.`
+        return `Konnichiwa. Soy Kenji, tu guía en el dojo de Katana. ¿Cómo te llamas?`
       case 3:
-        return `Estas son tus categorías para clasificar gastos. Puedes crear, editar o eliminar cuantas quieras en Configuración.`
+        return `¿Cuánto entra a tu dojo cada mes? Sirve para sugerirte límites justos. Puedes saltar si prefieres.`
       case 4:
-        return `Registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
+        return `Estas son tus categorías para clasificar gastos. Puedes crear, editar o eliminar cuantas quieras en Configuración.`
       case 5:
-        return `Bien hecho. Mira cómo te recompensa el dojo: puntos, logros, y el color del samurái cambia según tu salud financiera.`
+        return `Registra un gasto reciente que recuerdes. Así aprendes cómo funciona en 30 segundos.`
       case 6:
-        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
+        return `Bien hecho. Mira cómo te recompensa el dojo: puntos, logros, y el color del samurái cambia según tu salud financiera.`
       case 7:
+        return `¿Sabías que puedo leer tus recibos? Sube una foto y la magia pasa. Puedes probar ahora o después.`
+      case 8:
         return telegramLinked
           ? `¡Conectado! Ahora puedes registrar gastos desde Telegram.`
           : `Conecta el bot de Telegram ahora. Te va a ahorrar mucho tiempo después. Este paso no se salta.`
-      case 8:
-        return `Instala Katana en tu celular. Funciona offline, entra rápido, y es gratis.`
       case 9:
+        return `Elige cómo quieres que te avise de cosas importantes. Todo es configurable después.`
+      case 10:
+        return `Instala Katana en tu celular. Funciona offline, entra rápido, y es gratis.`
+      case 11:
         return `Ya eres samurái. El dojo es tuyo. Domo arigatou.`
       default:
         return ''
@@ -189,17 +194,9 @@ export function OnboardingWizard({
 
   function canAdvance(): boolean {
     switch (step) {
-      case 1:
-        return data.name.trim().length > 0 && data.currency.length > 0
       case 2:
-        return true
-      case 3:
-        return true
-      case 4:
-        return true
-      case 5:
-        return true
-      case 7:
+        return data.name.trim().length > 0 && data.currency.length > 0
+      case 8:
         return telegramLinked
       default:
         return true
@@ -207,7 +204,7 @@ export function OnboardingWizard({
   }
 
   function handleNext() {
-    if (step === 9) {
+    if (step === 11) {
       finalizeOnboarding()
       return
     }
@@ -276,21 +273,23 @@ export function OnboardingWizard({
         {/* Step content column */}
         <div className="bg-[#13091F]/80 backdrop-blur-sm border border-violet-500/15 rounded-2xl sm:rounded-3xl p-5 sm:p-8 sm:min-h-[420px] flex flex-col">
           <div className="flex-1">
-            {step === 1 && <Step1Welcome data={data} update={update} />}
-            {step === 2 && <Step2Income data={data} update={update} />}
-            {step === 3 && <Step3Categories existingCategories={existingCategories} />}
-            {step === 4 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
-            {step === 5 && <Step5Gamification />}
-            {step === 6 && <Step6Receipt />}
-            {step === 7 && (
+            {step === 1 && <StepPrivacy />}
+            {step === 2 && <Step1Welcome data={data} update={update} />}
+            {step === 3 && <Step2Income data={data} update={update} />}
+            {step === 4 && <Step3Categories existingCategories={existingCategories} />}
+            {step === 5 && <Step4FirstTransaction data={data} update={update} existingCategories={existingCategories} />}
+            {step === 6 && <Step5Gamification />}
+            {step === 7 && <Step6Receipt />}
+            {step === 8 && (
               <Step7Telegram
                 userId={userId}
                 linked={telegramLinked}
                 onLinked={() => setTelegramLinked(true)}
               />
             )}
-            {step === 8 && <Step8PWA />}
-            {step === 9 && <Step9Farewell data={data} telegramLinked={telegramLinked} />}
+            {step === 9 && <StepNotifications />}
+            {step === 10 && <Step8PWA />}
+            {step === 11 && <Step9Farewell data={data} telegramLinked={telegramLinked} />}
           </div>
 
           {error && (
@@ -327,7 +326,7 @@ export function OnboardingWizard({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Guardando...
                 </>
-              ) : step === 9 ? (
+              ) : step === 11 ? (
                 <>
                   Entrar al dojo
                   <ArrowRight className="h-4 w-4" />
@@ -354,6 +353,66 @@ export function OnboardingWizard({
 }
 
 // ========= STEPS =========
+
+function StepPrivacy() {
+  const points = [
+    {
+      icon: '🔐',
+      title: 'Datos cifrados',
+      text: 'Conexión HTTPS y almacenamiento en servidores privados de Supabase. Nadie más los ve.',
+    },
+    {
+      icon: '🚫',
+      title: 'Sin anuncios, sin venta de datos',
+      text: 'No monetizamos tu información. Nunca.',
+    },
+    {
+      icon: '📥',
+      title: 'Exportas cuando quieras',
+      text: 'Descargas todo en CSV compatible con Excel desde Configuración.',
+    },
+    {
+      icon: '🗑️',
+      title: 'Derecho al olvido',
+      text: 'Eliminas tu cuenta con un click. Se borra todo sin rastro.',
+    },
+  ]
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Tu privacidad primero 🔐
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          Katana maneja tu dinero, así que tu confianza importa más que cualquier feature. Esto es lo que prometemos:
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {points.map((p) => (
+          <div
+            key={p.title}
+            className="flex items-start gap-3 px-3 py-3 rounded-xl bg-violet-950/40 border border-violet-500/15"
+          >
+            <div className="text-2xl flex-shrink-0">{p.icon}</div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-white mb-0.5">{p.title}</h3>
+              <p className="text-xs text-purple-300/80 leading-snug">{p.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-gradient-to-br from-green-500/10 to-violet-500/5 border border-green-500/25 rounded-xl p-4 flex items-start gap-3">
+        <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-green-100 leading-snug">
+          Al continuar, aceptas que tus datos financieros se almacenen de forma privada solo para tu uso personal. Puedes revocar acceso cuando quieras.
+        </p>
+      </div>
+    </div>
+  )
+}
 
 function Step1Welcome({
   data,
@@ -1069,6 +1128,74 @@ function InstructionStep({ number, text }: { number: number; text: string }) {
         <span className="text-xs font-bold text-violet-200">{number}</span>
       </div>
       <p className="text-sm text-purple-100/90 leading-snug">{text}</p>
+    </div>
+  )
+}
+
+function StepNotifications() {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Alertas y recordatorios 🔔
+        </h2>
+        <p className="text-purple-300/80 text-sm">
+          Katana te avisa de cosas importantes sin saturarte. Todo se configura después en Configuración → Notificaciones.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <NotificationCard
+          icon="⚠️"
+          title="Alertas de presupuesto"
+          description="Te aviso cuando llegas al 80% y al 100% de un presupuesto mensual. Solo eso, no spam."
+          channel="En app + Telegram"
+        />
+        <NotificationCard
+          icon="📅"
+          title="Recordatorio diario (opcional)"
+          description="Un mensaje corto para que registres tus gastos del día. Eliges la hora (por default 21:00)."
+          channel="Telegram"
+        />
+        <NotificationCard
+          icon="📊"
+          title="Insights semanales"
+          description="Cada lunes, un resumen con tus patrones: dónde gastaste más, tendencias, recomendaciones."
+          channel="En app"
+        />
+      </div>
+
+      <div className="bg-violet-500/5 border border-violet-500/15 rounded-xl p-3 flex items-start gap-2">
+        <div className="text-base flex-shrink-0">💡</div>
+        <p className="text-xs text-purple-200/80 leading-snug">
+          Todos están <strong className="text-white">activos por default</strong> y los ajustas desde Configuración. Nunca recibirás spam ni notificaciones sobre features nuevos.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function NotificationCard({
+  icon,
+  title,
+  description,
+  channel,
+}: {
+  icon: string
+  title: string
+  description: string
+  channel: string
+}) {
+  return (
+    <div className="flex items-start gap-3 px-3 py-3 rounded-xl bg-violet-950/40 border border-violet-500/15">
+      <div className="text-2xl flex-shrink-0">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-white mb-0.5">{title}</h3>
+        <p className="text-xs text-purple-300/80 leading-snug mb-1.5">{description}</p>
+        <span className="inline-block text-[10px] font-mono text-violet-300 bg-violet-500/15 px-2 py-0.5 rounded-full">
+          {channel}
+        </span>
+      </div>
     </div>
   )
 }

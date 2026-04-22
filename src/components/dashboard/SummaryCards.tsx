@@ -36,7 +36,7 @@ export function SummaryCards({
   const isOverspending = prevExpense > 0 && projectedMonthEnd > prevExpense
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="dashboard-stats">
       {/* Hero balance card mejorado con insights */}
       <div className="relative overflow-hidden rounded-2xl gradient-indigo shadow-xl glow-indigo">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_60%)]" />

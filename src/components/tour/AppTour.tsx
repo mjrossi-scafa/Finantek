@@ -26,9 +26,19 @@ const TOUR_STEPS: TourStep[] = [
     targets: [],
     title: 'Te muestro el dojo',
     description:
-      'En 60 segundos conoces cada sección importante. Si quieres explorar solo, dale Saltar.',
+      'En 90 segundos conoces cada sección importante. Si quieres explorar solo, dale Saltar.',
     pose: 'saludo',
     placement: 'center',
+    requireRoute: '/dashboard',
+  },
+  {
+    id: 'dashboard-stats',
+    targets: ['[data-tour="dashboard-stats"]'],
+    title: 'Tu resumen del mes',
+    description:
+      'Ingresos, gastos, balance y tasa de ahorro en tiempo real. Incluye proyección de fin de mes basada en tu ritmo actual de gasto.',
+    pose: 'explicando',
+    placement: 'top',
     requireRoute: '/dashboard',
   },
   {
@@ -102,6 +112,15 @@ const TOUR_STEPS: TourStep[] = [
     description:
       'Cada acción te da puntos y desbloqueas logros: registrar 7 días seguidos, ahorrar 20%, subir tu primer recibo. Revisa aquí tu progreso.',
     pose: 'celebrando',
+    placement: 'right',
+  },
+  {
+    id: 'settings',
+    targets: ['[data-tour="nav-settings"]'],
+    title: 'Configuración',
+    description:
+      'Aquí cambias moneda, timezone, categorías, preferencias de notificaciones, exportas todo en CSV o eliminas tu cuenta. También puedes rehacer este tour cuando quieras.',
+    pose: 'explicando',
     placement: 'right',
   },
   {

@@ -176,6 +176,7 @@ export function Sidebar({ totalPoints = 0, katanaState = 'violet' }: SidebarProp
       <div className="px-4 py-2 border-t border-sidebar-border/50 space-y-0.5 flex-shrink-0">
         <Link
           href="/settings"
+          data-tour="nav-settings"
           className={cn(
             'flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-weight-medium transition-wa',
             pathname === '/settings'
