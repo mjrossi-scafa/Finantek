@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Achievement, UserAchievement } from '@/types/database'
 import { AchievementContext, calculateProgress } from '@/lib/utils/achievements'
 import { formatDate } from '@/lib/utils/dates'
@@ -9,6 +9,7 @@ import {
   Trophy, Star, Lock, Search, Filter, SortAsc,
   Sparkles, Target, TrendingUp, Award, Zap,
 } from 'lucide-react'
+import { Confetti } from '@/components/shared/Confetti'
 
 interface Props {
   achievements: Achievement[]
@@ -59,6 +60,20 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all')
   const [sortBy, setSortBy] = useState<SortBy>('category')
+  const [confettiTrigger, setConfettiTrigger] = useState<number | null>(null)
+
+  // Trigger confetti when a new achievement is unlocked (within last 5 seconds)
+  useEffect(() => {
+    const recent = userAchievements.filter((ua) => {
+      if (!ua.unlocked_at) return false
+      const unlockedMs = new Date(ua.unlocked_at).getTime()
+      return Date.now() - unlockedMs < 5000
+    })
+    if (recent.length > 0) {
+      setConfettiTrigger(Date.now())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const unlockedMap = useMemo(() => {
     return new Map(userAchievements.map((ua) => [ua.achievement_id, ua]))
@@ -180,6 +195,8 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
 
   return (
     <div className="space-y-6">
+      <Confetti trigger={confettiTrigger} />
+
       {/* Hero stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Tier card */}
