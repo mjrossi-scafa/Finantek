@@ -14,6 +14,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/login')
   }
 
+  const { data: onboardingProfile } = await supabase
+    .from('profiles')
+    .select('onboarding_completed')
+    .eq('id', user.id)
+    .single()
+
+  if (onboardingProfile && !onboardingProfile.onboarding_completed) {
+    redirect('/onboarding')
+  }
+
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1

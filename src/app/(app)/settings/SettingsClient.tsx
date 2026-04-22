@@ -13,7 +13,7 @@ import { EmojiPicker } from '@/components/settings/EmojiPicker'
 import { toast } from 'sonner'
 import {
   Plus, Trash2, Save, LogOut, User, Lock, Download,
-  Bell, Globe, DollarSign, AlertTriangle, Edit2, Palette,
+  Bell, Globe, DollarSign, AlertTriangle, Edit2, Palette, RefreshCw,
 } from 'lucide-react'
 
 interface SettingsClientProps {
@@ -191,6 +191,18 @@ export function SettingsClient({
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
+  }
+
+  async function handleRetakeTutorial() {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ onboarding_completed: false })
+      .eq('id', userId)
+    if (error) {
+      toast.error('No se pudo reiniciar el tutorial', { description: error.message })
+      return
+    }
+    router.push('/onboarding')
   }
 
   async function exportData() {
@@ -512,6 +524,21 @@ export function SettingsClient({
             </GradientButton>
           </div>
         </div>
+      </div>
+
+      {/* Retake tutorial */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <RefreshCw className="h-4 w-4 text-violet-light" />
+          <h2 className="text-sm font-bold text-text-primary">Rehacer tutorial</h2>
+        </div>
+        <p className="text-sm text-text-muted mb-3">
+          Vuelve al wizard de bienvenida con Kenji para repasar cómo funciona Katana.
+        </p>
+        <GradientButton onClick={handleRetakeTutorial} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4" />
+          Volver al dojo inicial
+        </GradientButton>
       </div>
 
       {/* Data export */}

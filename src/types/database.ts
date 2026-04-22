@@ -16,6 +16,9 @@ export interface Profile {
   timezone?: string | null
   avatar_url?: string | null
   preferences?: UserPreferences | null
+  onboarding_completed?: boolean
+  onboarding_completed_at?: string | null
+  monthly_income_estimate?: number | null
   created_at: string
   updated_at: string
 }
