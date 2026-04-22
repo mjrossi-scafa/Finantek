@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
-import { formatCurrency } from '@/lib/utils/exchangeRates'
+import { formatCurrency, getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/utils/exchangeRates'
 import { toDateStr } from '@/lib/utils/dates'
 import { toast } from 'sonner'
 import {
@@ -72,10 +72,18 @@ export function EditTransactionModal({
   const [notes, setNotes] = useState('')
   const [date, setDate] = useState(toDateStr(new Date()))
   const [includeInTrip, setIncludeInTrip] = useState(false)
-  const [amountIsForeign, setAmountIsForeign] = useState(false)
+  const [currencyCode, setCurrencyCode] = useState<string>('CLP')
+  const [liveRate, setLiveRate] = useState<number | null>(null)
+  const [rateLoading, setRateLoading] = useState(false)
 
   const tripHasForeignCurrency = !!activeTrip && activeTrip.currency !== 'CLP'
   const dateInTripRange = !!activeTrip && date >= activeTrip.start_date && date <= activeTrip.end_date
+
+  // Effective rate to use for conversion: trip rate if currency matches, otherwise live rate
+  const effectiveRate =
+    currencyCode === 'CLP' ? 1 :
+    activeTrip && currencyCode === activeTrip.currency ? Number(activeTrip.exchange_rate) :
+    liveRate
 
   // Initialize form when transaction changes
   useEffect(() => {
@@ -87,7 +95,7 @@ export function EditTransactionModal({
       setNotes(transaction.notes || '')
       setDate(transaction.transaction_date)
       setIncludeInTrip(!!transaction.trip_id)
-      setAmountIsForeign(!!transaction.original_currency && transaction.original_currency !== 'CLP')
+      setCurrencyCode(transaction.original_currency || 'CLP')
     } else if (mode === 'create') {
       setType('expense')
       setAmount(0)
@@ -96,7 +104,7 @@ export function EditTransactionModal({
       setNotes('')
       setDate(toDateStr(new Date()))
       setIncludeInTrip(false)
-      setAmountIsForeign(false)
+      setCurrencyCode('CLP')
     }
   }, [mode, transaction])
 
@@ -110,7 +118,7 @@ export function EditTransactionModal({
       setNotes('')
       setDate(toDateStr(new Date()))
       setIncludeInTrip(false)
-      setAmountIsForeign(false)
+      setCurrencyCode('CLP')
     }
   }, [open])
 
@@ -119,9 +127,29 @@ export function EditTransactionModal({
     if (mode !== 'create' || !activeTrip) return
     if (dateInTripRange) {
       setIncludeInTrip(true)
-      if (tripHasForeignCurrency) setAmountIsForeign(true)
+      if (tripHasForeignCurrency) setCurrencyCode(activeTrip.currency)
     }
   }, [mode, activeTrip, dateInTripRange, tripHasForeignCurrency])
+
+  // Fetch live exchange rate when the user picks a currency the trip doesn't cover
+  useEffect(() => {
+    if (currencyCode === 'CLP') {
+      setLiveRate(null)
+      return
+    }
+    // Trip rate covers this currency, no need to fetch
+    if (activeTrip && currencyCode === activeTrip.currency) {
+      setLiveRate(null)
+      return
+    }
+    let cancelled = false
+    setRateLoading(true)
+    getExchangeRate(currencyCode, 'CLP')
+      .then((rate) => { if (!cancelled) setLiveRate(rate) })
+      .catch(() => { if (!cancelled) setLiveRate(null) })
+      .finally(() => { if (!cancelled) setRateLoading(false) })
+    return () => { cancelled = true }
+  }, [currencyCode, activeTrip])
 
   const filteredCategories = categories.filter((c) => c.type === type)
 
@@ -156,11 +184,18 @@ export function EditTransactionModal({
 
       if (includeInTrip && activeTrip) {
         tripId = activeTrip.id
-        if (tripHasForeignCurrency && amountIsForeign) {
-          originalAmount = amount
-          originalCurrency = activeTrip.currency
-          amountCLP = Math.round(amount * activeTrip.exchange_rate)
+      }
+
+      if (currencyCode !== 'CLP') {
+        const rate = effectiveRate
+        if (!rate) {
+          toast.error('No se pudo obtener el tipo de cambio. Intenta de nuevo o cambia a CLP.')
+          setLoading(false)
+          return
         }
+        originalAmount = amount
+        originalCurrency = currencyCode
+        amountCLP = Math.round(amount * rate)
       }
 
       const transactionData = {
@@ -282,16 +317,43 @@ export function EditTransactionModal({
             />
           </div>
 
-          {/* Amount */}
+          {/* Amount + currency selector */}
           <div className="space-y-2">
-            <Label htmlFor="amount">
-              Monto {amountIsForeign && activeTrip ? `(${activeTrip.currency})` : '(CLP)'}
-            </Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="amount">Monto ({currencyCode})</Label>
+              <Select value={currencyCode} onValueChange={(v) => v && setCurrencyCode(v)}>
+                <SelectTrigger className="h-8 w-[140px] bg-surface-secondary border-surface-border text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <CurrencyInput
               value={amount}
               onChange={setAmount}
               className="bg-surface-secondary border-surface-border"
             />
+            {currencyCode !== 'CLP' && amount > 0 && (
+              <p className="text-[11px] text-text-muted font-mono pl-1">
+                {rateLoading ? (
+                  <span className="opacity-60">obteniendo tipo de cambio...</span>
+                ) : effectiveRate ? (
+                  <>
+                    {formatCurrency(amount, currencyCode)} ≈ {formatCLP(Math.round(amount * effectiveRate))}
+                    <span className="ml-1 opacity-60">
+                      (tasa {effectiveRate.toFixed(effectiveRate < 1 ? 4 : 2)}
+                      {activeTrip && currencyCode === activeTrip.currency ? ' del viaje' : ' en vivo'})
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-vermillion-shu">No se pudo obtener la tasa</span>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Category */}
@@ -353,25 +415,9 @@ export function EditTransactionModal({
               </label>
 
               {includeInTrip && tripHasForeignCurrency && (
-                <div className="pl-7 space-y-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs">
-                    <input
-                      type="checkbox"
-                      checked={amountIsForeign}
-                      onChange={(e) => setAmountIsForeign(e.target.checked)}
-                      className="h-3.5 w-3.5 rounded accent-violet-500"
-                    />
-                    <span className="text-text-secondary">
-                      El monto está en {activeTrip.currency}
-                    </span>
-                  </label>
-                  {amountIsForeign && amount > 0 && (
-                    <p className="text-[11px] text-text-muted font-mono">
-                      {formatCurrency(amount, activeTrip.currency)} ≈ {formatCLP(Math.round(amount * activeTrip.exchange_rate))}
-                      <span className="ml-1 opacity-60">(tasa {activeTrip.exchange_rate})</span>
-                    </p>
-                  )}
-                </div>
+                <p className="pl-7 text-[11px] text-text-muted">
+                  Cambia la moneda arriba si gastaste en otra divisa (ej: AUD durante una escala).
+                </p>
               )}
             </div>
           )}
