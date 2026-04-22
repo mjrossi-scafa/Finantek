@@ -1,16 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bladeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EDE9FE"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+  </defs>
   <rect width="32" height="32" rx="7" fill="#1A0A2E"/>
-  <!-- Columna vertical izquierda de la K -->
-  <rect x="5" y="4" width="4" height="24" rx="1" fill="#A855F7"/>
-  <!-- Diagonal superior de la K -->
-  <rect x="10" y="4" width="4" height="4" rx="1" fill="#84CC16"/>
-  <rect x="14" y="8" width="4" height="4" rx="1" fill="#7C3AED"/>
-  <rect x="18" y="4" width="4" height="4" rx="1" fill="#5B21B6"/>
-  <!-- Punto medio de unión -->
-  <rect x="10" y="13" width="4" height="4" rx="1" fill="#A855F7"/>
-  <!-- Diagonal inferior de la K -->
-  <rect x="14" y="18" width="4" height="4" rx="1" fill="#7C3AED"/>
-  <rect x="18" y="22" width="4" height="4" rx="1" fill="#5B21B6"/>
-  <!-- Punto verde de marca -->
-  <circle cx="26" cy="27" r="3" fill="#84CC16"/>
+  <text x="16" y="23" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="800" fill="#F8FAFC" text-anchor="middle" letter-spacing="-1">K</text>
+  <g transform="translate(16 16) rotate(-45)">
+    <rect x="-0.5" y="-12" width="1" height="17" rx="0.5" fill="url(#bladeGrad)"/>
+    <polygon points="-0.5,-12 0.5,-12 0,-13.5" fill="#EDE9FE"/>
+    <rect x="-1.5" y="5" width="3" height="1" rx="0.3" fill="#7C3AED"/>
+    <rect x="-0.8" y="6" width="1.6" height="5" rx="0.3" fill="#1A0A2E"/>
+    <ellipse cx="0" cy="11" rx="1" ry="0.5" fill="#7C3AED"/>
+  </g>
 </svg>
