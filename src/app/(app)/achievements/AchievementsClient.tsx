@@ -10,6 +10,7 @@ import {
   Sparkles, Target, TrendingUp, Award, Zap,
 } from 'lucide-react'
 import { Confetti } from '@/components/shared/Confetti'
+import { playAchievementUnlock } from '@/lib/utils/haptic'
 
 interface Props {
   achievements: Achievement[]
@@ -62,7 +63,7 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
   const [sortBy, setSortBy] = useState<SortBy>('category')
   const [confettiTrigger, setConfettiTrigger] = useState<number | null>(null)
 
-  // Trigger confetti when a new achievement is unlocked (within last 5 seconds)
+  // Trigger confetti + sound when a new achievement is unlocked (within last 5 seconds)
   useEffect(() => {
     const recent = userAchievements.filter((ua) => {
       if (!ua.unlocked_at) return false
@@ -71,6 +72,7 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
     })
     if (recent.length > 0) {
       setConfettiTrigger(Date.now())
+      playAchievementUnlock() // Sound + haptic
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

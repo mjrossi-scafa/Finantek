@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
+import { haptic } from '@/lib/utils/haptic'
 
 interface GradientButtonProps {
   children: React.ReactNode
@@ -41,7 +42,10 @@ export function GradientButton({
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={() => {
+        haptic('light')
+        onClick?.()
+      }}
       disabled={disabled || loading}
       className={cn(
         'rounded-full font-weight-semibold transition-wa inline-flex items-center justify-center gap-2.5',

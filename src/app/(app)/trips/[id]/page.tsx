@@ -1,10 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import { Trip, Transaction } from '@/types/database'
-import { formatCLP } from '@/lib/utils/currency'
-import { ArrowLeft, Calendar, MapPin, DollarSign, TrendingUp, Download } from 'lucide-react'
 import { TripDetailClient } from './TripDetailClient'
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 
 export default async function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -29,13 +27,12 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <Link
-        href="/trips"
-        className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-violet-light transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Todos los viajes
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Viajes', href: '/trips' },
+          { label: (trip as Trip).name },
+        ]}
+      />
 
       <TripDetailClient
         trip={trip as Trip}

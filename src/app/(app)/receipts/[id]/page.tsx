@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { ReceiptDetailClient } from './ReceiptDetailClient'
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 import { Category, Receipt } from '@/types/database'
 import { FileSearch } from 'lucide-react'
 
@@ -39,6 +40,12 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+      <Breadcrumbs
+        items={[
+          { label: 'Recibos', href: '/receipts' },
+          { label: r.file_name },
+        ]}
+      />
       <PageHeader
         icon={<FileSearch className="h-7 w-7 text-violet-light" />}
         title="Revisar recibo"

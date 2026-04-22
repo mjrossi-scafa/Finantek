@@ -14,6 +14,7 @@ import {
   Trip,
 } from '@/types/database'
 import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
+import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -106,6 +107,26 @@ export default async function DashboardPage() {
     tripCount = (tripTx ?? []).length
   }
 
+  // Activity heatmap: last 365 days of transactions
+  const oneYearAgo = new Date()
+  oneYearAgo.setDate(oneYearAgo.getDate() - 365)
+  const { data: heatmapTx } = await supabase
+    .from('transactions')
+    .select('transaction_date, amount, type')
+    .eq('user_id', user.id)
+    .gte('transaction_date', oneYearAgo.toISOString().split('T')[0])
+
+  const heatmapMap: Record<string, { amount: number; count: number }> = {}
+  for (const tx of (heatmapTx ?? []) as { transaction_date: string; amount: number; type: string }[]) {
+    if (tx.type !== 'expense') continue
+    if (!heatmapMap[tx.transaction_date]) heatmapMap[tx.transaction_date] = { amount: 0, count: 0 }
+    heatmapMap[tx.transaction_date].amount += tx.amount
+    heatmapMap[tx.transaction_date].count++
+  }
+  const heatmapData = Object.entries(heatmapMap).map(([date, v]) => ({
+    date, amount: v.amount, count: v.count,
+  }))
+
   // Extract user's first name for greeting and capitalize it
   const rawName = profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
   const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
@@ -131,6 +152,9 @@ export default async function DashboardPage() {
           count={tripCount}
         />
       )}
+
+      {/* Activity heatmap */}
+      <ActivityHeatmap data={heatmapData} />
 
       {/* Client-side dashboard with functional filters */}
       <DashboardClient

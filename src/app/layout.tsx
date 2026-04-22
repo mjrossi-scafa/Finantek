@@ -17,13 +17,31 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Katana',
+  title: 'Katana · Finanzas Samurai',
   description: 'La disciplina del samurai aplicada al dinero',
+  manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
     apple: '/icon.svg',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Katana',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+export const viewport = {
+  themeColor: '#8B5CF6',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover' as const,
 }
 
 export default function RootLayout({

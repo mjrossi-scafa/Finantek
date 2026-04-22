@@ -1,0 +1,41 @@
+{
+  "name": "Katana - Finanzas Samurai",
+  "short_name": "Katana",
+  "description": "La disciplina del samurai aplicada al dinero",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F0A1E",
+  "theme_color": "#8B5CF6",
+  "lang": "es-CL",
+  "dir": "ltr",
+  "categories": ["finance", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "url": "/dashboard",
+      "description": "Ver tu balance"
+    },
+    {
+      "name": "Nueva transacción",
+      "short_name": "Nueva",
+      "url": "/transactions",
+      "description": "Registrar gasto"
+    },
+    {
+      "name": "Planificador",
+      "short_name": "Planner",
+      "url": "/planner",
+      "description": "Gastos futuros"
+    }
+  ]
+}
