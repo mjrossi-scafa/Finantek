@@ -363,6 +363,12 @@ async function handlePendingDataResponse(
   conv: any,
   categories: Category[]
 ): Promise<void> {
+  // Corrections are handled by a regex-based parser, not the LLM intent classifier
+  if (conv.pendingData?.type === 'correction' && conv.pendingData?.transactionId) {
+    await handleCorrectionResponse(chatId, userId, message, conv.pendingData.transactionId, categories)
+    return
+  }
+
   const systemPrompt = `Eres el asistente de Katana.
 El usuario tiene una acción pendiente con estos datos:
 ${JSON.stringify(conv.pendingData)}
@@ -751,10 +757,128 @@ async function handleCorrectionRequest(chatId: number, userId: string): Promise<
     `• "monto 5000"\n` +
     `• "categoría transporte"\n` +
     `• "nombre taxi"\n` +
-    `• "borrar"`
+    `• "borrar"\n` +
+    `• "cancelar"`
 
+  setPendingData(chatId, { type: 'correction', transactionId: lastTx.id })
   addMessage(chatId, 'assistant', response)
   await sendMessage(chatId, response)
+}
+
+async function handleCorrectionResponse(
+  chatId: number,
+  userId: string,
+  message: string,
+  transactionId: string,
+  categories: Category[]
+): Promise<void> {
+  const supabase = getSupabase()
+  const lower = message.toLowerCase().trim()
+
+  // Cancelar
+  if (['cancelar', 'cancela', 'cancel', 'no'].includes(lower)) {
+    clearPendingData(chatId)
+    const msg = '👍 Listo, no toco la transacción.'
+    addMessage(chatId, 'assistant', msg)
+    await sendMessage(chatId, msg)
+    return
+  }
+
+  // Borrar
+  if (['borrar', 'borra', 'eliminar', 'elimina', 'borralo', 'bórralo', 'elimínalo', 'eliminalo'].some(w => lower === w)) {
+    const { error } = await supabase.from('transactions').delete().eq('id', transactionId).eq('user_id', userId)
+    clearPendingData(chatId)
+    const msg = error ? `❌ No pude borrarla: ${error.message}` : '🗑️ Transacción eliminada.'
+    addMessage(chatId, 'assistant', msg)
+    await sendMessage(chatId, msg)
+    return
+  }
+
+  // Monto: "monto 3900", "monto 3.900", "monto $3900"
+  const montoMatch = lower.match(/monto\s+\$?\s*([\d.,]+)/)
+  if (montoMatch) {
+    const cleaned = montoMatch[1].replace(/\./g, '').replace(',', '.')
+    const newAmount = Number(cleaned)
+    if (!Number.isFinite(newAmount) || newAmount <= 0) {
+      await sendMessage(chatId, '❌ Monto inválido. Ejemplo: "monto 3900"')
+      return
+    }
+    const { error } = await supabase
+      .from('transactions')
+      .update({ amount: Math.round(newAmount), original_amount: null, original_currency: null, trip_id: null })
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+    clearPendingData(chatId)
+    const msg = error
+      ? `❌ No pude actualizar: ${error.message}`
+      : `✅ Monto corregido a ${formatCLP(Math.round(newAmount))} (CLP, sin viaje asociado).`
+    addMessage(chatId, 'assistant', msg)
+    await sendMessage(chatId, msg)
+    return
+  }
+
+  // Categoría: "categoría transporte", "categoria alimentacion"
+  const categoriaMatch = lower.match(/categor[íi]a\s+(.+)/)
+  if (categoriaMatch) {
+    const target = categoriaMatch[1].trim().toLowerCase()
+    const cat = categories.find(c => c.name.toLowerCase() === target) ||
+                categories.find(c => c.name.toLowerCase().includes(target)) ||
+                categories.find(c => target.includes(c.name.toLowerCase()))
+    if (!cat) {
+      const list = categories.map(c => c.name).join(', ')
+      await sendMessage(chatId, `❌ No encontré la categoría "${target}". Disponibles: ${list}`)
+      return
+    }
+    const { error } = await supabase
+      .from('transactions')
+      .update({ category_id: cat.id })
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+    clearPendingData(chatId)
+    const msg = error
+      ? `❌ No pude actualizar: ${error.message}`
+      : `✅ Categoría corregida a ${cat.icon || ''} ${cat.name}`
+    addMessage(chatId, 'assistant', msg)
+    await sendMessage(chatId, msg)
+    return
+  }
+
+  // Nombre/descripción: "nombre taxi", "descripción almuerzo"
+  const nombreMatch = lower.match(/(?:nombre|descripci[óo]n)\s+(.+)/)
+  if (nombreMatch) {
+    // Use the original (non-lowered) text after the keyword to preserve casing
+    const idx = message.toLowerCase().search(/(?:nombre|descripci[óo]n)\s+/)
+    const newName = idx >= 0
+      ? message.slice(idx).replace(/^(?:nombre|descripci[óo]n)\s+/i, '').trim()
+      : nombreMatch[1].trim()
+    if (!newName) {
+      await sendMessage(chatId, '❌ Nombre vacío. Ejemplo: "nombre agua y barra"')
+      return
+    }
+    const { error } = await supabase
+      .from('transactions')
+      .update({ description: newName })
+      .eq('id', transactionId)
+      .eq('user_id', userId)
+    clearPendingData(chatId)
+    const msg = error
+      ? `❌ No pude actualizar: ${error.message}`
+      : `✅ Descripción corregida a "${newName}"`
+    addMessage(chatId, 'assistant', msg)
+    await sendMessage(chatId, msg)
+    return
+  }
+
+  // No reconoció la instrucción
+  await sendMessage(
+    chatId,
+    `🤔 No entendí qué corregir. Usa una de estas:\n` +
+    `• "monto 3900"\n` +
+    `• "categoría alimentación"\n` +
+    `• "nombre agua y barra"\n` +
+    `• "borrar"\n` +
+    `• "cancelar"`
+  )
 }
 
 async function handleGreeting(chatId: number, userId: string): Promise<void> {

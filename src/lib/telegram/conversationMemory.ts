@@ -7,10 +7,11 @@ interface Message {
 interface ConversationState {
   messages: Message[]
   pendingData?: {
-    type: 'receipt' | 'manual'
-    items: any[]
-    total: number
-    raw: string
+    type: 'receipt' | 'manual' | 'correction'
+    items?: any[]
+    total?: number
+    raw?: string
+    transactionId?: string
   }
   lastActivity: number
 }
