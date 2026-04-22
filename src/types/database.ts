@@ -43,10 +43,31 @@ export interface Transaction {
   transaction_date: string
   source: 'manual' | 'receipt' | 'pdf'
   receipt_id: string | null
+  trip_id?: string | null
+  original_amount?: number | null
+  original_currency?: string | null
   created_at: string
   updated_at: string
   // joined
   categories?: Category
+  trips?: Trip
+}
+
+export interface Trip {
+  id: string
+  user_id: string
+  name: string
+  destination: string | null
+  emoji: string
+  currency: string
+  exchange_rate: number
+  start_date: string
+  end_date: string
+  budget: number | null
+  notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 export type RecurrenceType = 'none' | 'weekly' | 'monthly' | 'yearly'

@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, CalendarClock, Target, Trophy } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, CalendarClock, Plane, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
   { href: '/transactions', label: 'Movimientos', icon: ArrowLeftRight },
+  { href: '/trips', label: 'Viajes', icon: Plane },
   { href: '/planner', label: 'Planificar', icon: CalendarClock },
-  { href: '/budgets', label: 'Metas', icon: Target },
   { href: '/achievements', label: 'Logros', icon: Trophy },
 ]
 

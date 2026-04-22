@@ -11,7 +11,9 @@ import {
   Transaction,
   BudgetAlert,
   PlannedExpense,
+  Trip,
 } from '@/types/database'
+import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -83,6 +85,27 @@ export default async function DashboardPage() {
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
   const plannedExpenses = (plannedExpensesResult.data ?? []) as PlannedExpense[]
 
+  // Active trip
+  const { data: activeTripData } = await supabase
+    .from('trips')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('is_active', true)
+    .maybeSingle()
+  const activeTrip = activeTripData as Trip | null
+
+  let tripSpent = 0
+  let tripCount = 0
+  if (activeTrip) {
+    const { data: tripTx } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('trip_id', activeTrip.id)
+      .eq('type', 'expense')
+    tripSpent = (tripTx ?? []).reduce((sum: number, t: { amount: number }) => sum + t.amount, 0)
+    tripCount = (tripTx ?? []).length
+  }
+
   // Extract user's first name for greeting and capitalize it
   const rawName = profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Samurai'
   const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
@@ -99,6 +122,15 @@ export default async function DashboardPage() {
           Nueva Transacción
         </Link>
       </div>
+
+      {/* Active trip banner */}
+      {activeTrip && (
+        <ActiveTripBanner
+          trip={activeTrip}
+          spent={tripSpent}
+          count={tripCount}
+        />
+      )}
 
       {/* Client-side dashboard with functional filters */}
       <DashboardClient

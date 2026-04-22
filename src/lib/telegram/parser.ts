@@ -1,4 +1,5 @@
 // Using Google Gemini API instead of Anthropic
+import { detectCurrency } from '@/lib/utils/exchangeRates'
 
 export interface ParsedTransaction {
   type: 'income' | 'expense'
@@ -6,6 +7,7 @@ export interface ParsedTransaction {
   description: string
   suggested_category: string
   date: string
+  currency?: string // ISO code if explicitly detected in message
 }
 
 export interface ParsedQuestion {
@@ -92,7 +94,15 @@ export async function parseMessage(text: string): Promise<ParseResult> {
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
-    return JSON.parse(jsonText) as ParseResult
+    const parsed = JSON.parse(jsonText) as ParseResult
+
+    // Detect currency from message and attach to transactions
+    const detectedCurrency = detectCurrency(text)
+    if (parsed.transactions && detectedCurrency) {
+      parsed.transactions = parsed.transactions.map((t) => ({ ...t, currency: detectedCurrency }))
+    }
+
+    return parsed
   } catch (error) {
     console.error('Parser error:', error)
     return { action: 'unknown' }

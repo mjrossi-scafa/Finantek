@@ -609,6 +609,16 @@ REGLAS:
 }
 
 async function handleSmartTransactions(chatId: number, userId: string, transactions: ParsedTransaction[], categories: Category[]): Promise<void> {
+  const supabase = getSupabase()
+
+  // Check for active trip
+  const { data: activeTrip } = await supabase
+    .from('trips')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .single()
+
   if (transactions.length === 1) {
     // Single transaction - confirm and save directly
     const tx = transactions[0]
@@ -616,19 +626,52 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
       c => c.name.toLowerCase().includes(tx.suggested_category.toLowerCase()) && c.type === tx.type
     ) || categories.find(c => c.type === tx.type) || categories[0]
 
-    const supabase = getSupabase()
+    // Determine currency: explicit in message > trip currency > CLP
+    const currency = tx.currency || activeTrip?.currency || 'CLP'
+    const isForeign = currency !== 'CLP'
+
+    let finalAmount = tx.amount
+    let originalAmount: number | null = null
+    let originalCurrency: string | null = null
+
+    if (isForeign) {
+      originalAmount = tx.amount
+      originalCurrency = currency
+      // Use trip's exchange rate if available, else fetch
+      if (activeTrip && activeTrip.currency === currency) {
+        finalAmount = Math.round(tx.amount * Number(activeTrip.exchange_rate))
+      } else {
+        const { convertCurrency } = await import('@/lib/utils/exchangeRates')
+        finalAmount = await convertCurrency(tx.amount, currency, 'CLP')
+      }
+    }
+
+    // Trip link: only if transaction date falls within trip range
+    let tripId: string | null = null
+    if (activeTrip && tx.date >= activeTrip.start_date && tx.date <= activeTrip.end_date) {
+      tripId = activeTrip.id
+    }
+
     await supabase.from('transactions').insert({
       user_id: userId,
       category_id: matchedCat.id,
       type: tx.type,
-      amount: tx.amount,
+      amount: finalAmount,
       description: tx.description,
       transaction_date: tx.date,
       source: 'manual',
+      trip_id: tripId,
+      original_amount: originalAmount,
+      original_currency: originalCurrency,
     })
 
     // Smart, contextual responses based on transaction type
-    const smartResponse = generateSmartResponse(tx, matchedCat)
+    const smartResponse = generateSmartResponse(tx, matchedCat, {
+      originalAmount,
+      originalCurrency,
+      finalAmount,
+      tripName: tripId ? activeTrip?.name : null,
+    })
 
     const successMsg = smartResponse
 
@@ -812,10 +855,29 @@ async function handleCommand(chatId: number, userId: string, command: string, ca
 
 
 
-function generateSmartResponse(tx: ParsedTransaction, category: Category): string {
-  const amount = formatCLP(tx.amount)
+function generateSmartResponse(
+  tx: ParsedTransaction,
+  category: Category,
+  tripCtx?: {
+    originalAmount: number | null
+    originalCurrency: string | null
+    finalAmount: number
+    tripName?: string | null
+  }
+): string {
+  const displayAmount = tripCtx?.finalAmount ?? tx.amount
+  const amount = formatCLP(displayAmount)
   const catIcon = category.icon || '💰'
   const desc = tx.description.toLowerCase()
+
+  // Foreign currency info
+  const isForeign = tripCtx?.originalCurrency && tripCtx?.originalAmount
+  const currencySymbols: Record<string, string> = {
+    JPY: '¥', USD: '$', EUR: '€', ARS: '$', PEN: 'S/', MXN: '$', COP: '$',
+  }
+  const foreignDisplay = isForeign
+    ? `${currencySymbols[tripCtx!.originalCurrency!] || ''}${tripCtx!.originalAmount!.toLocaleString()} ${tripCtx!.originalCurrency}`
+    : null
 
   // Detect context and generate intelligent responses
   let response = ""
@@ -849,6 +911,16 @@ function generateSmartResponse(tx: ParsedTransaction, category: Category): strin
     }
 
     response = `${contextualMsg}\n\n💰 **${amount}** en ${tx.description}\n📁 ${catIcon} ${category.name}\n\n⚔️ *Un samurai controla cada peso. ¿Correcto? Si no, di "corregir"*`
+  }
+
+  // Add travel context if applicable
+  if (foreignDisplay) {
+    response += `\n\n🌍 *${foreignDisplay} → ${amount}*`
+    if (tripCtx?.tripName) {
+      response += `\n✈️ Viaje: ${tripCtx.tripName}`
+    }
+  } else if (tripCtx?.tripName) {
+    response += `\n\n✈️ Viaje: ${tripCtx.tripName}`
   }
 
   return response
