@@ -1,10 +1,12 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatCLP } from '@/lib/utils/currency'
 import { getChileToday } from '@/lib/utils/timezone'
 import { WeeklyComparisonData, DAY_NAMES } from '@/lib/utils/weeklyComparison'
-import { TrendingUp, TrendingDown, Minus, Calendar, AlertCircle, CheckCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Calendar, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react'
+
+const COLLAPSE_KEY = 'katana:weekly-collapsed'
 
 interface Props {
   data: WeeklyComparisonData
@@ -12,6 +14,23 @@ interface Props {
 }
 
 export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setIsCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === '1')
+  }, [])
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
+      }
+      return next
+    })
+  }
+
   const { thisWeek, lastWeek, diff, diffPct, categoryDiffs, bestDay, worstDay } = data
 
   const isIncrease = diff > 0
@@ -38,15 +57,46 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
   const fmt = (n: number) => (isHidden ? '•••••' : formatCLP(n))
 
   return (
-    <div className="glass-card rounded-2xl p-5 space-y-5">
-      {/* Header + Hero */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Calendar className="h-5 w-5 text-violet-light" />
+    <div className={`glass-card rounded-2xl ${isCollapsed ? 'p-4' : 'p-5 space-y-5'}`}>
+      {/* Header — always visible */}
+      <div className={isCollapsed ? '' : 'mb-0'}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Calendar className="h-5 w-5 text-violet-light flex-shrink-0" />
           <h3 className="text-base font-bold text-text-primary">Comparación semanal</h3>
-          <span className="text-xs text-text-muted ml-auto">Semana actual vs anterior</span>
+          {!isCollapsed && (
+            <span className="text-xs text-text-muted ml-auto hidden sm:inline">Semana actual vs anterior</span>
+          )}
+          {isCollapsed && diffPct !== null && (
+            <span
+              className={`ml-auto text-xs font-mono font-semibold ${
+                isIncrease
+                  ? 'text-vermillion-shu'
+                  : isDecrease
+                    ? 'text-bamboo-take'
+                    : 'text-text-muted'
+              }`}
+            >
+              {diff >= 0 ? '+' : ''}
+              {diffPct}% · {fmt(thisWeek.total)}
+            </span>
+          )}
+          <button
+            onClick={toggleCollapsed}
+            aria-label={isCollapsed ? 'Expandir comparación semanal' : 'Ocultar comparación semanal'}
+            aria-expanded={!isCollapsed}
+            className={`p-1 rounded-md hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors ${
+              isCollapsed && diffPct === null ? 'ml-auto' : ''
+            }`}
+          >
+            {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </button>
         </div>
+      </div>
 
+      {isCollapsed ? null : (
+      <>
+      {/* Hero + chart + lists */}
+      <div>
         {/* Hero stats */}
         <div className="relative rounded-xl p-4 bg-gradient-to-br from-violet-500/10 to-indigo-500/5 border border-violet-500/20">
           <div className="flex items-start justify-between flex-wrap gap-3">
@@ -219,6 +269,8 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
             </div>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   )
