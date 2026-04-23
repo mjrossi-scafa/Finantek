@@ -62,7 +62,7 @@ export function MobileDrawer({ totalPoints = 0 }: Props) {
       {/* Hamburger button - visible only on mobile */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-40 w-10 h-10 rounded-xl bg-surface-primary/80 backdrop-blur-lg border border-surface-border flex items-center justify-center text-text-primary hover:bg-surface-hover transition-colors safe-area-top"
+        className="md:hidden fixed top-3 left-3 z-40 w-10 h-10 rounded-xl bg-surface-elevated/90 backdrop-blur-lg border border-white/10 flex items-center justify-center text-text-primary hover:bg-surface-hover shadow-lg transition-colors safe-area-top"
         aria-label="Abrir menú"
       >
         <Menu className="h-5 w-5" />
