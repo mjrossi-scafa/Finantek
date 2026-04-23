@@ -180,9 +180,14 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
 
   return (
     <div className="space-y-6">
-      {/* Period header — section anchor: marks where period-scoped cards start */}
-      <div className="relative glass-card rounded-2xl p-4 sm:p-5 border-l-4 border-violet-500 bg-gradient-to-r from-violet-500/[0.08] via-transparent to-transparent overflow-hidden">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-violet-light/70 font-semibold mb-1.5">
+      {/* Period header — section anchor: marks where period-scoped cards start.
+          box-shadow inset en vez de border-l-4 porque el shorthand border de
+          .glass-card (1px all sides) sobrescribe los border-left de Tailwind. */}
+      <div
+        className="relative glass-card rounded-2xl p-4 sm:p-5 pl-5 sm:pl-6 bg-gradient-to-r from-violet-500/[0.15] via-violet-500/[0.04] to-transparent overflow-hidden"
+        style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246)' }}
+      >
+        <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
           Resumen del período
         </p>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
