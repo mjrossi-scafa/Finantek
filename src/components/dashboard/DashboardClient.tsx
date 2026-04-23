@@ -168,22 +168,12 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
   const dailyAvg = daysElapsed > 0 ? expense / daysElapsed : 0
   const projectedMonthEnd = Math.round(dailyAvg * lastDayOfMonth)
 
-  // Personalized greeting based on time of day
-  const hour = today.getHours()
-  const timeGreeting = hour < 12 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches'
-  const timeEmoji = hour < 12 ? '🌅' : hour < 20 ? '☀️' : '🌙'
-
   return (
     <div className="space-y-6">
       {/* Header with functional period selector */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary font-sans">
-            <span className="mr-2">{timeEmoji}</span>
-            {timeGreeting}, {userName}
-            <span className="ml-2">⚔️</span>
-          </h1>
-          <p className="text-text-secondary mt-2 text-sm flex items-center gap-2 font-sans">
+          <p className="text-text-secondary text-sm flex items-center gap-2 font-sans">
             <Calendar className="h-4 w-4" />
             <span className="capitalize">{label}</span>
             <span className="text-text-muted">·</span>

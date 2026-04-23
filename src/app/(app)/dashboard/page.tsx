@@ -16,6 +16,7 @@ import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
 import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap'
 import { WeeklyComparisonCard } from '@/components/dashboard/WeeklyComparisonCard'
 import { TodayCard } from '@/components/dashboard/TodayCard'
+import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting'
 import { calculateWeeklyComparison } from '@/lib/utils/weeklyComparison'
 import { getChileToday } from '@/lib/utils/timezone'
 
@@ -198,6 +199,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      {/* Personal greeting */}
+      <DashboardGreeting userName={userName} />
+
       {/* Today snapshot */}
       <TodayCard
         todayTransactions={todayTransactions}
