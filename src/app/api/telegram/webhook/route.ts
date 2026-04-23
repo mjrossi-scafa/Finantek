@@ -369,28 +369,42 @@ async function handlePendingDataResponse(
   }
 
   // Deterministic shortcuts for common intents — el LLM no siempre clasifica
-  // bien "1", "2", "sí" durante un pending de receipt/manual, y el usuario
-  // terminaba repitiendo hasta que el bot entendía. Ahora reconocemos las
-  // opciones numéricas y palabras de confirmación antes de gastar una llamada
-  // al LLM.
+  // bien respuestas de opción en un pending de receipt/manual, y el usuario
+  // terminaba repitiendo hasta que el bot entendía. Se reconocen tanto números
+  // de opción como frases completas ("subir todo junto", "cada item separado").
   const normalized = message.trim().toLowerCase()
-  const yesWords = ['si', 'sí', 'dale', 'ok', 'okay', 'vale', 'sube', 'súbelo', 'subelo', 'subirlo', 'confirmo', 'confirmar']
 
-  if (normalized === '1' || yesWords.includes(normalized)) {
+  const isSingle =
+    /^\s*1\s*$/.test(normalized) ||
+    /\b(subir|sub[ií]r[ae]l[oa]|s[uú]belo|subelo|registr[oa]|registr[aá]lo|registrarlo|confirmo|confirmar|dale|ok|okay|vale|todo\s+junto)\b/i.test(normalized) ||
+    ['si', 'sí'].includes(normalized)
+  const isSeparate =
+    /^\s*2\s*$/.test(normalized) ||
+    /\b(por\s+separado|cada\s+(uno|item)|separad[oa]s?)\b/i.test(normalized)
+  const isExclude =
+    /^\s*3\s*$/.test(normalized) ||
+    /\b(excluir|quitar|sacar)\b/i.test(normalized)
+  const isCancel =
+    /^\s*4\s*$/.test(normalized) ||
+    /\b(cancelar|cancela|cancelo|cancel)\b/i.test(normalized) ||
+    normalized === 'no'
+
+  if (isSingle) {
     await handleSingleConfirmation(chatId, userId, conv.pendingData)
     return
   }
-  if (normalized === '2') {
+  if (isSeparate) {
     await handleSeparateConfirmation(chatId, userId, conv.pendingData, categories)
     return
   }
-  if (normalized === '3') {
+  if (isExclude && normalized.length <= 2) {
+    // Solo un "3" sin números — preguntamos qué item
     const askMsg = '¿Qué ítem excluyo? Dime el número, ej: "excluir 2" o "quitar el 1 y 3".'
     addMessage(chatId, 'assistant', askMsg)
     await sendMessage(chatId, askMsg)
     return
   }
-  if (normalized === '4' || ['cancelar', 'cancela', 'cancel', 'no'].includes(normalized)) {
+  if (isCancel) {
     clearPendingData(chatId)
     const cancelMsg = '❌ Cancelado. ¿En qué más te ayudo?'
     addMessage(chatId, 'assistant', cancelMsg)
