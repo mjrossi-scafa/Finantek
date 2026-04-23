@@ -7,7 +7,10 @@ import { formatCLP } from '@/lib/utils/currency'
 import { formatCurrency } from '@/lib/utils/exchangeRates'
 import { SHORT_WEEKDAY_FORMATTER, CLOCK_FORMATTER } from '@/lib/utils/dates'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
-import { Flame, Plus, Clock } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Flame, Plus, Clock, Bot, Pencil, ExternalLink } from 'lucide-react'
+
+const TELEGRAM_BOT_URL = 'https://t.me/risky_finance_bot'
 
 interface TodayCardProps {
   todayTransactions: Array<Transaction & { categories?: Category }>
@@ -33,6 +36,7 @@ export function TodayCard({
 }: TodayCardProps) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [chooserOpen, setChooserOpen] = useState(false)
   const [now, setNow] = useState<Date | null>(null)
 
   // Update "now" each minute on the client only — avoids hydration mismatch.
@@ -343,13 +347,63 @@ export function TodayCard({
 
         {/* CTA */}
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => setChooserOpen(true)}
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
         >
           <Plus className="h-4 w-4" />
           {count === 0 ? 'Registrar primer gasto' : 'Nuevo gasto'}
         </button>
       </div>
+
+      <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>¿Cómo quieres registrar?</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-2 pt-1">
+            <a
+              href={TELEGRAM_BOT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setChooserOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#229ED9]/10 border border-[#229ED9]/30 hover:bg-[#229ED9]/20 active:scale-[0.98] transition-all min-h-[56px]"
+            >
+              <div className="h-10 w-10 rounded-lg bg-[#229ED9]/20 flex items-center justify-center flex-shrink-0">
+                <Bot className="h-5 w-5 text-[#229ED9]" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="font-semibold text-text-primary text-sm flex items-center gap-1.5">
+                  Bot de Telegram
+                  <ExternalLink className="h-3 w-3 opacity-60" />
+                </div>
+                <div className="text-[11px] text-text-muted leading-tight">
+                  Texto o foto, más rápido
+                </div>
+              </div>
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                setChooserOpen(false)
+                setModalOpen(true)
+              }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/30 hover:bg-violet-500/20 active:scale-[0.98] transition-all min-h-[56px]"
+            >
+              <div className="h-10 w-10 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <Pencil className="h-5 w-5 text-violet-light" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="font-semibold text-text-primary text-sm">
+                  Ingreso manual
+                </div>
+                <div className="text-[11px] text-text-muted leading-tight">
+                  Formulario con todos los campos
+                </div>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <EditTransactionModal
         open={modalOpen}
