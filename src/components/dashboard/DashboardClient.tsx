@@ -181,10 +181,11 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
   return (
     <div className="space-y-6">
       {/* Period chapter: header + quick stats share one violet anchor + gradient
-          so the section reads as a single block. */}
+          so the section reads as a single block. Violet box-shadow on both
+          sides gives the wrapper a symmetric frame. */}
       <div
-        className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-violet-500/[0.14] via-violet-500/[0.06] to-violet-500/[0.02]"
-        style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246)' }}
+        className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-violet-500/[0.14] via-violet-500/[0.04] to-violet-500/[0.14]"
+        style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246), inset -4px 0 0 rgb(139 92 246)' }}
       >
         {/* Header */}
         <div className="p-4 sm:p-5 pl-5 sm:pl-6">
