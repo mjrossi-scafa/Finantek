@@ -513,7 +513,7 @@ export function TransactionsClient({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 px-4 py-6 sm:p-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -724,19 +724,19 @@ export function TransactionsClient({
         )}
       </div>
 
-      {/* Quick summary */}
+      {/* Quick summary — flex-wrap para que caiga a multiple líneas en mobile
+          en vez de hacer overflow horizontal del contenedor. Los dividers
+          sueltos se eliminaron porque no tienen sentido cuando hay wrap. */}
       {filteredTransactions.length > 0 && (
-        <div className="flex gap-4 text-sm">
+        <div className="flex flex-wrap gap-2 text-sm">
           <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-success/10 text-success">
             <span>Ingresos:</span>
             <span className="font-mono font-semibold">+{formatCLP(summary.income)}</span>
           </div>
-          <div className="w-px h-6 bg-surface-border"></div>
           <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-danger/10 text-danger">
             <span>Gastos:</span>
             <span className="font-mono font-semibold">-{formatCLP(summary.expense)}</span>
           </div>
-          <div className="w-px h-6 bg-surface-border"></div>
           <div className={`flex items-center gap-2 px-3 py-2 rounded-full ${
             summary.balance >= 0
               ? 'bg-success/10 text-success'
