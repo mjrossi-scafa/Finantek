@@ -187,11 +187,12 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
         className="relative glass-card rounded-2xl p-4 sm:p-5 pl-5 sm:pl-6 bg-gradient-to-r from-violet-500/[0.15] via-violet-500/[0.04] to-transparent overflow-hidden"
         style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246)' }}
       >
-        <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
-          Resumen del período
-        </p>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          {/* Left: meta info */}
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
+              Resumen del período
+            </p>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-violet-light flex-shrink-0" />
               <h2 className="text-lg sm:text-xl font-bold text-text-primary">{periodLabel}</h2>
@@ -211,33 +212,45 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={toggleFocusMode}
-              className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-surface-secondary hover:bg-surface-hover transition-colors group"
-              title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-              aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-            >
-              {isHidden ? (
-                <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
-              ) : (
-                <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
-              )}
-            </button>
+          {/* Right: total + controls */}
+          <div className="flex flex-col sm:items-end gap-2.5 flex-shrink-0">
+            <div className="sm:text-right">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted font-semibold">
+                Total gastado
+              </p>
+              <p className="text-lg sm:text-xl font-bold font-mono text-text-primary mt-0.5">
+                {isHidden && focusMounted ? '•••••' : formatCLP(expense)}
+              </p>
+            </div>
 
-            <div className="rounded-xl bg-surface-secondary px-3 py-2 flex items-center gap-2 min-h-[40px]">
-              <Calendar className="h-4 w-4 text-text-muted flex-shrink-0" />
-              <select
-                className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer pr-1"
-                value={period}
-                onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
-                disabled={loading}
-                aria-label="Seleccionar período"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleFocusMode}
+                className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-surface-secondary hover:bg-surface-hover transition-colors group"
+                title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
+                aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
               >
-                {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((key) => (
-                  <option key={key} value={key}>{PERIOD_LABELS[key]}</option>
-                ))}
-              </select>
+                {isHidden ? (
+                  <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
+                ) : (
+                  <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
+                )}
+              </button>
+
+              <div className="rounded-xl bg-surface-secondary px-3 py-2 flex items-center gap-2 min-h-[40px]">
+                <Calendar className="h-4 w-4 text-text-muted flex-shrink-0" />
+                <select
+                  className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer pr-1"
+                  value={period}
+                  onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
+                  disabled={loading}
+                  aria-label="Seleccionar período"
+                >
+                  {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((key) => (
+                    <option key={key} value={key}>{PERIOD_LABELS[key]}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
