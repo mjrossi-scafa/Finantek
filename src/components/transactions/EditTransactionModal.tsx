@@ -361,7 +361,18 @@ export function EditTransactionModal({
             <Label>Categoría</Label>
             <Select value={categoryId} onValueChange={(value) => setCategoryId(value || '')}>
               <SelectTrigger className="bg-surface-secondary border-surface-border">
-                <SelectValue placeholder="Selecciona una categoría" />
+                <SelectValue placeholder="Selecciona una categoría">
+                  {(value) => {
+                    const cat = filteredCategories.find((c) => c.id === value)
+                    if (!cat) return null
+                    return (
+                      <span className="flex items-center gap-2">
+                        <span>{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </span>
+                    )
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {filteredCategories.map((category) => (
@@ -385,9 +396,9 @@ export function EditTransactionModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-surface-secondary border-surface-border pl-10"
+                className="bg-surface-secondary border-surface-border pl-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
             </div>
           </div>
 

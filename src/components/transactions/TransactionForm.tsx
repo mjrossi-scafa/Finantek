@@ -119,7 +119,18 @@ export function TransactionForm({ categories, userId }: TransactionFormProps) {
         <Label className="text-text-secondary text-sm font-medium">Categoría</Label>
         <Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? '')}>
           <SelectTrigger className={inputClasses}>
-            <SelectValue placeholder="Selecciona una categoría" />
+            <SelectValue placeholder="Selecciona una categoría">
+              {(value) => {
+                const cat = filteredCategories.find((c) => c.id === value)
+                if (!cat) return null
+                return (
+                  <span className="flex items-center gap-2">
+                    <span>{cat.icon}</span>
+                    <span>{cat.name}</span>
+                  </span>
+                )
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {filteredCategories.map((c) => (

@@ -127,7 +127,13 @@ export function ExtractedTransactionReview({
                   onValueChange={(v) => update(index, 'category_id', v)}
                 >
                   <SelectTrigger className={inputClasses}>
-                    <SelectValue placeholder="Seleccionar..." />
+                    <SelectValue placeholder="Seleccionar...">
+                      {(value) => {
+                        const cat = categories.find((c) => c.id === value)
+                        if (!cat) return null
+                        return <>{cat.icon} {cat.name}</>
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {categories

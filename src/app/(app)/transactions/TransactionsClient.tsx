@@ -610,7 +610,19 @@ export function TransactionsClient({
             {/* Category filter */}
             <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value || 'all')}>
               <SelectTrigger className="w-48 bg-surface-secondary border-surface-border flex-shrink-0">
-                <SelectValue placeholder="Todas las categorías" />
+                <SelectValue placeholder="Todas las categorías">
+                  {(value) => {
+                    if (!value || value === 'all') return 'Todas las categorías'
+                    const cat = categories.find((c) => c.id === value)
+                    if (!cat) return 'Todas las categorías'
+                    return (
+                      <span className="flex items-center gap-2">
+                        <span>{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </span>
+                    )
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas las categorías</SelectItem>
@@ -628,7 +640,14 @@ export function TransactionsClient({
             {/* Month filter */}
             <Select value={monthFilter} onValueChange={(value) => setMonthFilter(value || 'all')}>
               <SelectTrigger className="w-40 bg-surface-secondary border-surface-border flex-shrink-0">
-                <SelectValue placeholder="Todos los meses" />
+                <SelectValue placeholder="Todos los meses">
+                  {(value) => {
+                    if (!value || value === 'all') return 'Todos los meses'
+                    const [year, monthNum] = value.split('-')
+                    return new Date(parseInt(year), parseInt(monthNum) - 1)
+                      .toLocaleString('es', { month: 'long', year: 'numeric' })
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los meses</SelectItem>
@@ -649,7 +668,18 @@ export function TransactionsClient({
               <SelectTrigger className="w-44 bg-surface-secondary border-surface-border flex-shrink-0">
                 <div className="flex items-center gap-1.5">
                   <ArrowDownUp className="h-3.5 w-3.5" />
-                  <SelectValue placeholder="Ordenar" />
+                  <SelectValue placeholder="Ordenar">
+                    {(value) => {
+                      const labels: Record<string, string> = {
+                        'date-desc': '📅 Más recientes',
+                        'date-asc': '📅 Más antiguas',
+                        'amount-desc': '💰 Mayor monto',
+                        'amount-asc': '💰 Menor monto',
+                        'category': '📁 Por categoría',
+                      }
+                      return labels[value] ?? 'Ordenar'
+                    }}
+                  </SelectValue>
                 </div>
               </SelectTrigger>
               <SelectContent>
