@@ -107,7 +107,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen overflow-hidden">
       <Sidebar totalPoints={totalPoints} katanaState={katanaState} />
       <MobileDrawer totalPoints={totalPoints} />
-      <main className="flex-1 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0 pt-14 md:pt-0">
+      <main className="flex-1 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0 pt-[calc(env(safe-area-inset-top)+3.5rem)] md:pt-0">
         {children}
       </main>
       <MobileNav />
