@@ -156,7 +156,7 @@ export function ReceiptsClient({ initialReceipts, stats }: ReceiptsClientProps) 
     <div className="space-y-6">
       {/* Stats cards */}
       {stats.monthTotal > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <FileCheck className="h-4 w-4 text-violet-light" />

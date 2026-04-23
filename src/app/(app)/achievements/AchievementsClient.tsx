@@ -208,15 +208,15 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
           <div className="relative flex items-center justify-between mb-4">
             <div>
               <p className="text-xs text-text-muted uppercase tracking-wide mb-1">Nivel actual</p>
-              <h2 className="text-3xl font-bold text-text-primary flex items-center gap-2">
-                <span className="text-4xl">{tier.emoji}</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary flex items-center gap-2">
+                <span className="text-3xl sm:text-4xl">{tier.emoji}</span>
                 <span className={tier.color}>{tier.name}</span>
               </h2>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                <span className="text-3xl font-bold font-mono text-text-primary">{totalPoints}</span>
+                <span className="text-2xl sm:text-3xl font-bold font-mono text-text-primary">{totalPoints}</span>
               </div>
               <p className="text-xs text-text-muted mt-1">puntos totales</p>
             </div>
@@ -246,7 +246,7 @@ export function AchievementsClient({ achievements, userAchievements, ctx }: Prop
             <Trophy className="h-5 w-5 text-yellow-400" />
             <p className="text-sm font-semibold text-text-primary">Progreso total</p>
           </div>
-          <p className="text-3xl font-bold font-mono text-text-primary mb-2">
+          <p className="text-2xl sm:text-3xl font-bold font-mono text-text-primary mb-2">
             {unlockedCount}
             <span className="text-lg text-text-muted">/{totalCount}</span>
           </p>
