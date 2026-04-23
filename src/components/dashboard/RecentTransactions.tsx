@@ -79,11 +79,17 @@ export function RecentTransactions({
       </div>
 
       {transactions.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-10">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-elevated flex items-center justify-center">
             <TrendingUp className="h-8 w-8 text-text-muted" />
           </div>
-          <p className="text-sm text-text-tertiary">Sin transacciones recientes</p>
+          <p className="text-sm text-text-secondary mb-4">Aún no hay transacciones registradas.</p>
+          <Link
+            href="/transactions"
+            className="inline-flex items-center gap-2 px-4 py-2 min-h-[40px] bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
+          >
+            Registrar primera <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       ) : (
         <div className="space-y-0 divide-y divide-surface-border/50">

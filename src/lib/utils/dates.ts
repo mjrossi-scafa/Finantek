@@ -124,3 +124,17 @@ export function formatDateGroup(dateStr: string): string {
   const date = parseISO(dateStr)
   return format(date, "d 'de' MMMM, yyyy", { locale: es })
 }
+
+// Shared Intl instances — hoisted to module level so every consumer reuses
+// the same instance across renders instead of re-creating one.
+export const SHORT_WEEKDAY_FORMATTER = new Intl.DateTimeFormat('es-CL', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+})
+
+export const CLOCK_FORMATTER = new Intl.DateTimeFormat('es-CL', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})

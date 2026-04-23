@@ -141,7 +141,7 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="h-5 w-5 text-yellow-400" />
-          <h3 className="text-base font-bold text-text-primary">Actividad del año</h3>
+          <h3 className="text-base font-bold text-text-primary">Gastos del año</h3>
         </div>
         <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
           <p className="text-sm text-text-secondary max-w-sm">
@@ -164,7 +164,7 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
       <div className={`flex items-center justify-between flex-wrap gap-2 ${isCollapsed ? '' : 'mb-4'}`}>
         <div className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-yellow-400" />
-          <h3 className="text-base font-bold text-text-primary">Actividad del año</h3>
+          <h3 className="text-base font-bold text-text-primary">Gastos del año</h3>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <div>

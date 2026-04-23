@@ -13,6 +13,7 @@ import { formatCLP } from '@/lib/utils/currency'
 import { Calendar, Eye, EyeOff, TrendingUp } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useFocusMode } from '@/hooks/useFocusMode'
+import { getChileToday } from '@/lib/utils/timezone'
 import {
   MonthlySummary,
   CategorySpending,
@@ -74,9 +75,10 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
     const prevMonthNum = month === 1 ? 12 : month - 1
     const prevYearNum = month === 1 ? year - 1 : year
 
-    // Calculate end of month for planned expenses query
-    const currentMonthEnd = new Date(year, month, 0).toISOString().split('T')[0]
-    const todayDate = new Date().toISOString().split('T')[0]
+    // Calculate end of month for planned expenses query (YYYY-MM-DD, no UTC drift)
+    const lastDay = new Date(year, month, 0).getDate()
+    const currentMonthEnd = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+    const todayDate = getChileToday()
 
     try {
       const [

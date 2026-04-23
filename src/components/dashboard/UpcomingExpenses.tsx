@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { PlannedExpense } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday } from '@/lib/utils/timezone'
 import { CalendarClock, ArrowRight, AlertTriangle } from 'lucide-react'
 
 interface UpcomingExpensesProps {
@@ -11,16 +12,19 @@ interface UpcomingExpensesProps {
   isHidden?: boolean
 }
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24
+
 export function UpcomingExpenses({
   plannedExpenses,
   currentExpense,
   isHidden = false,
 }: UpcomingExpensesProps) {
-  const today = new Date()
-  const in7Days = new Date()
-  in7Days.setDate(in7Days.getDate() + 7)
-  const in7DaysStr = in7Days.toISOString().split('T')[0]
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = getChileToday()
+  const [ty, tm, td] = todayStr.split('-').map(Number)
+  const todayMs = Date.UTC(ty, tm - 1, td)
+  const in7DaysMs = todayMs + 7 * MS_PER_DAY
+  const in7d = new Date(in7DaysMs)
+  const in7DaysStr = `${in7d.getUTCFullYear()}-${String(in7d.getUTCMonth() + 1).padStart(2, '0')}-${String(in7d.getUTCDate()).padStart(2, '0')}`
 
   const next7Days = plannedExpenses.filter(
     (e) => e.planned_date >= todayStr && e.planned_date <= in7DaysStr
@@ -31,14 +35,15 @@ export function UpcomingExpenses({
   const projectedTotal = currentExpense + totalPlanned
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T12:00:00')
-    const diffDays = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    const [py, pm, pd] = dateStr.split('-').map(Number)
+    const planMs = Date.UTC(py, pm - 1, pd)
+    const diffDays = Math.round((planMs - todayMs) / MS_PER_DAY)
 
     if (diffDays === 0) return 'Hoy'
     if (diffDays === 1) return 'Mañana'
     if (diffDays < 7) return `En ${diffDays} días`
 
-    return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
   }
 
   if (plannedExpenses.length === 0) {
@@ -88,7 +93,7 @@ export function UpcomingExpenses({
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <div className="bg-surface-secondary rounded-xl p-3">
           <p className="text-[10px] text-text-muted uppercase tracking-wide">Próx. 7 días</p>
           <p className="text-sm font-bold font-mono text-text-primary mt-1">
@@ -115,10 +120,8 @@ export function UpcomingExpenses({
       {/* List */}
       <div className="space-y-1.5">
         {plannedExpenses.slice(0, 5).map((exp) => {
-          const diffDays = Math.floor(
-            (new Date(exp.planned_date + 'T12:00:00').getTime() - today.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
+          const [py, pm, pd] = exp.planned_date.split('-').map(Number)
+          const diffDays = Math.round((Date.UTC(py, pm - 1, pd) - todayMs) / MS_PER_DAY)
           const isUrgent = diffDays <= 2 && diffDays >= 0
 
           return (

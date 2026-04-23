@@ -35,8 +35,13 @@ export function SpendingByCategoryChart({ data }: SpendingByCategoryChartProps) 
       <div className="glass-card rounded-2xl p-6">
         <h3 className="text-sm font-bold text-text-primary mb-1">Gastos por categoría</h3>
         <p className="text-xs text-text-tertiary mb-4">Distribución del mes</p>
-        <div className="flex items-center justify-center h-48 text-text-tertiary text-sm">
-          Sin gastos este mes
+        <div className="flex flex-col items-center justify-center h-48 gap-2 text-center px-4">
+          <p className="text-sm text-text-secondary">
+            Todavía no hay gastos este mes.
+          </p>
+          <p className="text-xs text-text-muted">
+            A medida que registres, verás la distribución por categoría acá.
+          </p>
         </div>
       </div>
     )

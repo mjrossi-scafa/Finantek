@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday } from '@/lib/utils/timezone'
 import { WeeklyComparisonData, DAY_NAMES } from '@/lib/utils/weeklyComparison'
 import { TrendingUp, TrendingDown, Minus, Calendar, AlertCircle, CheckCircle } from 'lucide-react'
 
@@ -26,6 +27,12 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
 
   // Max value for day chart scale
   const maxDay = Math.max(...thisWeek.byDay, ...lastWeek.byDay, 1)
+
+  // Today's weekday index (Mon=0..Sun=6) computed from Chile TZ so Vercel's
+  // UTC runtime doesn't shift which bar gets "isCurrentDay" styling.
+  const todayChileStr = getChileToday()
+  const [tcy, tcm, tcd] = todayChileStr.split('-').map(Number)
+  const todayIdx = (new Date(Date.UTC(tcy, tcm - 1, tcd)).getUTCDay() + 6) % 7
 
   // Hide helper
   const fmt = (n: number) => (isHidden ? '•••••' : formatCLP(n))
@@ -97,8 +104,6 @@ export function WeeklyComparisonCard({ data, isHidden = false }: Props) {
             const lastAmt = lastWeek.byDay[i]
             const thisPct = (thisAmt / maxDay) * 100
             const lastPct = (lastAmt / maxDay) * 100
-            const today = new Date()
-            const todayIdx = (today.getDay() + 6) % 7
             const isCurrentDay = i === todayIdx
             const isFuture = i > todayIdx
 

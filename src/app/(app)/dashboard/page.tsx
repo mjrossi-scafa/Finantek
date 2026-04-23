@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardClient } from '@/components/dashboard/DashboardClient'
-import { Plus } from 'lucide-react'
-import Link from 'next/link'
 import {
   MonthlySummary,
   CategorySpending,
@@ -188,17 +186,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Quick action button */}
-      <div className="flex justify-end mb-4">
-        <Link
-          href="/transactions"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          <Plus className="h-4 w-4" />
-          Nueva Transacción
-        </Link>
-      </div>
-
       {/* Today snapshot */}
       <TodayCard
         todayTransactions={todayTransactions}

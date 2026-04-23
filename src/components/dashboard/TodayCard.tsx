@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { formatCurrency } from '@/lib/utils/exchangeRates'
+import { SHORT_WEEKDAY_FORMATTER, CLOCK_FORMATTER } from '@/lib/utils/dates'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
 import { Flame, Plus, Clock } from 'lucide-react'
 
@@ -18,19 +19,6 @@ interface TodayCardProps {
 }
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
-
-// Hoisted outside component to avoid re-creating the Intl instance on every render.
-const DATE_FORMATTER = new Intl.DateTimeFormat('es-CL', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-})
-
-const TIME_FORMATTER = new Intl.DateTimeFormat('es-CL', {
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-})
 
 export function TodayCard({
   todayTransactions,
@@ -180,7 +168,7 @@ export function TodayCard({
       color = 'text-vermillion-shu'
     }
 
-    const timeLabel = TIME_FORMATTER.format(now)
+    const timeLabel = CLOCK_FORMATTER.format(now)
     return { dayPct: Math.round(dayPct), label, color, timeLabel }
   }, [now, comparisonTarget, totalCLP])
 
@@ -198,7 +186,7 @@ export function TodayCard({
 
   const barWidth = percentOfBudget === null ? 0 : Math.min(percentOfBudget, 100)
 
-  const dateLabel = DATE_FORMATTER.format(new Date(todayStr + 'T12:00:00'))
+  const dateLabel = SHORT_WEEKDAY_FORMATTER.format(new Date(todayStr + 'T12:00:00'))
 
   const handleSuccess = () => {
     setModalOpen(false)
