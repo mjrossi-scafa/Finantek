@@ -187,7 +187,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
         className="relative glass-card rounded-2xl p-4 sm:p-5 pl-5 sm:pl-6 bg-gradient-to-r from-violet-500/[0.15] via-violet-500/[0.04] to-transparent overflow-hidden"
         style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246)' }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Left: meta info */}
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
@@ -212,13 +212,13 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
             </p>
           </div>
 
-          {/* Right: total + controls */}
-          <div className="flex flex-col sm:items-end gap-2.5 flex-shrink-0">
+          {/* Right: hero amount + controls */}
+          <div className="flex flex-col sm:items-end gap-3 flex-shrink-0">
             <div className="sm:text-right">
               <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted font-semibold">
                 Total gastado
               </p>
-              <p className="text-lg sm:text-xl font-bold font-mono text-text-primary mt-0.5">
+              <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-text-primary mt-0.5 leading-tight">
                 {isHidden && focusMounted ? '•••••' : formatCLP(expense)}
               </p>
             </div>
