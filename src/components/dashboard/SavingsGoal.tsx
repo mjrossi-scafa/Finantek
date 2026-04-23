@@ -48,7 +48,7 @@ export function SavingsGoal({ currentSavings, isHidden = false }: SavingsGoalPro
   const remaining = Math.max(goal - currentSavings, 0)
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">

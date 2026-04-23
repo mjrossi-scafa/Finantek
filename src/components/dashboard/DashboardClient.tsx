@@ -306,16 +306,18 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
         )}
       </div>
 
-      {/* Loading indicator */}
-      {loading && (
-        <div className="glass-card rounded-xl p-4 text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-500 mx-auto"></div>
-          <p className="text-sm text-text-secondary mt-2">Cargando datos...</p>
-        </div>
-      )}
-
-      {/* Content with opacity during loading */}
-      <div className={`space-y-6 transition-opacity duration-200 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+      {/* Content with loading overlay (pointer-events-none desactiva clicks
+          durante la transición de período para evitar race conditions). */}
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-start justify-center pt-4 pointer-events-none">
+            <div className="glass-card rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+              <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-violet-400 border-t-transparent" />
+              <span className="text-xs text-text-secondary font-medium">Cambiando período...</span>
+            </div>
+          </div>
+        )}
+        <div className={`space-y-6 transition-all duration-200 ${loading ? 'opacity-40 blur-[1px] pointer-events-none' : 'opacity-100'}`}>
         {budgetAlerts.length > 0 && (
           <BudgetAlertBanner alerts={budgetAlerts} />
         )}
@@ -350,6 +352,7 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
           isHidden={isHidden && focusMounted}
           onTransactionUpdated={() => loadPeriodData(period)}
         />
+        </div>
       </div>
     </div>
   )

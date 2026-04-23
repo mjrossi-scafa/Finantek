@@ -201,13 +201,14 @@ export function TransactionsClient({
     setSelectionMode(false)
   }
 
-  // Infinite scroll observer
+  // Infinite scroll observer — runs regardless of active filters so paginated
+  // tail still reaches the user even while filtering client-side.
   useEffect(() => {
     if (!sentinelRef.current) return
 
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMore && !searchQuery && typeFilter === 'all' && categoryFilter === 'all' && monthFilter === 'all' && dateRange === 'all' && !minAmount && !maxAmount) {
+        if (entries[0].isIntersecting && hasMore) {
           loadMore()
         }
       },
@@ -216,7 +217,7 @@ export function TransactionsClient({
 
     observer.observe(sentinelRef.current)
     return () => observer.disconnect()
-  }, [hasMore, searchQuery, typeFilter, categoryFilter, monthFilter, dateRange, minAmount, maxAmount])
+  }, [hasMore])
 
   // Get unique months for filter
   const availableMonths = useMemo(() => {
@@ -481,15 +482,20 @@ export function TransactionsClient({
   }
 
   const handleExport = () => {
-    // Basic CSV export
+    // CSV export with original currency columns so trip expenses in foreign
+    // currency (JPY, AUD, USD…) don't lose their native amount when the file
+    // is opened later for reconciliation.
+    const escape = (v: string | number | null | undefined) => `"${String(v ?? '').replace(/"/g, '""')}"`
     const csvContent = [
-      ['Fecha', 'Tipo', 'Descripción', 'Categoría', 'Monto'].join(','),
+      ['Fecha', 'Tipo', 'Descripción', 'Categoría', 'Monto (CLP)', 'Monto original', 'Moneda original'].join(','),
       ...filteredTransactions.map(t => [
         t.transaction_date,
         t.type === 'income' ? 'Ingreso' : 'Gasto',
-        `"${t.description || ''}"`,
-        `"${t.categories?.name || ''}"`,
-        t.amount
+        escape(t.description),
+        escape(t.categories?.name),
+        t.amount,
+        t.original_amount ?? '',
+        t.original_currency ?? '',
       ].join(','))
     ].join('\n')
 
@@ -497,7 +503,7 @@ export function TransactionsClient({
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `transacciones_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute('download', `transacciones_${getChileToday()}.csv`)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
@@ -536,7 +542,10 @@ export function TransactionsClient({
         </div>
       </div>
 
-      {/* Quick date range filters */}
+      {/* Quick date range filters — horizontal scroll on mobile with fade hint
+          on the right edge so the user knows more options exist. */}
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent md:hidden z-10" />
       <div className="flex gap-2 overflow-x-auto pb-1">
         {[
           { key: 'all', label: 'Todos', icon: null },
@@ -559,6 +568,7 @@ export function TransactionsClient({
             {label}
           </button>
         ))}
+      </div>
       </div>
 
       {/* Filters */}
@@ -863,10 +873,15 @@ export function TransactionsClient({
         </div>
       )}
 
-      {/* Infinite scroll sentinel */}
-      {hasMore && filteredTransactions.length > 0 && (
+      {/* Infinite scroll sentinel — always visible while hasMore so filtros
+          que dejan la lista en 0 igual pueden seguir cargando del server. */}
+      {hasMore && (
         <div ref={sentinelRef} style={{ height: '20px' }} className="flex justify-center">
-          <div className="text-xs text-text-tertiary">Cargando más...</div>
+          <div className="text-xs text-text-tertiary">
+            {filteredTransactions.length === 0
+              ? 'Buscando más resultados...'
+              : 'Cargando más...'}
+          </div>
         </div>
       )}
 

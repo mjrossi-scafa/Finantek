@@ -48,7 +48,7 @@ export function UpcomingExpenses({
 
   if (plannedExpenses.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CalendarClock className="h-5 w-5 text-violet-light" />
@@ -77,7 +77,7 @@ export function UpcomingExpenses({
   }
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="glass-card rounded-2xl p-5 sm:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

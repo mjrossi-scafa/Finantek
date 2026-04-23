@@ -61,7 +61,7 @@ export function RecentTransactions({
     }
   }
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-base font-bold text-text-primary flex items-center gap-2">

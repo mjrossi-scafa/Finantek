@@ -34,7 +34,7 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 export function WeeklyComparisonChart({ data }: WeeklyComparisonChartProps) {
   if (data.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-5 sm:p-6">
         <h3 className="text-sm font-bold text-text-primary mb-1">Comparación semanal</h3>
         <p className="text-xs text-text-tertiary mb-4">Esta semana vs anterior</p>
         <div className="flex items-center justify-center h-48 text-text-tertiary text-sm">
@@ -51,7 +51,7 @@ export function WeeklyComparisonChart({ data }: WeeklyComparisonChartProps) {
   }))
 
   return (
-    <div className="glass-card rounded-2xl p-6 overflow-hidden">
+    <div className="glass-card rounded-2xl p-5 sm:p-6 overflow-hidden">
       <h3 className="text-sm font-bold text-text-primary mb-1">Comparación semanal</h3>
       <p className="text-xs text-text-tertiary mb-4">Esta semana vs anterior por categoría</p>
       <div className="[&_.recharts-bar-rectangle:hover]:opacity-90 [&_.recharts-bar-rectangle]:transition-opacity [&_.recharts-cartesian-grid-bg]:fill-transparent [&_.recharts-wrapper]:bg-transparent pb-4">

@@ -213,7 +213,7 @@ export function TodayCard({
 
   return (
     <>
-      <div className="glass-card rounded-2xl p-4 sm:p-5">
+      <div className="glass-card rounded-2xl p-5 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
           <div className="flex items-center gap-2 min-w-0">

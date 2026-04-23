@@ -138,7 +138,7 @@ export function ActivityHeatmap({ data, todayStr }: ActivityHeatmapProps) {
 
   if (isEmpty) {
     return (
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="h-5 w-5 text-yellow-400" />
           <h3 className="text-base font-bold text-text-primary">Gastos del año</h3>

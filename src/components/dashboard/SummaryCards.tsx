@@ -104,7 +104,7 @@ export function SummaryCards({
       {/* Tarjetas de ingresos y gastos mejoradas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Income card mejorada */}
-        <div className="glass-card rounded-2xl p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 hover:glow-bamboo group">
+        <div className="glass-card rounded-2xl p-5 sm:p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 hover:glow-bamboo group">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-bamboo-take/10 flex items-center justify-center transition-all group-hover:bg-bamboo-take/20 group-hover:scale-110">
@@ -149,7 +149,7 @@ export function SummaryCards({
         </div>
 
         {/* Expense card mejorada */}
-        <div className="glass-card rounded-2xl p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 hover:glow-vermillion group">
+        <div className="glass-card rounded-2xl p-5 sm:p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 hover:glow-vermillion group">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-vermillion-shu/10 flex items-center justify-center transition-all group-hover:bg-vermillion-shu/20 group-hover:scale-110">

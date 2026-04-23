@@ -32,7 +32,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<
 export function SpendingByCategoryChart({ data }: SpendingByCategoryChartProps) {
   if (data.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-5 sm:p-6">
         <h3 className="text-sm font-bold text-text-primary mb-1">Gastos por categoría</h3>
         <p className="text-xs text-text-tertiary mb-4">Distribución del mes</p>
         <div className="flex flex-col items-center justify-center h-48 gap-2 text-center px-4">
@@ -57,7 +57,7 @@ export function SpendingByCategoryChart({ data }: SpendingByCategoryChartProps) 
   }))
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 rounded-xl bg-vermillion-shu/10 flex items-center justify-center">
           <TrendingDown className="h-5 w-5 text-vermillion-shu" />
