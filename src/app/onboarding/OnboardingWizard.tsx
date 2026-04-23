@@ -217,7 +217,7 @@ export function OnboardingWizard({
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col p-4 sm:p-6 lg:p-10"
+      className="min-h-[100dvh] flex flex-col p-4 sm:p-6 lg:p-10 overflow-x-hidden"
       style={{
         paddingTop: 'max(1rem, env(safe-area-inset-top))',
         paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
@@ -527,7 +527,15 @@ function Step2Income({
           value={income}
           disabled={data.incomeSkipped}
           onChange={(e) => handleSliderChange(parseInt(e.target.value, 10))}
-          className="w-full h-3 bg-violet-950/60 rounded-full appearance-none cursor-pointer accent-violet-500 disabled:opacity-40 touch-manipulation"
+          className={cn(
+            'w-full h-3 bg-violet-950/60 rounded-full appearance-none cursor-pointer disabled:opacity-40 touch-manipulation',
+            '[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6',
+            '[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white',
+            '[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-violet-500',
+            '[&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(168,85,247,0.6)]',
+            '[&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full',
+            '[&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-violet-500',
+          )}
           style={{
             background: data.incomeSkipped
               ? undefined
@@ -1052,14 +1060,14 @@ function Step7Telegram({
         </p>
         {code ? (
           <>
-            <div className="flex items-center justify-center gap-2">
-              <div className="font-mono text-4xl sm:text-5xl font-bold tracking-widest bg-black/40 px-6 py-4 rounded-xl text-violet-200 shadow-inner">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="font-mono text-[28px] sm:text-5xl font-bold tracking-[0.15em] sm:tracking-widest bg-black/40 px-4 sm:px-6 py-3 sm:py-4 rounded-xl text-violet-200 shadow-inner">
                 {code}
               </div>
               <button
                 type="button"
                 onClick={copyCode}
-                className="p-4 rounded-xl bg-violet-500/20 border border-violet-500/30 text-violet-200 hover:bg-violet-500/30 transition-colors min-h-[60px]"
+                className="p-3 sm:p-4 rounded-xl bg-violet-500/20 border border-violet-500/30 text-violet-200 hover:bg-violet-500/30 transition-colors min-h-[48px] sm:min-h-[60px]"
                 aria-label="Copiar código"
               >
                 {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
@@ -1246,7 +1254,7 @@ function Step8PWA() {
             type="button"
             onClick={() => setPlatform(p)}
             className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all',
+              'flex-1 min-w-0 px-2 sm:px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap truncate',
               platform === p
                 ? 'bg-violet-500/25 text-white border border-violet-400'
                 : 'text-purple-400 hover:text-purple-200'
