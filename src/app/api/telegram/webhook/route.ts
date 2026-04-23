@@ -438,22 +438,96 @@ Solo JSON, sin texto extra.`
   }
 }
 
+// Shared helper — decides trip_id + currency conversion for a single tx candidate.
+// Used by webhook flows that insert into `transactions` (single smart, single
+// confirmation, separate confirmation) to stay consistent.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveTransactionForTrip(
+  tx: { amount: number; date: string; currency?: string },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  activeTrip: any | null
+): Promise<{ finalAmount: number; originalAmount: number | null; originalCurrency: string | null; tripId: string | null }> {
+  const isDuringTrip = !!activeTrip && tx.date >= activeTrip.start_date && tx.date <= activeTrip.end_date
+  const tripId: string | null = isDuringTrip ? activeTrip.id : null
+
+  const currency = tx.currency || (isDuringTrip ? activeTrip.currency : 'CLP')
+  const isForeign = currency !== 'CLP'
+
+  let finalAmount = tx.amount
+  let originalAmount: number | null = null
+  let originalCurrency: string | null = null
+
+  if (isForeign) {
+    originalAmount = tx.amount
+    originalCurrency = currency
+    if (activeTrip && activeTrip.currency === currency) {
+      finalAmount = Math.round(tx.amount * Number(activeTrip.exchange_rate))
+    } else {
+      const { convertCurrency } = await import('@/lib/utils/exchangeRates')
+      finalAmount = await convertCurrency(tx.amount, currency, 'CLP')
+    }
+  }
+
+  return { finalAmount, originalAmount, originalCurrency, tripId }
+}
+
 async function handleSingleConfirmation(chatId: number, userId: string, pendingData: any, customName?: string): Promise<void> {
   const supabase = getSupabase()
   const name = customName || `Compra ${pendingData.raw.substring(0, 30)}`
+
+  const { data: activeTrip } = await supabase
+    .from('trips')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  const items = (pendingData.items ?? []) as Array<{ amount: number; date?: string; currency?: string }>
+  const today = getChileToday()
+
+  let totalCLP = 0
+  let tripId: string | null = null
+  const currencies = new Set<string>()
+  let originalSum = 0
+
+  if (items.length > 0) {
+    for (const item of items) {
+      const resolved = await resolveTransactionForTrip(
+        { amount: item.amount, date: item.date || today, currency: item.currency },
+        activeTrip
+      )
+      totalCLP += resolved.finalAmount
+      if (resolved.tripId) tripId = resolved.tripId
+      if (resolved.originalCurrency) {
+        currencies.add(resolved.originalCurrency)
+        originalSum += resolved.originalAmount ?? 0
+      } else {
+        currencies.add('CLP')
+      }
+    }
+  } else {
+    // Legacy shape: no items, just a total already computed
+    totalCLP = Number(pendingData.total ?? 0)
+  }
+
+  const uniqueCurrency = currencies.size === 1 ? Array.from(currencies)[0] : null
+  const keepOriginal = uniqueCurrency && uniqueCurrency !== 'CLP'
 
   await supabase.from('transactions').insert({
     user_id: userId,
     category_id: getDefaultExpenseCategory(await getCategories(userId))?.id,
     type: 'expense',
-    amount: pendingData.total,
+    amount: totalCLP,
     description: name,
-    transaction_date: getChileToday(),
+    transaction_date: today,
     source: pendingData.type,
+    trip_id: tripId,
+    original_amount: keepOriginal ? originalSum : null,
+    original_currency: keepOriginal ? uniqueCurrency : null,
   })
 
   clearPendingData(chatId)
-  const successMsg = `✅ Registrado: ${name}\n💰 ${formatCLP(pendingData.total)}`
+  const successMsg = `✅ Registrado: ${name}\n💰 ${formatCLP(totalCLP)}${tripId ? `\n✈️ Asociado al viaje activo` : ''}`
   addMessage(chatId, 'assistant', successMsg)
   await sendMessage(chatId, successMsg)
 }
@@ -462,24 +536,52 @@ async function handleSeparateConfirmation(chatId: number, userId: string, pendin
   const supabase = getSupabase()
   const lines: string[] = []
 
+  const { data: activeTrip } = await supabase
+    .from('trips')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  const today = getChileToday()
+  let anyLinkedToTrip = false
+
   for (const item of pendingData.items) {
-    const matchedCat = categories.find(c => c.type === 'expense') || categories[0]
+    const resolved = await resolveTransactionForTrip(
+      { amount: item.amount, date: item.date || today, currency: item.currency },
+      activeTrip
+    )
+    if (resolved.tripId) anyLinkedToTrip = true
+
+    // Match category with the parsed suggestion; fallback to first expense.
+    const txType = item.type || 'expense'
+    const matchedCat =
+      (item.suggested_category &&
+        categories.find(
+          (c) => c.type === txType && c.name.toLowerCase().includes(String(item.suggested_category).toLowerCase())
+        )) ||
+      categories.find((c) => c.type === txType) ||
+      categories[0]
 
     await supabase.from('transactions').insert({
       user_id: userId,
       category_id: matchedCat.id,
-      type: 'expense',
-      amount: item.amount,
+      type: txType,
+      amount: resolved.finalAmount,
       description: item.description,
-      transaction_date: getChileToday(),
+      transaction_date: item.date || today,
       source: pendingData.type,
+      trip_id: resolved.tripId,
+      original_amount: resolved.originalAmount,
+      original_currency: resolved.originalCurrency,
     })
 
-    lines.push(`🔴 ${item.description}: ${formatCLP(item.amount)}`)
+    lines.push(`🔴 ${item.description}: ${formatCLP(resolved.finalAmount)}`)
   }
 
   clearPendingData(chatId)
-  const successMsg = `✅ ${pendingData.items.length} transacciones registradas:\n\n${lines.join('\n')}`
+  const tripSuffix = anyLinkedToTrip ? `\n\n✈️ Asociadas al viaje activo` : ''
+  const successMsg = `✅ ${pendingData.items.length} transacciones registradas:\n\n${lines.join('\n')}${tripSuffix}`
   addMessage(chatId, 'assistant', successMsg)
   await sendMessage(chatId, successMsg)
 
@@ -869,15 +971,17 @@ async function handleCorrectionResponse(
     return
   }
 
-  // No reconoció la instrucción
+  // No reconoció la instrucción — salimos del modo corrección para no colgar
+  // al usuario en un loop. El próximo mensaje se trata como interacción normal.
+  clearPendingData(chatId)
   await sendMessage(
     chatId,
-    `🤔 No entendí qué corregir. Usa una de estas:\n` +
+    `🤔 No entendí qué corregir. Salí del modo corrección.\n\n` +
+    `Si necesitas corregir, envía "corregir" de nuevo y luego una de:\n` +
     `• "monto 3900"\n` +
     `• "categoría alimentación"\n` +
     `• "nombre agua y barra"\n` +
-    `• "borrar"\n` +
-    `• "cancelar"`
+    `• "borrar"`
   )
 }
 

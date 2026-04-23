@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Trip, Transaction } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday } from '@/lib/utils/timezone'
 import { Calendar, MapPin, Download, TrendingUp, Calculator } from 'lucide-react'
 import { TripFormModal } from '@/components/trips/TripFormModal'
 
@@ -25,13 +26,22 @@ export function TripDetailClient({ trip, transactions }: Props) {
     const total = transactions.reduce((sum, t) => t.type === 'expense' ? sum + t.amount : sum, 0)
     const count = transactions.filter((t) => t.type === 'expense').length
 
-    // Days
-    const today = new Date()
-    const start = new Date(trip.start_date + 'T12:00:00')
-    const end = new Date(trip.end_date + 'T12:00:00')
-    const totalDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1)
-    const isActive = today >= start && today <= end
-    const daysPassed = today < start ? 0 : today > end ? totalDays : Math.round((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    // Days — comparison via YYYY-MM-DD string in Chile TZ keeps in sync with
+    // ActiveTripBanner and avoids UTC drift on Vercel's runtime.
+    const MS_PER_DAY = 1000 * 60 * 60 * 24
+    const todayStr = getChileToday()
+    const [ty, tm, td] = todayStr.split('-').map(Number)
+    const [sy, sm, sd] = trip.start_date.split('-').map(Number)
+    const [ey, em, ed] = trip.end_date.split('-').map(Number)
+    const todayMs = Date.UTC(ty, tm - 1, td)
+    const startMs = Date.UTC(sy, sm - 1, sd)
+    const endMs = Date.UTC(ey, em - 1, ed)
+    const totalDays = Math.max(1, Math.round((endMs - startMs) / MS_PER_DAY) + 1)
+    const isActive = todayStr >= trip.start_date && todayStr <= trip.end_date
+    const daysPassed =
+      todayStr < trip.start_date ? 0 :
+      todayStr > trip.end_date ? totalDays :
+      Math.round((todayMs - startMs) / MS_PER_DAY) + 1
 
     const avgPerDay = daysPassed > 0 ? total / daysPassed : 0
     const projection = Math.round(avgPerDay * totalDays)

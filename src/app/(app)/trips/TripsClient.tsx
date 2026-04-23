@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Trip } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { formatCLP } from '@/lib/utils/currency'
+import { getChileToday } from '@/lib/utils/timezone'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
@@ -27,7 +28,7 @@ export function TripsClient({ initialTrips, tripSpending, userId }: TripsClientP
   const [formOpen, setFormOpen] = useState(false)
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>()
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = getChileToday()
 
   const activeTrip = trips.find((t) => t.is_active)
   const upcomingTrips = trips.filter((t) => !t.is_active && t.start_date > today)

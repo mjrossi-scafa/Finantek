@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { formatCurrency, getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/utils/exchangeRates'
-import { toDateStr } from '@/lib/utils/dates'
+import { getChileToday } from '@/lib/utils/timezone'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -70,7 +70,7 @@ export function EditTransactionModal({
   const [categoryId, setCategoryId] = useState('')
   const [description, setDescription] = useState('')
   const [notes, setNotes] = useState('')
-  const [date, setDate] = useState(toDateStr(new Date()))
+  const [date, setDate] = useState(getChileToday())
   const [includeInTrip, setIncludeInTrip] = useState(false)
   const [currencyCode, setCurrencyCode] = useState<string>('CLP')
   const [liveRate, setLiveRate] = useState<number | null>(null)
@@ -102,7 +102,7 @@ export function EditTransactionModal({
       setCategoryId('')
       setDescription('')
       setNotes('')
-      setDate(toDateStr(new Date()))
+      setDate(getChileToday())
       setIncludeInTrip(false)
       setCurrencyCode('CLP')
     }
@@ -116,7 +116,7 @@ export function EditTransactionModal({
       setCategoryId('')
       setDescription('')
       setNotes('')
-      setDate(toDateStr(new Date()))
+      setDate(getChileToday())
       setIncludeInTrip(false)
       setCurrencyCode('CLP')
     }

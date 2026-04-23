@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import * as DateUtils from '@/lib/utils/dates'
+import { getChileToday } from '@/lib/utils/timezone'
 import { createClient } from '@/lib/supabase/client'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
 import { TransactionItem } from '@/components/transactions/TransactionItem'
@@ -61,24 +62,26 @@ function getMonthFromDate(dateStr: string) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
-function isDateInRange(dateStr: string, range: DateRange): boolean {
+function isDateInRange(dateStr: string, range: DateRange, todayStr: string): boolean {
   if (range === 'all') return true
-  const now = new Date()
-  const date = new Date(dateStr)
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = diffMs / (1000 * 60 * 60 * 24)
+  if (range === 'today') return dateStr === todayStr
+
+  const MS_PER_DAY = 1000 * 60 * 60 * 24
+  const [ty, tm, td] = todayStr.split('-').map(Number)
+  const [dy, dm, dd] = dateStr.split('-').map(Number)
+  const todayMs = Date.UTC(ty, tm - 1, td)
+  const dateMs = Date.UTC(dy, dm - 1, dd)
+  const diffDays = (todayMs - dateMs) / MS_PER_DAY
 
   switch (range) {
-    case 'today':
-      return date.toDateString() === now.toDateString()
     case 'week':
-      return diffDays <= 7
+      return diffDays >= 0 && diffDays <= 7
     case 'month':
-      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
+      return dy === ty && dm === tm
     case '30days':
-      return diffDays <= 30
+      return diffDays >= 0 && diffDays <= 30
     case 'year':
-      return date.getFullYear() === now.getFullYear()
+      return dy === ty
     default:
       return true
   }
@@ -249,7 +252,7 @@ export function TransactionsClient({
       if (monthFilter !== 'all' && getMonthFromDate(transaction.transaction_date) !== monthFilter) return false
 
       // Date range filter
-      if (dateRange !== 'all' && !isDateInRange(transaction.transaction_date, dateRange)) return false
+      if (dateRange !== 'all' && !isDateInRange(transaction.transaction_date, dateRange, getChileToday())) return false
 
       // Amount range filter
       const min = parseFloat(minAmount)
