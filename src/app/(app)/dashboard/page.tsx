@@ -12,10 +12,12 @@ import {
   BudgetAlert,
   PlannedExpense,
   Trip,
+  Category,
 } from '@/types/database'
 import { ActiveTripBanner } from '@/components/dashboard/ActiveTripBanner'
 import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap'
 import { WeeklyComparisonCard } from '@/components/dashboard/WeeklyComparisonCard'
+import { TodayCard } from '@/components/dashboard/TodayCard'
 import { calculateWeeklyComparison } from '@/lib/utils/weeklyComparison'
 import { getChileToday } from '@/lib/utils/timezone'
 
@@ -43,6 +45,8 @@ export default async function DashboardPage() {
   const currentMonthEnd = new Date(year, month, 0).toISOString().split('T')[0]
   const todayDate = now.toISOString().split('T')[0]
 
+  const todayChile = getChileToday()
+
   const [
     monthlySummaryResult,
     prevMonthlySummaryResult,
@@ -52,6 +56,8 @@ export default async function DashboardPage() {
     recentTransactionsResult,
     budgetAlertsResult,
     plannedExpensesResult,
+    todayTransactionsResult,
+    categoriesResult,
   ] = await Promise.all([
     supabase.rpc('get_monthly_summary', { p_year: year, p_month: month }),
     supabase.rpc('get_monthly_summary', { p_year: prevYear, p_month: prevMonth }),
@@ -78,6 +84,18 @@ export default async function DashboardPage() {
       .gte('planned_date', todayDate)
       .lte('planned_date', currentMonthEnd)
       .order('planned_date', { ascending: true }),
+    supabase
+      .from('transactions')
+      .select('*, categories(*)')
+      .eq('user_id', user.id)
+      .eq('type', 'expense')
+      .eq('transaction_date', todayChile)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('categories')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('sort_order'),
   ])
 
   const summaryData = (monthlySummaryResult.data ?? []) as MonthlySummary[]
@@ -88,6 +106,13 @@ export default async function DashboardPage() {
   const recentTransactions = (recentTransactionsResult.data ?? []) as Transaction[]
   const budgetAlerts = (budgetAlertsResult.data ?? []) as BudgetAlert[]
   const plannedExpenses = (plannedExpensesResult.data ?? []) as PlannedExpense[]
+  const todayTransactions = (todayTransactionsResult.data ?? []) as Array<Transaction & { categories?: Category }>
+  const categoriesList = (categoriesResult.data ?? []) as Category[]
+
+  // Daily average of the month so far (expense). Uses monthly summary + Chile day number.
+  const monthExpense = Number(summaryData.find((s) => s.type === 'expense')?.total ?? 0)
+  const dayOfMonthChile = Number(todayChile.split('-')[2])
+  const dailyAvgMonth = dayOfMonthChile > 0 ? Math.round(monthExpense / dayOfMonthChile) : 0
 
   // Active trip
   const { data: activeTripData } = await supabase
@@ -111,7 +136,6 @@ export default async function DashboardPage() {
   }
 
   // Activity heatmap: last 365 days of expense transactions (Chile timezone)
-  const todayChile = getChileToday() // YYYY-MM-DD in America/Santiago
   const [y, m, d] = todayChile.split('-').map(Number)
   const oneYearAgoChile = new Date(Date.UTC(y, m - 1, d))
   oneYearAgoChile.setUTCDate(oneYearAgoChile.getUTCDate() - 365)
@@ -174,6 +198,16 @@ export default async function DashboardPage() {
           Nueva Transacción
         </Link>
       </div>
+
+      {/* Today snapshot */}
+      <TodayCard
+        todayTransactions={todayTransactions}
+        dailyAvgMonth={dailyAvgMonth}
+        activeTrip={activeTrip}
+        todayStr={todayChile}
+        categories={categoriesList}
+        userId={user.id}
+      />
 
       {/* Active trip banner */}
       {activeTrip && (
