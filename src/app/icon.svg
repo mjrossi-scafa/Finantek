@@ -4,29 +4,49 @@
       <stop offset="0%" stop-color="#1E0B3A"/>
       <stop offset="100%" stop-color="#0A0416"/>
     </linearGradient>
-    <linearGradient id="kFill" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#E9D5FF"/>
+    <linearGradient id="kBlock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D8B4FE"/>
       <stop offset="50%" stop-color="#C084FC"/>
-      <stop offset="100%" stop-color="#9333EA"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="kHl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="kSh" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5B21B6" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#5B21B6" stop-opacity="0.6"/>
     </linearGradient>
     <filter id="dotGlow" x="-100%" y="-100%" width="300%" height="300%">
       <feGaussianBlur stdDeviation="3"/>
     </filter>
   </defs>
 
-  <!-- Fondo cuadrado con esquinas redondeadas -->
+  <!-- Fondo cuadrado con esquinas redondeadas (iOS aplica squircle encima) -->
   <rect width="100" height="100" rx="22" fill="url(#kBg)"/>
 
-  <!-- K gruesa y legible -->
+  <!-- K pixel-art: misma construcción que el logo KATANA (variant icon) -->
   <!-- Palo vertical -->
-  <rect x="22" y="22" width="14" height="56" rx="2" fill="url(#kFill)"/>
-  <!-- Diagonal superior -->
-  <path d="M 40 48 L 60 22 L 72 22 L 50 50 Z" fill="url(#kFill)"/>
-  <!-- Diagonal inferior -->
-  <path d="M 40 52 L 50 50 L 72 78 L 60 78 Z" fill="url(#kFill)"/>
+  <rect x="18" y="18" width="9" height="64" rx="2" fill="url(#kBlock)"/>
+  <rect x="18" y="18" width="9" height="3" rx="1" fill="url(#kHl)"/>
+  <rect x="18" y="78" width="9" height="4" rx="1" fill="url(#kSh)"/>
+
+  <!-- Bloque medio (vértice de la K) -->
+  <rect x="30" y="41" width="9" height="18" rx="2" fill="url(#kBlock)"/>
+
+  <!-- Diagonal superior: dos bloques -->
+  <rect x="42" y="29" width="9" height="20" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="18" width="9" height="16" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="18" width="9" height="3" rx="1" fill="url(#kHl)"/>
+
+  <!-- Diagonal inferior: dos bloques -->
+  <rect x="42" y="51" width="9" height="22" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="66" width="9" height="16" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="78" width="9" height="4" rx="1" fill="url(#kSh)"/>
 
   <!-- Punto verde característico con glow -->
-  <circle cx="78" cy="78" r="10" fill="#84CC16" opacity="0.35" filter="url(#dotGlow)"/>
-  <circle cx="78" cy="78" r="6" fill="#84CC16"/>
-  <circle cx="76" cy="76" r="2" fill="#FFFFFF" opacity="0.85"/>
+  <circle cx="80" cy="80" r="9" fill="#84CC16" opacity="0.35" filter="url(#dotGlow)"/>
+  <circle cx="80" cy="80" r="6" fill="#84CC16"/>
+  <circle cx="80" cy="80" r="3.5" fill="#A3E635"/>
+  <circle cx="79" cy="79" r="1.4" fill="#FFFFFF" opacity="0.9"/>
 </svg>

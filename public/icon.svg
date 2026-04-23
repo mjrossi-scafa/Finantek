@@ -1,16 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#1A0A2E"/>
-  <!-- Columna vertical izquierda de la K -->
-  <rect x="5" y="4" width="4" height="24" rx="1" fill="#A855F7"/>
-  <!-- Diagonal superior de la K -->
-  <rect x="10" y="4" width="4" height="4" rx="1" fill="#84CC16"/>
-  <rect x="14" y="8" width="4" height="4" rx="1" fill="#7C3AED"/>
-  <rect x="18" y="4" width="4" height="4" rx="1" fill="#5B21B6"/>
-  <!-- Punto medio de unión -->
-  <rect x="10" y="13" width="4" height="4" rx="1" fill="#A855F7"/>
-  <!-- Diagonal inferior de la K -->
-  <rect x="14" y="18" width="4" height="4" rx="1" fill="#7C3AED"/>
-  <rect x="18" y="22" width="4" height="4" rx="1" fill="#5B21B6"/>
-  <!-- Punto verde de marca -->
-  <circle cx="26" cy="27" r="3" fill="#84CC16"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="kBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E0B3A"/>
+      <stop offset="100%" stop-color="#0A0416"/>
+    </linearGradient>
+    <linearGradient id="kBlock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D8B4FE"/>
+      <stop offset="50%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="kHl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EDE9FE" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="kSh" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5B21B6" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#5B21B6" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="dotGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Fondo cuadrado con esquinas redondeadas (iOS aplica squircle encima) -->
+  <rect width="100" height="100" rx="22" fill="url(#kBg)"/>
+
+  <!-- K pixel-art: misma construcción que el logo KATANA (variant icon) -->
+  <rect x="18" y="18" width="9" height="64" rx="2" fill="url(#kBlock)"/>
+  <rect x="18" y="18" width="9" height="3" rx="1" fill="url(#kHl)"/>
+  <rect x="18" y="78" width="9" height="4" rx="1" fill="url(#kSh)"/>
+
+  <rect x="30" y="41" width="9" height="18" rx="2" fill="url(#kBlock)"/>
+
+  <rect x="42" y="29" width="9" height="20" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="18" width="9" height="16" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="18" width="9" height="3" rx="1" fill="url(#kHl)"/>
+
+  <rect x="42" y="51" width="9" height="22" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="66" width="9" height="16" rx="2" fill="url(#kBlock)"/>
+  <rect x="54" y="78" width="9" height="4" rx="1" fill="url(#kSh)"/>
+
+  <!-- Punto verde característico con glow -->
+  <circle cx="80" cy="80" r="9" fill="#84CC16" opacity="0.35" filter="url(#dotGlow)"/>
+  <circle cx="80" cy="80" r="6" fill="#84CC16"/>
+  <circle cx="80" cy="80" r="3.5" fill="#A3E635"/>
+  <circle cx="79" cy="79" r="1.4" fill="#FFFFFF" opacity="0.9"/>
 </svg>
