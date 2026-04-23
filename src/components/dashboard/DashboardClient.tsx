@@ -41,6 +41,13 @@ interface DashboardClientProps {
 
 type PeriodType = 'current' | 'previous' | '3months' | '6months'
 
+const PERIOD_LABELS: Record<PeriodType, string> = {
+  current: 'Este mes',
+  previous: 'Mes anterior',
+  '3months': 'Últimos 3 meses',
+  '6months': 'Últimos 6 meses',
+}
+
 export function DashboardClient({ userId, userName, initialData }: DashboardClientProps) {
   const [period, setPeriod] = useState<PeriodType>('current')
   const [loading, setLoading] = useState(false)
@@ -168,47 +175,62 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
   const dailyAvg = daysElapsed > 0 ? expense / daysElapsed : 0
   const projectedMonthEnd = Math.round(dailyAvg * lastDayOfMonth)
 
+  const periodLabel = PERIOD_LABELS[period]
+  const isCurrentMonth = period === 'current'
+
   return (
     <div className="space-y-6">
-      {/* Header with functional period selector */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div className="flex-1">
-          <p className="text-text-secondary text-sm flex items-center gap-2 font-sans">
-            <Calendar className="h-4 w-4" />
-            <span className="capitalize">{label}</span>
-            <span className="text-text-muted">·</span>
-            <span>{daysRemaining > 0 ? `quedan ${daysRemaining} días del mes` : 'último día del mes'}</span>
-          </p>
-        </div>
+      {/* Period header — glass card with selector and focus toggle */}
+      <div className="glass-card rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-violet-light flex-shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold text-text-primary">{periodLabel}</h2>
+            </div>
+            <p className="text-xs text-text-muted mt-1 flex flex-wrap items-center gap-x-1.5">
+              <span className="capitalize">{label}</span>
+              {isCurrentMonth && (
+                <>
+                  <span className="text-text-muted/60">·</span>
+                  <span>
+                    {daysRemaining > 0
+                      ? `quedan ${daysRemaining} días del mes`
+                      : 'último día del mes'}
+                  </span>
+                </>
+              )}
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
-          {/* Focus mode toggle */}
-          <button
-            onClick={toggleFocusMode}
-            className="glass-card rounded-xl p-2.5 hover:bg-surface-hover transition-colors group"
-            title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-          >
-            {isHidden ? (
-              <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
-            ) : (
-              <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
-            )}
-          </button>
-
-          {/* Functional period selector */}
-          <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-text-muted" />
-            <select
-              className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer"
-              value={period}
-              onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
-              disabled={loading}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={toggleFocusMode}
+              className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-surface-secondary hover:bg-surface-hover transition-colors group"
+              title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
+              aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
             >
-              <option value="current">Este mes</option>
-              <option value="previous">Mes anterior</option>
-              <option value="3months">Últimos 3 meses</option>
-              <option value="6months">Últimos 6 meses</option>
-            </select>
+              {isHidden ? (
+                <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
+              ) : (
+                <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
+              )}
+            </button>
+
+            <div className="rounded-xl bg-surface-secondary px-3 py-2 flex items-center gap-2 min-h-[40px]">
+              <Calendar className="h-4 w-4 text-text-muted flex-shrink-0" />
+              <select
+                className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer pr-1"
+                value={period}
+                onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
+                disabled={loading}
+                aria-label="Seleccionar período"
+              >
+                {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((key) => (
+                  <option key={key} value={key}>{PERIOD_LABELS[key]}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -221,21 +243,23 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
             <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
               <TrendingUp className="h-5 w-5 text-indigo-300" />
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-text-muted">Promedio diario</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-text-muted">Promedio diario · {periodLabel}</p>
               <p className="text-lg font-bold font-mono text-text-primary">
                 {isHidden && focusMounted ? '•••••' : formatCLP(Math.round(dailyAvg))}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-text-muted">Día {daysElapsed} de {lastDayOfMonth}</p>
-            </div>
+            {isCurrentMonth && (
+              <div className="text-right flex-shrink-0">
+                <p className="text-xs text-text-muted">Día {daysElapsed} de {lastDayOfMonth}</p>
+              </div>
+            )}
           </div>
 
           {/* Top 3 categories */}
           {categorySpending.length > 0 && (
             <div className="glass-card rounded-xl px-4 py-3">
-              <p className="text-xs text-text-muted mb-2">🏆 Top categorías del mes</p>
+              <p className="text-xs text-text-muted mb-2">🏆 Top categorías · {periodLabel}</p>
               <div className="flex gap-2 flex-wrap">
                 {categorySpending.slice(0, 3).map((cat, i) => {
                   const medals = ['🥇', '🥈', '🥉']
