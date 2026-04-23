@@ -368,6 +368,36 @@ async function handlePendingDataResponse(
     return
   }
 
+  // Deterministic shortcuts for common intents — el LLM no siempre clasifica
+  // bien "1", "2", "sí" durante un pending de receipt/manual, y el usuario
+  // terminaba repitiendo hasta que el bot entendía. Ahora reconocemos las
+  // opciones numéricas y palabras de confirmación antes de gastar una llamada
+  // al LLM.
+  const normalized = message.trim().toLowerCase()
+  const yesWords = ['si', 'sí', 'dale', 'ok', 'okay', 'vale', 'sube', 'súbelo', 'subelo', 'subirlo', 'confirmo', 'confirmar']
+
+  if (normalized === '1' || yesWords.includes(normalized)) {
+    await handleSingleConfirmation(chatId, userId, conv.pendingData)
+    return
+  }
+  if (normalized === '2') {
+    await handleSeparateConfirmation(chatId, userId, conv.pendingData, categories)
+    return
+  }
+  if (normalized === '3') {
+    const askMsg = '¿Qué ítem excluyo? Dime el número, ej: "excluir 2" o "quitar el 1 y 3".'
+    addMessage(chatId, 'assistant', askMsg)
+    await sendMessage(chatId, askMsg)
+    return
+  }
+  if (normalized === '4' || ['cancelar', 'cancela', 'cancel', 'no'].includes(normalized)) {
+    clearPendingData(chatId)
+    const cancelMsg = '❌ Cancelado. ¿En qué más te ayudo?'
+    addMessage(chatId, 'assistant', cancelMsg)
+    await sendMessage(chatId, cancelMsg)
+    return
+  }
+
   const systemPrompt = `Eres el asistente de Katana.
 El usuario tiene una acción pendiente con estos datos:
 ${JSON.stringify(conv.pendingData)}
