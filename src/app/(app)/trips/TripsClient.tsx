@@ -113,12 +113,37 @@ export function TripsClient({ initialTrips, tripSpending, userId }: TripsClientP
       </div>
 
       {/* Active trip - hero */}
-      {activeTrip && (
+      {activeTrip && (() => {
+        const activeStatus: 'upcoming' | 'inProgress' | 'past' =
+          today < activeTrip.start_date ? 'upcoming' :
+          today > activeTrip.end_date ? 'past' :
+          'inProgress'
+        const statusConfig = {
+          upcoming: {
+            label: 'Próximo',
+            colors: 'bg-violet-500/20 border-violet-400/40 text-violet-300',
+            dot: 'bg-violet-400',
+            animated: false,
+          },
+          inProgress: {
+            label: 'En curso',
+            colors: 'bg-bamboo-take/20 border-bamboo-take/40 text-bamboo-take',
+            dot: 'bg-bamboo-take',
+            animated: true,
+          },
+          past: {
+            label: 'Finalizado',
+            colors: 'bg-surface-hover/60 border-surface-border text-text-muted',
+            dot: 'bg-text-muted',
+            animated: false,
+          },
+        }[activeStatus]
+        return (
         <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-violet-500/20 via-indigo-500/10 to-purple-500/10 border-2 border-violet-500/40">
           <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-bamboo-take/20 border border-bamboo-take/40 text-bamboo-take text-xs font-semibold">
-              <div className="w-1.5 h-1.5 rounded-full bg-bamboo-take animate-pulse" />
-              En curso
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${statusConfig.colors}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot} ${statusConfig.animated ? 'animate-pulse' : ''}`} />
+              {statusConfig.label}
             </span>
           </div>
 
@@ -138,6 +163,7 @@ export function TripsClient({ initialTrips, tripSpending, userId }: TripsClientP
           <ActiveTripStats
             trip={activeTrip}
             spending={tripSpending[activeTrip.id]}
+            status={activeStatus}
           />
 
           <div className="flex items-center justify-between mt-5 pt-5 border-t border-surface-border/50">
@@ -166,7 +192,8 @@ export function TripsClient({ initialTrips, tripSpending, userId }: TripsClientP
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* Upcoming */}
       {upcomingTrips.length > 0 && (
@@ -222,19 +249,31 @@ export function TripsClient({ initialTrips, tripSpending, userId }: TripsClientP
 function ActiveTripStats({
   trip,
   spending,
+  status,
 }: {
   trip: Trip
   spending?: { total: number; count: number }
+  status: 'upcoming' | 'inProgress' | 'past'
 }) {
   const total = spending?.total ?? 0
   const count = spending?.count ?? 0
 
-  // Days progress
-  const today = new Date()
-  const start = new Date(trip.start_date + 'T12:00:00')
-  const end = new Date(trip.end_date + 'T12:00:00')
-  const totalDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1)
-  const daysPassed = Math.max(0, Math.min(totalDays, Math.round((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1))
+  // Days progress (uses UTC midnight to avoid timezone drift between server and client)
+  const MS_PER_DAY = 1000 * 60 * 60 * 24
+  const [sy, sm, sd] = trip.start_date.split('-').map(Number)
+  const [ey, em, ed] = trip.end_date.split('-').map(Number)
+  const todayStr = getChileToday()
+  const [ty, tm, td] = todayStr.split('-').map(Number)
+  const startMs = Date.UTC(sy, sm - 1, sd)
+  const endMs = Date.UTC(ey, em - 1, ed)
+  const todayMs = Date.UTC(ty, tm - 1, td)
+
+  const totalDays = Math.max(1, Math.round((endMs - startMs) / MS_PER_DAY) + 1)
+  const daysPassed =
+    status === 'upcoming' ? 0 :
+    status === 'past' ? totalDays :
+    Math.round((todayMs - startMs) / MS_PER_DAY) + 1
+  const daysUntilStart = status === 'upcoming' ? Math.round((startMs - todayMs) / MS_PER_DAY) : 0
   const avgPerDay = daysPassed > 0 ? Math.round(total / daysPassed) : 0
 
   // Budget progress
@@ -250,17 +289,31 @@ function ActiveTripStats({
         </div>
 
         <div className="bg-surface/50 rounded-xl p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wide">Día</p>
-          <p className="text-lg font-bold font-mono text-violet-light mt-1">
-            {daysPassed}<span className="text-sm text-text-muted">/{totalDays}</span>
+          <p className="text-[10px] text-text-muted uppercase tracking-wide">
+            {status === 'upcoming' ? 'Empieza en' : status === 'past' ? 'Duración' : 'Día'}
           </p>
-          <p className="text-[10px] text-text-muted mt-0.5">días del viaje</p>
+          <p className="text-lg font-bold font-mono text-violet-light mt-1">
+            {status === 'upcoming'
+              ? (daysUntilStart === 0 ? 'Hoy' : daysUntilStart === 1 ? '1 día' : `${daysUntilStart} días`)
+              : <>{daysPassed}<span className="text-sm text-text-muted">/{totalDays}</span></>}
+          </p>
+          <p className="text-[10px] text-text-muted mt-0.5">
+            {status === 'upcoming' ? 'hasta el inicio' : status === 'past' ? 'días totales' : 'días del viaje'}
+          </p>
         </div>
 
         <div className="bg-surface/50 rounded-xl p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wide">Promedio/día</p>
-          <p className="text-lg font-bold font-mono text-text-primary mt-1">{formatCLP(avgPerDay)}</p>
-          <p className="text-[10px] text-text-muted mt-0.5">diario</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wide">
+            {status === 'upcoming' ? 'Presupuesto/día' : 'Promedio/día'}
+          </p>
+          <p className="text-lg font-bold font-mono text-text-primary mt-1">
+            {status === 'upcoming'
+              ? formatCLP(trip.budget ? Math.round(trip.budget / totalDays) : 0)
+              : formatCLP(avgPerDay)}
+          </p>
+          <p className="text-[10px] text-text-muted mt-0.5">
+            {status === 'upcoming' ? 'estimado' : 'diario'}
+          </p>
         </div>
 
         <div className="bg-surface/50 rounded-xl p-3">
