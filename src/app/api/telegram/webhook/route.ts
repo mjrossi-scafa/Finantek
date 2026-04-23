@@ -127,11 +127,10 @@ export async function POST(request: NextRequest) {
 
       await sendMessage(chatId, linkResult.message)
 
-      if (linkResult.success) {
-        userId = linkResult.userId!
-      } else {
-        return NextResponse.json({ ok: true })
-      }
+      // Always early-return: success o fail, el código de vinculación NO
+      // debe caer al parser de transacciones abajo (si no, "670515" se
+      // registra como un gasto de $670.515).
+      return NextResponse.json({ ok: true })
     } else {
       // Send registration message
       await sendMessage(chatId,
