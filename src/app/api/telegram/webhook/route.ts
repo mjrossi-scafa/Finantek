@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
       const moreItems = result.transactions.length > 8 ?
         `\n... y ${result.transactions.length - 8} items más` : ''
 
-      setPendingData(chatId, {
+      await setPendingData(chatId, {
         type: 'receipt',
         items: result.transactions,
         total,
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         `3️⃣ Excluir algún item (di cuál)\n` +
         `4️⃣ Cancelar`
 
-      addMessage(chatId, 'assistant', botResponse)
+      await addMessage(chatId, 'assistant', botResponse)
       await sendMessage(chatId, botResponse)
     } catch {
       await sendMessage(chatId, 'Algo falló. Intenta enviar la imagen de nuevo.')
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
       const moreItems = result.transactions.length > 8 ?
         `\n... y ${result.transactions.length - 8} items más` : ''
 
-      setPendingData(chatId, {
+      await setPendingData(chatId, {
         type: 'receipt',
         items: result.transactions,
         total,
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
         `3️⃣ Excluir algún item (di cuál)\n` +
         `4️⃣ Cancelar`
 
-      addMessage(chatId, 'assistant', botResponse)
+      await addMessage(chatId, 'assistant', botResponse)
       await sendMessage(chatId, botResponse)
     } catch {
       await sendMessage(chatId, '❌ Error al procesar el PDF.')
@@ -243,12 +243,12 @@ export async function POST(request: NextRequest) {
   if (!text) return NextResponse.json({ ok: true })
 
   // Get conversation state
-  const conv = getConversation(chatId)
-  addMessage(chatId, 'user', text)
+  const conv = await getConversation(chatId)
+  await addMessage(chatId, 'user', text)
 
   // Quick commands
   if (text === '/start') {
-    clearConversation(chatId)
+    await clearConversation(chatId)
     await sendMessage(chatId,
       "⚔️ Bienvenido a Katana\n\n" +
       "La disciplina del samurai aplicada al dinero.\n\n" +
@@ -400,14 +400,14 @@ async function handlePendingDataResponse(
   if (isExclude && normalized.length <= 2) {
     // Solo un "3" sin números — preguntamos qué item
     const askMsg = '¿Qué ítem excluyo? Dime el número, ej: "excluir 2" o "quitar el 1 y 3".'
-    addMessage(chatId, 'assistant', askMsg)
+    await addMessage(chatId, 'assistant', askMsg)
     await sendMessage(chatId, askMsg)
     return
   }
   if (isCancel) {
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const cancelMsg = '❌ Cancelado. ¿En qué más te ayudo?'
-    addMessage(chatId, 'assistant', cancelMsg)
+    await addMessage(chatId, 'assistant', cancelMsg)
     await sendMessage(chatId, cancelMsg)
     return
   }
@@ -465,9 +465,9 @@ Solo JSON, sin texto extra.`
         break
 
       case 'cancel':
-        clearPendingData(chatId)
+        await clearPendingData(chatId)
         const cancelMsg = '❌ Cancelado. ¿En qué más te ayudo?'
-        addMessage(chatId, 'assistant', cancelMsg)
+        await addMessage(chatId, 'assistant', cancelMsg)
         await sendMessage(chatId, cancelMsg)
         break
 
@@ -569,9 +569,9 @@ async function handleSingleConfirmation(chatId: number, userId: string, pendingD
     original_currency: keepOriginal ? uniqueCurrency : null,
   })
 
-  clearPendingData(chatId)
+  await clearPendingData(chatId)
   const successMsg = `✅ Registrado: ${name}\n💰 ${formatCLP(totalCLP)}${tripId ? `\n✈️ Asociado al viaje activo` : ''}`
-  addMessage(chatId, 'assistant', successMsg)
+  await addMessage(chatId, 'assistant', successMsg)
   await sendMessage(chatId, successMsg)
 }
 
@@ -622,10 +622,10 @@ async function handleSeparateConfirmation(chatId: number, userId: string, pendin
     lines.push(`🔴 ${item.description}: ${formatCLP(resolved.finalAmount)}`)
   }
 
-  clearPendingData(chatId)
+  await clearPendingData(chatId)
   const tripSuffix = anyLinkedToTrip ? `\n\n✈️ Asociadas al viaje activo` : ''
   const successMsg = `✅ ${pendingData.items.length} transacciones registradas:\n\n${lines.join('\n')}${tripSuffix}`
-  addMessage(chatId, 'assistant', successMsg)
+  await addMessage(chatId, 'assistant', successMsg)
   await sendMessage(chatId, successMsg)
 
   // Alertas inteligentes post-transacción
@@ -652,7 +652,7 @@ async function handleItemExclusion(chatId: number, pendingData: any, excludeIndi
   const remaining = pendingData.items.filter((_: any, i: number) => !excludeIndices.includes(i + 1))
   const newTotal = remaining.reduce((s: number, i: any) => s + i.amount, 0)
 
-  setPendingData(chatId, {
+  await setPendingData(chatId, {
     ...pendingData,
     items: remaining,
     total: newTotal
@@ -663,7 +663,7 @@ async function handleItemExclusion(chatId: number, pendingData: any, excludeIndi
     `¿Los subo todos juntos o por separado?\n` +
     `1️⃣ Juntos\n2️⃣ Por separado\n4️⃣ Cancelar`
 
-  addMessage(chatId, 'assistant', response)
+  await addMessage(chatId, 'assistant', response)
   await sendMessage(chatId, response)
 }
 
@@ -767,13 +767,13 @@ REGLAS:
     // Clean up any remaining tags
     botText = botText.replace(/\[REGISTRAR:.*?\]/, '').trim()
 
-    addMessage(chatId, 'assistant', botText)
+    await addMessage(chatId, 'assistant', botText)
     await sendMessage(chatId, botText)
 
   } catch (err) {
     console.error('Free conversation error:', err)
     const fallback = '🤔 No entendí bien. ¿Podrías ser más específico?'
-    addMessage(chatId, 'assistant', fallback)
+    await addMessage(chatId, 'assistant', fallback)
     await sendMessage(chatId, fallback)
   }
 }
@@ -843,13 +843,13 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
 
     const successMsg = smartResponse
 
-    addMessage(chatId, 'assistant', successMsg)
+    await addMessage(chatId, 'assistant', successMsg)
     await sendMessage(chatId, successMsg)
 
   } else if (transactions.length > 1) {
     // Multiple transactions - show confirmation
     const total = transactions.reduce((s, t) => s + t.amount, 0)
-    setPendingData(chatId, {
+    await setPendingData(chatId, {
       type: 'manual',
       items: transactions,
       total,
@@ -868,7 +868,7 @@ async function handleSmartTransactions(chatId: number, userId: string, transacti
       `2️⃣ Subir por separado\n` +
       `4️⃣ Cancelar`
 
-    addMessage(chatId, 'assistant', response)
+    await addMessage(chatId, 'assistant', response)
     await sendMessage(chatId, response)
   }
 }
@@ -905,8 +905,8 @@ async function handleCorrectionRequest(chatId: number, userId: string): Promise<
     `• "borrar"\n` +
     `• "cancelar"`
 
-  setPendingData(chatId, { type: 'correction', transactionId: lastTx.id })
-  addMessage(chatId, 'assistant', response)
+  await setPendingData(chatId, { type: 'correction', transactionId: lastTx.id })
+  await addMessage(chatId, 'assistant', response)
   await sendMessage(chatId, response)
 }
 
@@ -922,9 +922,9 @@ async function handleCorrectionResponse(
 
   // Cancelar
   if (['cancelar', 'cancela', 'cancel', 'no'].includes(lower)) {
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const msg = '👍 Listo, no toco la transacción.'
-    addMessage(chatId, 'assistant', msg)
+    await addMessage(chatId, 'assistant', msg)
     await sendMessage(chatId, msg)
     return
   }
@@ -932,9 +932,9 @@ async function handleCorrectionResponse(
   // Borrar
   if (['borrar', 'borra', 'eliminar', 'elimina', 'borralo', 'bórralo', 'elimínalo', 'eliminalo'].some(w => lower === w)) {
     const { error } = await supabase.from('transactions').delete().eq('id', transactionId).eq('user_id', userId)
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const msg = error ? `❌ No pude borrarla: ${error.message}` : '🗑️ Transacción eliminada.'
-    addMessage(chatId, 'assistant', msg)
+    await addMessage(chatId, 'assistant', msg)
     await sendMessage(chatId, msg)
     return
   }
@@ -953,11 +953,11 @@ async function handleCorrectionResponse(
       .update({ amount: Math.round(newAmount), original_amount: null, original_currency: null, trip_id: null })
       .eq('id', transactionId)
       .eq('user_id', userId)
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const msg = error
       ? `❌ No pude actualizar: ${error.message}`
       : `✅ Monto corregido a ${formatCLP(Math.round(newAmount))} (CLP, sin viaje asociado).`
-    addMessage(chatId, 'assistant', msg)
+    await addMessage(chatId, 'assistant', msg)
     await sendMessage(chatId, msg)
     return
   }
@@ -979,11 +979,11 @@ async function handleCorrectionResponse(
       .update({ category_id: cat.id })
       .eq('id', transactionId)
       .eq('user_id', userId)
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const msg = error
       ? `❌ No pude actualizar: ${error.message}`
       : `✅ Categoría corregida a ${cat.icon || ''} ${cat.name}`
-    addMessage(chatId, 'assistant', msg)
+    await addMessage(chatId, 'assistant', msg)
     await sendMessage(chatId, msg)
     return
   }
@@ -1005,18 +1005,18 @@ async function handleCorrectionResponse(
       .update({ description: newName })
       .eq('id', transactionId)
       .eq('user_id', userId)
-    clearPendingData(chatId)
+    await clearPendingData(chatId)
     const msg = error
       ? `❌ No pude actualizar: ${error.message}`
       : `✅ Descripción corregida a "${newName}"`
-    addMessage(chatId, 'assistant', msg)
+    await addMessage(chatId, 'assistant', msg)
     await sendMessage(chatId, msg)
     return
   }
 
   // No reconoció la instrucción — salimos del modo corrección para no colgar
   // al usuario en un loop. El próximo mensaje se trata como interacción normal.
-  clearPendingData(chatId)
+  await clearPendingData(chatId)
   await sendMessage(
     chatId,
     `🤔 No entendí qué corregir. Salí del modo corrección.\n\n` +
@@ -1050,7 +1050,7 @@ async function handleGreeting(chatId: number, userId: string): Promise<void> {
 
   const response = `${greeting}${todayMsg}\n\n¿En qué te ayudo?`
 
-  addMessage(chatId, 'assistant', response)
+  await addMessage(chatId, 'assistant', response)
   await sendMessage(chatId, response)
 }
 
