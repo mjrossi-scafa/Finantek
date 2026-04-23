@@ -180,126 +180,130 @@ export function DashboardClient({ userId, userName, initialData }: DashboardClie
 
   return (
     <div className="space-y-6">
-      {/* Period header — section anchor: marks where period-scoped cards start.
-          box-shadow inset en vez de border-l-4 porque el shorthand border de
-          .glass-card (1px all sides) sobrescribe los border-left de Tailwind. */}
+      {/* Period chapter: header + quick stats share one violet anchor + gradient
+          so the section reads as a single block. */}
       <div
-        className="relative glass-card rounded-2xl p-4 sm:p-5 pl-5 sm:pl-6 bg-gradient-to-r from-violet-500/[0.15] via-violet-500/[0.04] to-transparent overflow-hidden"
+        className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-violet-500/[0.14] via-violet-500/[0.06] to-violet-500/[0.02]"
         style={{ boxShadow: 'inset 4px 0 0 rgb(139 92 246)' }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Left: meta info */}
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
-              Resumen del período
-            </p>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-violet-light flex-shrink-0" />
-              <h2 className="text-lg sm:text-xl font-bold text-text-primary">{periodLabel}</h2>
-            </div>
-            <p className="text-xs text-text-muted mt-1 flex flex-wrap items-center gap-x-1.5">
-              <span className="capitalize">{label}</span>
-              {isCurrentMonth && (
-                <>
-                  <span className="text-text-muted/60">·</span>
-                  <span>
-                    {daysRemaining > 0
-                      ? `quedan ${daysRemaining} días del mes`
-                      : 'último día del mes'}
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
-
-          {/* Right: hero amount + controls */}
-          <div className="flex flex-col sm:items-end gap-3 flex-shrink-0">
-            <div className="sm:text-right">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted font-semibold">
-                Total gastado
+        {/* Header */}
+        <div className="p-4 sm:p-5 pl-5 sm:pl-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Left: meta info */}
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300 font-semibold mb-1.5">
+                Resumen del período
               </p>
-              <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-text-primary mt-0.5 leading-tight">
-                {isHidden && focusMounted ? '•••••' : formatCLP(expense)}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleFocusMode}
-                className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-surface-secondary hover:bg-surface-hover transition-colors group"
-                title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-                aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-              >
-                {isHidden ? (
-                  <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
-                ) : (
-                  <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-violet-light flex-shrink-0" />
+                <h2 className="text-lg sm:text-xl font-bold text-text-primary">{periodLabel}</h2>
+              </div>
+              <p className="text-xs text-text-muted mt-1 flex flex-wrap items-center gap-x-1.5">
+                <span className="capitalize">{label}</span>
+                {isCurrentMonth && (
+                  <>
+                    <span className="text-text-muted/60">·</span>
+                    <span>
+                      {daysRemaining > 0
+                        ? `quedan ${daysRemaining} días del mes`
+                        : 'último día del mes'}
+                    </span>
+                  </>
                 )}
-              </button>
-
-              <div className="rounded-xl bg-surface-secondary px-3 py-2 flex items-center gap-2 min-h-[40px]">
-                <Calendar className="h-4 w-4 text-text-muted flex-shrink-0" />
-                <select
-                  className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer pr-1"
-                  value={period}
-                  onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
-                  disabled={loading}
-                  aria-label="Seleccionar período"
-                >
-                  {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((key) => (
-                    <option key={key} value={key}>{PERIOD_LABELS[key]}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Daily spending rate + Top 3 categories quick stats */}
-      {expense > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Daily average */}
-          <div className="glass-card rounded-xl px-4 py-3 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="h-5 w-5 text-indigo-300" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-text-muted">Promedio diario · {periodLabel}</p>
-              <p className="text-lg font-bold font-mono text-text-primary">
-                {isHidden && focusMounted ? '•••••' : formatCLP(Math.round(dailyAvg))}
               </p>
             </div>
-            {isCurrentMonth && (
-              <div className="text-right flex-shrink-0">
-                <p className="text-xs text-text-muted">Día {daysElapsed} de {lastDayOfMonth}</p>
-              </div>
-            )}
-          </div>
 
-          {/* Top 3 categories */}
-          {categorySpending.length > 0 && (
-            <div className="glass-card rounded-xl px-4 py-3">
-              <p className="text-xs text-text-muted mb-2">🏆 Top categorías · {periodLabel}</p>
-              <div className="flex gap-2 flex-wrap">
-                {categorySpending.slice(0, 3).map((cat, i) => {
-                  const medals = ['🥇', '🥈', '🥉']
-                  return (
-                    <div key={cat.category_id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-surface-border text-xs">
-                      <span>{medals[i]}</span>
-                      <span>{cat.icon || '📁'}</span>
-                      <span className="text-text-primary font-medium">{cat.category_name}</span>
-                      <span className="font-mono text-text-muted">
-                        {isHidden && focusMounted ? '•••' : formatCLP(cat.total)}
-                      </span>
-                    </div>
-                  )
-                })}
+            {/* Right: hero amount + controls */}
+            <div className="flex flex-col sm:items-end gap-3 flex-shrink-0">
+              <div className="sm:text-right">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted font-semibold">
+                  Total gastado
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-text-primary mt-0.5 leading-tight">
+                  {isHidden && focusMounted ? '•••••' : formatCLP(expense)}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleFocusMode}
+                  className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-surface-secondary hover:bg-surface-hover transition-colors group"
+                  title={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
+                  aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
+                >
+                  {isHidden ? (
+                    <EyeOff className="h-4 w-4 text-violet-300 group-hover:text-violet-200" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-text-muted group-hover:text-text-primary" />
+                  )}
+                </button>
+
+                <div className="rounded-xl bg-surface-secondary px-3 py-2 flex items-center gap-2 min-h-[40px]">
+                  <Calendar className="h-4 w-4 text-text-muted flex-shrink-0" />
+                  <select
+                    className="bg-transparent text-sm font-medium text-text-primary border-0 outline-none cursor-pointer pr-1"
+                    value={period}
+                    onChange={(e) => handlePeriodChange(e.target.value as PeriodType)}
+                    disabled={loading}
+                    aria-label="Seleccionar período"
+                  >
+                    {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((key) => (
+                      <option key={key} value={key}>{PERIOD_LABELS[key]}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      )}
+
+        {/* Quick stats — within the same chapter wrapper */}
+        {expense > 0 && (
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pl-5 sm:pl-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Daily average */}
+              <div className="glass-card rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 text-indigo-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-muted">Promedio diario · {periodLabel}</p>
+                  <p className="text-lg font-bold font-mono text-text-primary">
+                    {isHidden && focusMounted ? '•••••' : formatCLP(Math.round(dailyAvg))}
+                  </p>
+                </div>
+                {isCurrentMonth && (
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs text-text-muted">Día {daysElapsed} de {lastDayOfMonth}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Top 3 categories */}
+              {categorySpending.length > 0 && (
+                <div className="glass-card rounded-xl px-4 py-3">
+                  <p className="text-xs text-text-muted mb-2">🏆 Top categorías · {periodLabel}</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {categorySpending.slice(0, 3).map((cat, i) => {
+                      const medals = ['🥇', '🥈', '🥉']
+                      return (
+                        <div key={cat.category_id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-surface-border text-xs">
+                          <span>{medals[i]}</span>
+                          <span>{cat.icon || '📁'}</span>
+                          <span className="text-text-primary font-medium">{cat.category_name}</span>
+                          <span className="font-mono text-text-muted">
+                            {isHidden && focusMounted ? '•••' : formatCLP(cat.total)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Loading indicator */}
       {loading && (
