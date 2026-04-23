@@ -11,7 +11,8 @@ import { Flame, Plus, Clock } from 'lucide-react'
 
 interface TodayCardProps {
   todayTransactions: Array<Transaction & { categories?: Category }>
-  dailyAvgMonth: number
+  dailyAvgRolling: number
+  activeDaysLast30: number
   activeTrip: Trip | null
   todayStr: string
   categories: Category[]
@@ -19,10 +20,12 @@ interface TodayCardProps {
 }
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
+const MIN_ACTIVE_DAYS_FOR_AVG = 7
 
 export function TodayCard({
   todayTransactions,
-  dailyAvgMonth,
+  dailyAvgRolling,
+  activeDaysLast30,
   activeTrip,
   todayStr,
   categories,
@@ -47,6 +50,8 @@ export function TodayCard({
     count,
     comparisonTarget,
     comparisonLabel,
+    hideReason,
+    daysNeededForAvg,
     isDuringTrip,
     dayNumber,
     totalDays,
@@ -125,12 +130,21 @@ export function TodayCard({
 
     let comparisonTarget = 0
     let comparisonLabel = ''
+    let hideReason: 'insufficientHistory' | 'tripNoBudget' | null = null
+    let daysNeededForAvg = 0
+
     if (isDuringTrip && activeTrip?.budget && totalDays > 0) {
       comparisonTarget = Math.round(activeTrip.budget / totalDays)
       comparisonLabel = 'presupuesto del día'
-    } else if (dailyAvgMonth > 0) {
-      comparisonTarget = dailyAvgMonth
-      comparisonLabel = 'promedio diario'
+    } else if (isDuringTrip) {
+      // trip activo sin budget definido — no hay target relevante
+      hideReason = 'tripNoBudget'
+    } else if (activeDaysLast30 >= MIN_ACTIVE_DAYS_FOR_AVG && dailyAvgRolling > 0) {
+      comparisonTarget = dailyAvgRolling
+      comparisonLabel = 'promedio (últimos 30 días)'
+    } else {
+      hideReason = 'insufficientHistory'
+      daysNeededForAvg = Math.max(1, MIN_ACTIVE_DAYS_FOR_AVG - activeDaysLast30)
     }
 
     return {
@@ -141,11 +155,13 @@ export function TodayCard({
       count,
       comparisonTarget,
       comparisonLabel,
+      hideReason,
+      daysNeededForAvg,
       isDuringTrip,
       dayNumber,
       totalDays,
     }
-  }, [todayTransactions, dailyAvgMonth, activeTrip, todayStr])
+  }, [todayTransactions, dailyAvgRolling, activeDaysLast30, activeTrip, todayStr])
 
   // Pace indicator: compare spent-so-far vs expected at current hour of day
   const pace = useMemo(() => {
@@ -239,11 +255,17 @@ export function TodayCard({
                 <p className="text-sm text-text-muted mt-0.5">
                   {percentOfBudget}% de {formatCLP(comparisonTarget)} ({comparisonLabel})
                 </p>
-              ) : (
+              ) : hideReason === 'insufficientHistory' ? (
                 <p className="text-sm text-text-muted mt-0.5">
-                  Sin presupuesto definido aún
+                  {activeDaysLast30 === 0
+                    ? `Tu promedio diario aparecerá tras ${MIN_ACTIVE_DAYS_FOR_AVG} días con actividad.`
+                    : `Te faltan ${daysNeededForAvg} día${daysNeededForAvg === 1 ? '' : 's'} con actividad para ver tu promedio.`}
                 </p>
-              )}
+              ) : hideReason === 'tripNoBudget' ? (
+                <p className="text-sm text-text-muted mt-0.5">
+                  Define un presupuesto del viaje para ver tu avance diario.
+                </p>
+              ) : null}
             </>
           )}
         </div>

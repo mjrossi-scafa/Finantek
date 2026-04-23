@@ -107,11 +107,6 @@ export default async function DashboardPage() {
   const todayTransactions = (todayTransactionsResult.data ?? []) as Array<Transaction & { categories?: Category }>
   const categoriesList = (categoriesResult.data ?? []) as Category[]
 
-  // Daily average of the month so far (expense). Uses monthly summary + Chile day number.
-  const monthExpense = Number(summaryData.find((s) => s.type === 'expense')?.total ?? 0)
-  const dayOfMonthChile = Number(todayChile.split('-')[2])
-  const dailyAvgMonth = dayOfMonthChile > 0 ? Math.round(monthExpense / dayOfMonthChile) : 0
-
   // Active trip
   const { data: activeTripData } = await supabase
     .from('trips')
@@ -159,6 +154,23 @@ export default async function DashboardPage() {
     date, amount: v.amount, count: v.count,
   }))
 
+  // Rolling average for the "Hoy" card: last 30 calendar days, counting only
+  // days with activity (not dividing by 30). Excludes today itself so new
+  // spending doesn't skew its own benchmark.
+  const thirtyDaysAgo = new Date(Date.UTC(y, m - 1, d))
+  thirtyDaysAgo.setUTCDate(thirtyDaysAgo.getUTCDate() - 30)
+  const thirtyDaysAgoStr = `${thirtyDaysAgo.getUTCFullYear()}-${String(thirtyDaysAgo.getUTCMonth() + 1).padStart(2, '0')}-${String(thirtyDaysAgo.getUTCDate()).padStart(2, '0')}`
+
+  let rollingSum = 0
+  let activeDaysLast30 = 0
+  for (const [date, v] of Object.entries(heatmapMap)) {
+    if (date >= thirtyDaysAgoStr && date < todayChile && v.count > 0) {
+      rollingSum += v.amount
+      activeDaysLast30 += 1
+    }
+  }
+  const dailyAvgRolling = activeDaysLast30 > 0 ? Math.round(rollingSum / activeDaysLast30) : 0
+
   // Weekly comparison: last 14 days
   const fourteenDaysAgo = new Date()
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
@@ -189,7 +201,8 @@ export default async function DashboardPage() {
       {/* Today snapshot */}
       <TodayCard
         todayTransactions={todayTransactions}
-        dailyAvgMonth={dailyAvgMonth}
+        dailyAvgRolling={dailyAvgRolling}
+        activeDaysLast30={activeDaysLast30}
         activeTrip={activeTrip}
         todayStr={todayChile}
         categories={categoriesList}
