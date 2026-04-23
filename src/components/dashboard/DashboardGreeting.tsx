@@ -10,7 +10,8 @@ export function DashboardGreeting({ userName }: DashboardGreetingProps) {
   const emoji = hour < 12 ? '🌅' : hour < 20 ? '☀️' : '🌙'
 
   return (
-    <div className="flex items-center gap-2">
+    // Left padding in mobile to clear the fixed hamburger button (top-3 left-3, 40px wide).
+    <div className="flex items-center gap-2 pl-12 md:pl-0">
       <span className="text-xl leading-none" aria-hidden="true">
         {emoji}
       </span>
