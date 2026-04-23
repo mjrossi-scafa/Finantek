@@ -1,12 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Transaction, Category, Trip } from '@/types/database'
 import { formatCLP } from '@/lib/utils/currency'
 import { formatCurrency } from '@/lib/utils/exchangeRates'
 import { EditTransactionModal } from '@/components/transactions/EditTransactionModal'
-import { Flame, Plus } from 'lucide-react'
+import { Flame, Plus, Clock } from 'lucide-react'
 
 interface TodayCardProps {
   todayTransactions: Array<Transaction & { categories?: Category }>
@@ -26,6 +26,12 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('es-CL', {
   month: 'short',
 })
 
+const TIME_FORMATTER = new Intl.DateTimeFormat('es-CL', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
 export function TodayCard({
   todayTransactions,
   dailyAvgMonth,
@@ -36,6 +42,14 @@ export function TodayCard({
 }: TodayCardProps) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [now, setNow] = useState<Date | null>(null)
+
+  // Update "now" each minute on the client only — avoids hydration mismatch.
+  useEffect(() => {
+    setNow(new Date())
+    const interval = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
 
   const {
     totalCLP,
@@ -43,7 +57,6 @@ export function TodayCard({
     originalCurrency,
     byCategory,
     count,
-    comparisonPct,
     comparisonTarget,
     comparisonLabel,
     isDuringTrip,
@@ -69,7 +82,6 @@ export function TodayCard({
       totalDays = Math.max(1, Math.round((endMs - startMs) / MS_PER_DAY) + 1)
     }
 
-    // Aggregate original amount if every transaction is in the trip's foreign currency
     let totalOriginal = 0
     let originalCurrency: string | null = null
     if (isDuringTrip && activeTrip && activeTrip.currency !== 'CLP' && todayTransactions.length > 0) {
@@ -83,7 +95,6 @@ export function TodayCard({
       }
     }
 
-    // Group by category, sorted desc
     const catMap = new Map<
       string,
       { name: string; icon: string; totalCLP: number; totalOriginal: number; count: number }
@@ -105,7 +116,6 @@ export function TodayCard({
     }
     const sorted = Array.from(catMap.values()).sort((a, b) => b.totalCLP - a.totalCLP)
 
-    // Top 4; group the rest as "Otras N"
     const TOP_N = 4
     let byCategory: typeof sorted = sorted
     if (sorted.length > TOP_N) {
@@ -115,22 +125,25 @@ export function TodayCard({
       const restCount = rest.reduce((s, c) => s + c.count, 0)
       byCategory = [
         ...top,
-        { name: `Otras ${rest.length}`, icon: '📦', totalCLP: restTotal, totalOriginal: 0, count: restCount },
+        {
+          name: `Otras ${rest.length}`,
+          icon: '📦',
+          totalCLP: restTotal,
+          totalOriginal: 0,
+          count: restCount,
+        },
       ]
     }
 
-    // Comparison target: trip budget/day if during trip, else monthly average
     let comparisonTarget = 0
     let comparisonLabel = ''
     if (isDuringTrip && activeTrip?.budget && totalDays > 0) {
       comparisonTarget = Math.round(activeTrip.budget / totalDays)
-      comparisonLabel = 'del presupuesto del día'
+      comparisonLabel = 'presupuesto del día'
     } else if (dailyAvgMonth > 0) {
       comparisonTarget = dailyAvgMonth
-      comparisonLabel = 'de tu promedio diario'
+      comparisonLabel = 'promedio diario'
     }
-    const comparisonPct =
-      comparisonTarget > 0 ? Math.round((totalCLP / comparisonTarget) * 100) : null
 
     return {
       totalCLP,
@@ -138,7 +151,6 @@ export function TodayCard({
       originalCurrency,
       byCategory,
       count,
-      comparisonPct,
       comparisonTarget,
       comparisonLabel,
       isDuringTrip,
@@ -147,27 +159,46 @@ export function TodayCard({
     }
   }, [todayTransactions, dailyAvgMonth, activeTrip, todayStr])
 
-  const dateLabel = DATE_FORMATTER.format(new Date(todayStr + 'T12:00:00'))
+  // Pace indicator: compare spent-so-far vs expected at current hour of day
+  const pace = useMemo(() => {
+    if (!now || comparisonTarget <= 0) return null
+    const hoursElapsed = now.getHours() + now.getMinutes() / 60
+    const dayPct = Math.min(100, (hoursElapsed / 24) * 100)
+    const expected = (comparisonTarget * hoursElapsed) / 24
+    const ratio = expected > 0 ? totalCLP / expected : 0
+
+    let label: string
+    let color: string
+    if (totalCLP === 0 || ratio < 0.7) {
+      label = 'Vas tranquilo'
+      color = 'text-bamboo-take'
+    } else if (ratio <= 1.2) {
+      label = 'Al ritmo esperado'
+      color = 'text-yellow-400'
+    } else {
+      label = 'Vas acelerado'
+      color = 'text-vermillion-shu'
+    }
+
+    const timeLabel = TIME_FORMATTER.format(now)
+    return { dayPct: Math.round(dayPct), label, color, timeLabel }
+  }, [now, comparisonTarget, totalCLP])
+
+  const percentOfBudget =
+    comparisonTarget > 0 ? Math.round((totalCLP / comparisonTarget) * 100) : null
 
   const barColorClass =
-    comparisonPct === null
-      ? ''
-      : comparisonPct <= 70
+    percentOfBudget === null
+      ? 'bg-surface-hover'
+      : percentOfBudget <= 70
         ? 'bg-gradient-to-r from-bamboo-take to-green-400'
-        : comparisonPct <= 100
+        : percentOfBudget <= 100
           ? 'bg-gradient-to-r from-yellow-400 to-amber-500'
           : 'bg-gradient-to-r from-vermillion-shu to-red-500'
 
-  const barTextClass =
-    comparisonPct === null
-      ? 'text-text-muted'
-      : comparisonPct <= 70
-        ? 'text-bamboo-take'
-        : comparisonPct <= 100
-          ? 'text-yellow-400'
-          : 'text-vermillion-shu'
+  const barWidth = percentOfBudget === null ? 0 : Math.min(percentOfBudget, 100)
 
-  const barWidth = comparisonPct === null ? 0 : Math.min(comparisonPct, 100)
+  const dateLabel = DATE_FORMATTER.format(new Date(todayStr + 'T12:00:00'))
 
   const handleSuccess = () => {
     setModalOpen(false)
@@ -194,115 +225,120 @@ export function TodayCard({
           <span className="text-xs text-text-muted capitalize">{dateLabel}</span>
         </div>
 
-        {count === 0 ? (
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center py-6 text-center gap-3">
-            <p className="text-sm text-text-secondary max-w-sm">
-              Aún no registras gastos hoy. Empieza a trackear.
-            </p>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
+        {/* Hero amount */}
+        <div className="mb-4">
+          {originalCurrency && totalOriginal > 0 ? (
+            <>
+              <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums text-text-primary">
+                {formatCurrency(totalOriginal, originalCurrency)}
+              </p>
+              <p className="text-sm text-text-muted mt-0.5 font-mono">
+                ≈ {formatCLP(totalCLP)}
+                {comparisonTarget > 0 && (
+                  <>
+                    {' '}
+                    · {percentOfBudget}% de {formatCLP(comparisonTarget)}
+                  </>
+                )}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums text-text-primary">
+                {formatCLP(totalCLP)}
+              </p>
+              {comparisonTarget > 0 ? (
+                <p className="text-sm text-text-muted mt-0.5">
+                  {percentOfBudget}% de {formatCLP(comparisonTarget)} ({comparisonLabel})
+                </p>
+              ) : (
+                <p className="text-sm text-text-muted mt-0.5">
+                  Sin presupuesto definido aún
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Progress bar (always shown when there is a target) */}
+        {comparisonTarget > 0 && (
+          <div className="mb-4">
+            <div
+              className="h-2 bg-surface-hover rounded-full overflow-hidden"
+              role="progressbar"
+              aria-valuenow={percentOfBudget ?? 0}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`${percentOfBudget ?? 0}% del ${comparisonLabel}`}
             >
-              <Plus className="h-4 w-4" />
-              Registrar primer gasto
-            </button>
+              <div
+                className={`h-full transition-all duration-700 ${barColorClass}`}
+                style={{ width: `${barWidth}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Pace + day progress (client-only, updates every minute) */}
+        {pace && (
+          <div className="flex items-center justify-between gap-2 text-xs mb-4 pb-4 border-b border-surface-border/50">
+            <div className="flex items-center gap-1.5 text-text-muted min-w-0">
+              <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="font-mono">{pace.timeLabel}</span>
+              <span className="hidden sm:inline">· {pace.dayPct}% del día</span>
+            </div>
+            <span className={`${pace.color} font-semibold text-right flex-shrink-0`}>
+              {pace.label}
+            </span>
+          </div>
+        )}
+
+        {/* Categories breakdown or empty state */}
+        {count === 0 ? (
+          <div className="text-xs text-text-muted mb-4 py-2">
+            Aún no registras gastos hoy.
+            {comparisonTarget > 0
+              ? ` Tienes ${formatCLP(comparisonTarget)} de margen diario.`
+              : ''}
           </div>
         ) : (
-          <>
-            {/* Hero amount */}
-            <div className="mb-5">
-              {originalCurrency && totalOriginal > 0 ? (
-                <>
-                  <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums text-text-primary">
-                    {formatCurrency(totalOriginal, originalCurrency)}
-                  </p>
-                  <p className="text-sm text-text-muted mt-0.5 font-mono">
-                    ≈ {formatCLP(totalCLP)} · {count} {count === 1 ? 'transacción' : 'transacciones'}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums text-text-primary">
-                    {formatCLP(totalCLP)}
-                  </p>
-                  <p className="text-sm text-text-muted mt-0.5">
-                    {count} {count === 1 ? 'transacción' : 'transacciones'}
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* Comparison bar */}
-            {comparisonPct !== null && (
-              <div className="mb-5">
-                <div
-                  className="h-2 bg-surface-hover rounded-full overflow-hidden"
-                  role="progressbar"
-                  aria-valuenow={comparisonPct}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`${comparisonPct}% ${comparisonLabel}`}
-                >
-                  <div
-                    className={`h-full transition-all duration-700 ${barColorClass}`}
-                    style={{ width: `${barWidth}%` }}
-                  />
+          <div className="space-y-2 mb-4">
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-semibold">
+              {count} {count === 1 ? 'transacción' : 'transacciones'}
+            </p>
+            {byCategory.map((c, i) => {
+              const pct = totalCLP > 0 ? Math.round((c.totalCLP / totalCLP) * 100) : 0
+              return (
+                <div key={i} className="flex items-center justify-between gap-2 text-sm">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="flex-shrink-0">{c.icon}</span>
+                    <span className="text-text-secondary truncate">{c.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {originalCurrency && c.totalOriginal > 0 && (
+                      <span className="text-[11px] text-text-muted font-mono hidden sm:inline">
+                        {formatCurrency(c.totalOriginal, originalCurrency)} ≈
+                      </span>
+                    )}
+                    <span className="font-mono text-text-primary">{formatCLP(c.totalCLP)}</span>
+                    <span className="text-[11px] text-text-muted font-mono w-9 text-right">
+                      {pct}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-xs mt-1.5 gap-2">
-                  <span className={`${barTextClass} font-semibold`}>
-                    {comparisonPct}% {comparisonLabel}
-                  </span>
-                  <span className="text-text-muted font-mono truncate">
-                    meta {formatCLP(comparisonTarget)}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Categories breakdown */}
-            {byCategory.length > 0 && (
-              <div className="space-y-2 mb-4 pt-3 border-t border-surface-border/50">
-                {byCategory.map((c, i) => {
-                  const pct = totalCLP > 0 ? Math.round((c.totalCLP / totalCLP) * 100) : 0
-                  return (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between gap-2 text-sm"
-                    >
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="flex-shrink-0">{c.icon}</span>
-                        <span className="text-text-secondary truncate">{c.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {originalCurrency && c.totalOriginal > 0 && (
-                          <span className="text-[11px] text-text-muted font-mono hidden sm:inline">
-                            {formatCurrency(c.totalOriginal, originalCurrency)} ≈
-                          </span>
-                        )}
-                        <span className="font-mono text-text-primary">
-                          {formatCLP(c.totalCLP)}
-                        </span>
-                        <span className="text-[11px] text-text-muted font-mono w-9 text-right">
-                          {pct}%
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* CTA */}
-            <button
-              onClick={() => setModalOpen(true)}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo gasto
-            </button>
-          </>
+              )
+            })}
+          </div>
         )}
+
+        {/* CTA */}
+        <button
+          onClick={() => setModalOpen(true)}
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-600 hover:to-indigo-700 transition-all"
+        >
+          <Plus className="h-4 w-4" />
+          {count === 0 ? 'Registrar primer gasto' : 'Nuevo gasto'}
+        </button>
       </div>
 
       <EditTransactionModal
